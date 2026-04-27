@@ -1,0 +1,23 @@
+{
+  "name": "website_intranet",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/vfourny/iut-intranet#readme",
+  "bugs": {
+    "url": "https://github.com/vfourny/iut-intranet/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vfourny/iut-intranet.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
