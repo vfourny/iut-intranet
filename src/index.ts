@@ -1,6 +1,6 @@
 import express from 'express';
 import * as trpcExpress from '@trpc/server/adapters/express'; 
-import { appRouter } from './appRouteur';
+import { appRouter } from './appRouteur.js';
 
 const app = express();
 
@@ -9,6 +9,7 @@ app.use(
   '/trpc',
   trpcExpress.createExpressMiddleware({
     router: appRouter,
+    createContext: ({ req, res }) => ({ req, res }),
   })
 );
 

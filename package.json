@@ -12,7 +12,7 @@
   },
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "directories": {
     "doc": "docs"
@@ -22,7 +22,8 @@
     "dev": "npx tsx watch src/index.ts",
     "seed": "npx tsx prisma/seed.ts",
     "reset": "npx prisma migrate reset --force && npx prisma generate && npx tsx prisma/seed.ts",
-    "generate": "npx prisma generate"
+    "generate": "npx prisma generate",
+    "reset-better-auth": "npx prisma migrate reset --force && npx auth@latest generate --config ./src/auth/auth.service.ts"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
@@ -34,6 +35,7 @@
     "@trpc/client": "^11.16.0",
     "@trpc/server": "^11.16.0",
     "@types/express": "^5.0.6",
+    "better-auth": "^1.6.9",
     "express": "^5.2.1"
   }
 }
