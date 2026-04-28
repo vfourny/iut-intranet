@@ -19,8 +19,10 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx tsx watch src/index.ts",
     "seed": "npx tsx prisma/seed.ts",
-    "reset": "npx prisma migrate reset --force && npx prisma generate && npx tsx prisma/seed.ts"
+    "reset": "npx prisma migrate reset --force && npx prisma generate && npx tsx prisma/seed.ts",
+    "generate": "npx prisma generate"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
@@ -28,6 +30,10 @@
     "prisma": "^6.19.3"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.3"
+    "@prisma/client": "^6.19.3",
+    "@trpc/client": "^11.16.0",
+    "@trpc/server": "^11.16.0",
+    "@types/express": "^5.0.6",
+    "express": "^5.2.1"
   }
 }
