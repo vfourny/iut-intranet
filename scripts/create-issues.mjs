@@ -113,30 +113,38 @@ ${additionalContext || "_N/A_"}`;
 
 // ─── Issues data ──────────────────────────────────────────────────────────────
 
-function buildIssues(milestones) {
-  const m1 = milestones["Sprint 1 — Fondations, Auth, Annuaire"] ?? milestones["Milestone 1 — Sprint 1"] ?? milestones["Sprint 1"];
-  const m2 = milestones["Sprint 2 — Profils, Actualités, Storage"] ?? milestones["Milestone 2 — Sprint 2"] ?? milestones["Sprint 2"];
-  const m3 = milestones["Sprint 3 — Newsletter, Agenda, RH"] ?? milestones["Milestone 3 — Sprint 3"] ?? milestones["Sprint 3"];
-  const m4 = milestones["Sprint 4 — Photothèque, Plans, Organigramme, Documentation"] ?? milestones["Milestone 4 — Sprint 4"] ?? milestones["Sprint 4"];
-  const m5 = milestones["Reprise — Valeur ajoutée et mise en production"] ?? milestones["Milestone 5 — Reprise"] ?? milestones["Sprint 5"];
+// Titres exacts des milestones (sans notion de sprint)
+const MILESTONE_TITLES = [
+  "Fondations, Auth, Annuaire",                           // ms1
+  "Profils, Actualités, Storage",                         // ms2
+  "Newsletter, Agenda, RH",                               // ms3
+  "Photothèque, Plans, Organigramme, Documentation",      // ms4
+  "Reprise : Valeur ajoutée et mise en production",       // ms5
+];
 
-  // Auto-detect milestone number from any key containing the sprint number
-  function findMilestone(num) {
+function buildIssues(milestones) {
+  function findMilestone(title) {
+    // Exact match first
+    if (milestones[title] !== undefined) return milestones[title];
+    // Fallback: partial case-insensitive match on first keyword
+    const keyword = title.split(",")[0].trim().toLowerCase();
     for (const [key, val] of Object.entries(milestones)) {
-      if (key.includes(`Sprint ${num}`) || key.includes(`Milestone ${num}`)) return val;
+      if (key.toLowerCase().includes(keyword)) return val;
     }
     return undefined;
   }
 
-  const ms1 = m1 ?? findMilestone(1);
-  const ms2 = m2 ?? findMilestone(2);
-  const ms3 = m3 ?? findMilestone(3);
-  const ms4 = m4 ?? findMilestone(4);
-  const ms5 = m5 ?? findMilestone(5) ?? Object.values(milestones)[4];
+  const ms1 = findMilestone(MILESTONE_TITLES[0]);
+  const ms2 = findMilestone(MILESTONE_TITLES[1]);
+  const ms3 = findMilestone(MILESTONE_TITLES[2]);
+  const ms4 = findMilestone(MILESTONE_TITLES[3]);
+  const ms5 = findMilestone(MILESTONE_TITLES[4]);
 
   if (!ms1 || !ms2 || !ms3 || !ms4 || !ms5) {
     console.warn("⚠️  Certains milestones n'ont pas été trouvés. Milestones disponibles :", milestones);
-    console.warn(`  Sprint 1 → ${ms1}, Sprint 2 → ${ms2}, Sprint 3 → ${ms3}, Sprint 4 → ${ms4}, Sprint 5 → ${ms5}`);
+    console.warn(`  ms1 → ${ms1}, ms2 → ${ms2}, ms3 → ${ms3}, ms4 → ${ms4}, ms5 → ${ms5}`);
+  } else {
+    console.log(`✅ Milestones résolus : ms1=${ms1} ms2=${ms2} ms3=${ms3} ms4=${ms4} ms5=${ms5}`);
   }
 
   return [

@@ -151,20 +151,39 @@ jobs:
             }
             console.log('Milestones trouvés :', JSON.stringify(milestoneMap));
 
-            function findMilestone(num) {
+            // Titres exacts des milestones (sans notion de sprint)
+            const MILESTONE_TITLES = [
+              'Fondations, Auth, Annuaire',                           // ms1
+              'Profils, Actualités, Storage',                         // ms2
+              'Newsletter, Agenda, RH',                               // ms3
+              'Photothèque, Plans, Organigramme, Documentation',      // ms4
+              'Reprise : Valeur ajoutée et mise en production',       // ms5
+            ];
+
+            function findMilestone(titleToFind) {
               for (const [key, val] of Object.entries(milestoneMap)) {
-                if (key.includes(`Sprint ${num}`) || key.includes(`Milestone ${num}`)) return val;
+                if (key === titleToFind) return val;
+              }
+              // Fallback: partial match (case-insensitive)
+              const lower = titleToFind.toLowerCase();
+              for (const [key, val] of Object.entries(milestoneMap)) {
+                if (key.toLowerCase().includes(lower.split(',')[0].trim())) return val;
               }
               return undefined;
             }
 
-            const ms1 = findMilestone(1);
-            const ms2 = findMilestone(2);
-            const ms3 = findMilestone(3);
-            const ms4 = findMilestone(4);
-            const ms5 = findMilestone(5) ?? Object.values(milestoneMap)[4];
+            const ms1 = findMilestone(MILESTONE_TITLES[0]);
+            const ms2 = findMilestone(MILESTONE_TITLES[1]);
+            const ms3 = findMilestone(MILESTONE_TITLES[2]);
+            const ms4 = findMilestone(MILESTONE_TITLES[3]);
+            const ms5 = findMilestone(MILESTONE_TITLES[4]);
 
-            console.log(`Milestones résolus → Sprint1:${ms1} Sprint2:${ms2} Sprint3:${ms3} Sprint4:${ms4} Sprint5:${ms5}`);
+            console.log(`Milestones résolus →`);
+            console.log(`  ms1 (${MILESTONE_TITLES[0]}) → ${ms1}`);
+            console.log(`  ms2 (${MILESTONE_TITLES[1]}) → ${ms2}`);
+            console.log(`  ms3 (${MILESTONE_TITLES[2]}) → ${ms3}`);
+            console.log(`  ms4 (${MILESTONE_TITLES[3]}) → ${ms4}`);
+            console.log(`  ms5 (${MILESTONE_TITLES[4]}) → ${ms5}`);
 
             // ── Issues list ───────────────────────────────────────────────────
 
