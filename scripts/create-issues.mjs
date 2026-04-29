@@ -68,45 +68,45 @@ async function getMilestones() {
 function userStoryBody({ asA, iWant, soThat, acceptanceCriteria, additionalContext }) {
   return `## 🎯 User Story
 
-**As a** ${asA}
+**En tant que** ${asA}
 
-**I want** ${iWant}
+**Je veux** ${iWant}
 
-**So that** ${soThat}
+**Afin de** ${soThat}
 
-## Acceptance criteria
+## Critères d'acceptation
 
 ${acceptanceCriteria}
 
-## Additional context
+## Contexte additionnel
 
 ${additionalContext || "_N/A_"}`;
 }
 
 function taskBody({ taskType, description, steps, additionalContext }) {
-  return `## 🔧 Task
+  return `## 🔧 Tâche
 
-**Task type:** ${taskType}
+**Type de tâche :** ${taskType}
 
 ## Description
 
 ${description}
 
-## Steps
+## Étapes
 
 ${steps || "_À définir_"}
 
-## Additional context
+## Contexte additionnel
 
 ${additionalContext || "_N/A_"}`;
 }
 
 function docBody({ whatToDocument, additionalContext }) {
-  return `## What needs to be documented?
+  return `## Qu'est-ce qui doit être documenté ?
 
 ${whatToDocument}
 
-## Additional context
+## Contexte additionnel
 
 ${additionalContext || "_N/A_"}`;
 }
