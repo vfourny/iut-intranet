@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
+      contents: read
     steps:
       - name: Create all project issues
         uses: actions/github-script@v7
@@ -23,6 +24,66 @@ jobs:
             const owner = context.repo.owner;
             const repo  = context.repo.repo;
             const dryRun = '${{ inputs.dry_run }}' === 'true';
+
+            // ── Labels setup ─────────────────────────────────────────────────
+
+            const LABELS = [
+              // Type
+              { name: 'type: feature',   color: '0075ca', description: 'New feature or request' },
+              { name: 'type: bug',        color: 'd73a4a', description: 'Something isn\'t working' },
+              { name: 'type: chore',      color: 'e4e669', description: 'Build, tooling, infrastructure' },
+              { name: 'type: docs',       color: '0075ca', description: 'Documentation' },
+              { name: 'type: refactor',   color: 'fbca04', description: 'Code refactoring' },
+              // Priority
+              { name: 'priority: critical', color: 'b60205', description: 'Critical – blocks everything' },
+              { name: 'priority: high',     color: 'e11d48', description: 'High priority' },
+              { name: 'priority: medium',   color: 'f97316', description: 'Medium priority' },
+              { name: 'priority: low',      color: 'fde68a', description: 'Low priority' },
+              // Scope
+              { name: 'scope: auth',        color: 'c5def5', description: 'Authentication & authorization' },
+              { name: 'scope: directory',   color: 'c5def5', description: 'Annuaire / user profiles' },
+              { name: 'scope: news',        color: 'c5def5', description: 'Actualités / articles' },
+              { name: 'scope: newsletter',  color: 'c5def5', description: 'Newsletter & email subscriptions' },
+              { name: 'scope: agenda',      color: 'c5def5', description: 'Agenda & events' },
+              { name: 'scope: hr',          color: 'c5def5', description: 'Espace RH & documents' },
+              { name: 'scope: photos',      color: 'c5def5', description: 'Photothèque' },
+              { name: 'scope: plans',       color: 'c5def5', description: 'Plans des sites & déplacements' },
+              { name: 'scope: org-chart',   color: 'c5def5', description: 'Organigramme' },
+              { name: 'scope: ui',          color: 'c5def5', description: 'UI components & design system' },
+              { name: 'scope: infra',       color: 'c5def5', description: 'Infrastructure & DevOps' },
+              { name: 'scope: db',          color: 'c5def5', description: 'Database & Prisma schema' },
+              // Special
+              { name: 'good first issue',   color: '7057ff', description: 'Good for newcomers' },
+              { name: 'breaking-change',    color: 'b60205', description: 'Introduces a breaking change' },
+              { name: 'security',           color: 'b60205', description: 'Security concern' },
+              { name: 'dependencies',       color: '0075ca', description: 'Dependency updates' },
+              { name: 'status: blocked',    color: 'e4e669', description: 'Blocked by another issue or external factor' },
+              { name: 'status: needs-info', color: 'e4e669', description: 'More information required' },
+            ];
+
+            // Get existing labels
+            const existingLabelsRes = await github.rest.issues.listLabelsForRepo({ owner, repo, per_page: 100 });
+            const existingLabels = new Set(existingLabelsRes.data.map(l => l.name));
+
+            console.log(`\n🏷️  Synchronisation des labels (${LABELS.length} labels définis)...`);
+            for (const label of LABELS) {
+              if (existingLabels.has(label.name)) {
+                console.log(`  ⏭️  Label existant : ${label.name}`);
+                continue;
+              }
+              if (dryRun) {
+                console.log(`  [DRY RUN] Would create label: ${label.name}`);
+                continue;
+              }
+              try {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+                console.log(`  ✅ Label créé : ${label.name}`);
+                await new Promise(r => setTimeout(r, 200));
+              } catch (err) {
+                console.warn(`  ⚠️  Impossible de créer le label "${label.name}" :`, err.message);
+              }
+            }
+            console.log('');
 
             // ── Helpers ──────────────────────────────────────────────────────
 
