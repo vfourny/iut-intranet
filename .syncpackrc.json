@@ -1,8 +1,14 @@
 {
   "$schema": "./node_modules/syncpack/schema.json",
+  "customTypes": {
+    "overrides": {
+      "path": "overrides",
+      "strategy": "versionsByName"
+    }
+  },
   "semverGroups": [
     {
-      "dependencyTypes": ["dev", "prod"],
+      "dependencyTypes": ["dev", "overrides", "prod"],
       "packages": ["**"],
       "range": ""
     }
