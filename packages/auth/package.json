@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "@iut-intranet/db": "*",
+    "@iut-intranet/helpers": "*",
+    "better-auth": "1.4.10"
+  },
+  "devDependencies": {
+    "@iut-intranet/configs": "*"
+  },
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "name": "@iut-intranet/auth",
+  "private": true,
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "clean": "rimraf node_modules dist .turbo",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "ts:check": "tsc --noEmit"
+  },
+  "type": "module",
+  "version": "0.0.1"
+}

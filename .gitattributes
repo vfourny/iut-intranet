@@ -1,0 +1,5 @@
+# Normalize all text files to LF on checkout (auto-detect binaries)
+* text=auto eol=lf
+
+# Force LF on scripts executed in containers / by git hooks
+*.sh  text eol=lf

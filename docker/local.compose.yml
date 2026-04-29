@@ -1,0 +1,13 @@
+name: iut-intranet-local
+
+services:
+  postgres:
+    extends:
+      file: ./postgres.base.yml
+      service: postgres
+    container_name: postgres-local
+    restart: 'no'
+    ports:
+      - '5432:5432'
+    volumes:
+      - ../.cache/db_data_local:/var/lib/postgresql/data

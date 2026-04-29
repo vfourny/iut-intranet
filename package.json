@@ -1,41 +1,63 @@
 {
-  "name": "website_intranet",
-  "version": "1.0.0",
-  "description": "",
-  "homepage": "https://github.com/vfourny/iut-intranet#readme",
-  "bugs": {
-    "url": "https://github.com/vfourny/iut-intranet/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/vfourny/iut-intranet.git"
-  },
-  "license": "ISC",
-  "author": "",
-  "type": "module",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "name": "iut-intranet",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx tsx watch src/index.ts",
-    "seed": "npx tsx prisma/seed.ts",
-    "reset": "npx prisma migrate reset --force && npx prisma generate && npx tsx prisma/seed.ts",
-    "generate": "npx prisma generate",
-    "reset-better-auth": "npx prisma migrate reset --force && npx auth@latest generate --config ./src/auth/auth.service.ts"
+    "build": "turbo build",
+    "dev": "turbo watch dev",
+    "preview": "turbo preview",
+    "ts:check": "turbo ts:check",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix --",
+    "format": "turbo build --filter=@iut-intranet/configs && prettier --write .",
+    "format:check": "turbo build --filter=@iut-intranet/configs && prettier --check .",
+    "db:start": "docker compose -f docker/local.compose.yml up -d",
+    "db:down": "docker compose -f docker/local.compose.yml down",
+    "db:generate": "turbo db:generate --filter=@iut-intranet/db",
+    "db:migrate": "turbo db:migrate --filter=@iut-intranet/db",
+    "db:deploy": "turbo db:deploy --filter=@iut-intranet/db",
+    "db:seed": "turbo db:seed --filter=@iut-intranet/db",
+    "db:reset": "turbo db:reset --filter=@iut-intranet/db",
+    "db:push": "turbo db:push --filter=@iut-intranet/db",
+    "db:studio": "turbo db:studio --filter=@iut-intranet/db",
+    "clean": "turbo clean && rimraf node_modules .turbo",
+    "prepare": "husky",
+    "syncpack:check": "syncpack lint --dependency-types dev,prod"
   },
+  "engines": {
+    "node": "22.22.2"
+  },
+  "packageManager": "npm@10.9.7",
   "devDependencies": {
-    "@types/node": "^25.6.0",
-    "dotenv": "^17.4.2",
-    "prisma": "^6.19.3"
+    "@iut-intranet/configs": "*",
+    "@types/node": "22.19.15",
+    "eslint": "9.39.4",
+    "husky": "9.1.7",
+    "lint-staged": "16.4.0",
+    "prettier": "3.8.1",
+    "rimraf": "6.1.3",
+    "syncpack": "14.3.1",
+    "tsc-alias": "1.8.16",
+    "tsx": "4.21.0",
+    "turbo": "2.8.21",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.57.2"
   },
-  "dependencies": {
-    "@prisma/client": "^6.19.3",
-    "@trpc/client": "^11.16.0",
-    "@trpc/server": "^11.16.0",
-    "@types/express": "^5.0.6",
-    "better-auth": "^1.6.9",
-    "express": "^5.2.1"
-  }
+  "commitlint": {
+    "extends": [
+      "@iut-intranet/configs/commitlint"
+    ]
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs}": [
+      "npm run lint:fix"
+    ],
+    "*": [
+      "prettier --write --ignore-unknown"
+    ]
+  },
+  "prettier": "@iut-intranet/configs/prettier"
 }

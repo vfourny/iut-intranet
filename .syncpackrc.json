@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/syncpack/schema.json",
+  "semverGroups": [
+    {
+      "dependencyTypes": ["dev", "prod"],
+      "packages": ["**"],
+      "range": ""
+    }
+  ],
+  "versionGroups": [
+    {
+      "dependencies": ["@iut-intranet/**"],
+      "isIgnored": true,
+      "label": "Ignore internal workspace packages"
+    }
+  ]
+}

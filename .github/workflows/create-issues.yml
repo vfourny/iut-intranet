@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Dry run (affiche les issues sans les créer)"
+        description: 'Dry run (affiche les issues sans les créer)'
         required: false
-        default: "false"
+        default: 'false'
         type: boolean
 
 jobs:
