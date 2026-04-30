@@ -1,0 +1,23 @@
+meta {
+  name: Update User
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{SERVER_URL}}/{{TRPC}}/user.update
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "id": "{{activeUserId}}",
+    "firstName": "UpdatedBurnoName"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

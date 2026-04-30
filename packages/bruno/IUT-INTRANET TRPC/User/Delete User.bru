@@ -1,0 +1,22 @@
+meta {
+  name: Delete User
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{SERVER_URL}}/{{TRPC}}/user.delete
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "userId": "{{createdUserId}}"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

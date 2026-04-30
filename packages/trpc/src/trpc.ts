@@ -1,8 +1,24 @@
 import { initTRPC } from '@trpc/server'
 
-import type { Context } from '@/context'
+import type { AuthenticatedContext, Context } from '@/context'
 
-const t = initTRPC.context<Context>().create()
+export const { middleware, procedure, router } = initTRPC
+  .context<Context>()
+  .create({
+    errorFormatter(opts) {
+      const { error, shape } = opts
+      const { code, httpStatus, path } = shape.data
 
-export const router = t.router
-export const publicProcedure = t.procedure
+      return {
+        code,
+        error,
+        httpStatus,
+        procedure: path,
+        shape,
+      }
+    },
+  })
+
+export const { procedure: procedureWithSession } = initTRPC
+  .context<AuthenticatedContext>()
+  .create()
