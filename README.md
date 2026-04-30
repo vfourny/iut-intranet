@@ -35,6 +35,10 @@ docs/                 Cahier des charges + MCD
 
 ## Installation
 
+Deux options : installation locale **ou** Dev Container (recommandé pour démarrer rapidement avec un environnement isolé).
+
+### Option 1 — Locale
+
 ```bash
 nvm use
 npm install
@@ -43,7 +47,20 @@ cp .env.sample .env
 
 Renseigner `BETTER_AUTH_SECRET` dans `.env` (les autres valeurs par défaut conviennent en local).
 
-## Lancer le projet
+### Option 2 — Dev Container (VS Code / JetBrains)
+
+Le repo fournit un Dev Container clé en main (`.devcontainer/`) qui provisionne Node, le projet et une base Postgres dans des conteneurs.
+
+Prérequis : Docker + l'extension **Dev Containers** (VS Code) ou le support **Dev Containers** dans les IDE JetBrains.
+
+1. `cp .env.sample .env` et renseigner `BETTER_AUTH_SECRET`.
+2. Ouvrir le projet dans l'IDE et lancer **« Reopen in Container »** (VS Code) ou **« New Dev Container »** (JetBrains).
+3. À la première création, `npm run db:deploy` est exécuté automatiquement (`postCreateCommand`).
+4. Une fois dans le conteneur : `npm install` puis `npm run dev`.
+
+Ports forwardés : `8000` (API), `5432` (Postgres). La base tourne dans le service `postgres-dev` du compose ; pas besoin de lancer `npm run db:start`.
+
+## Lancer le projet (installation locale)
 
 ```bash
 npm run db:start        # démarre Postgres dans Docker
@@ -57,18 +74,18 @@ npm run dev             # lance API + Web en watch
 
 ## Commandes utiles
 
-| Commande | Description |
-| --- | --- |
-| `npm run dev` | Lance toutes les apps en mode watch |
-| `npm run build` | Build de production |
-| `npm run ts:check` | Type-check global |
-| `npm run lint` / `npm run lint:fix` | Lint global |
-| `npm run format` | Formatte le repo avec Prettier |
-| `npm run syncpack:check` | Vérifie l'uniformité des versions de dépendances |
-| `npm run db:start` / `db:down` | Démarre / arrête Postgres local |
-| `npm run db:migrate -- <name>` | Crée et applique une migration |
-| `npm run db:reset` | Reset complet de la base |
-| `npm run db:studio` | Ouvre Prisma Studio |
+| Commande                            | Description                                      |
+| ----------------------------------- | ------------------------------------------------ |
+| `npm run dev`                       | Lance toutes les apps en mode watch              |
+| `npm run build`                     | Build de production                              |
+| `npm run ts:check`                  | Type-check global                                |
+| `npm run lint` / `npm run lint:fix` | Lint global                                      |
+| `npm run format`                    | Formatte le repo avec Prettier                   |
+| `npm run syncpack:check`            | Vérifie l'uniformité des versions de dépendances |
+| `npm run db:start` / `db:down`      | Démarre / arrête Postgres local                  |
+| `npm run db:migrate -- <name>`      | Crée et applique une migration                   |
+| `npm run db:reset`                  | Reset complet de la base                         |
+| `npm run db:studio`                 | Ouvre Prisma Studio                              |
 
 Cibler un seul package : `npx turbo <task> --filter=@iut-intranet/<pkg>`.
 
