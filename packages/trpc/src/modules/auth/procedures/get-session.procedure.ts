@@ -8,10 +8,9 @@ export const getSessionProcedure = authenticatedProcedure.query(
       throw new Error('No active session')
     }
 
-    const { activeOrganization, user } = session
+    const { user } = session
     const { email, firstName, id, lastName, role } = user
     return {
-      activeOrganization,
       user: { email, firstName, id, lastName, role },
     }
   },

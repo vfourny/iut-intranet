@@ -6,9 +6,9 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo watch dev",
+    "build": "dotenvx run -- turbo build",
     "preview": "turbo preview",
+    "dev": "dotenvx run -- turbo watch dev",
     "ts:check": "turbo ts:check",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix --",
@@ -17,12 +17,12 @@
     "db:start": "docker compose -f docker/local.compose.yml up -d",
     "db:down": "docker compose -f docker/local.compose.yml down",
     "db:generate": "turbo db:generate --filter=@iut-intranet/db",
-    "db:migrate": "turbo db:migrate --filter=@iut-intranet/db",
+    "db:migrate": "dotenvx run -- turbo db:migrate --filter=@iut-intranet/db",
     "db:deploy": "turbo db:deploy --filter=@iut-intranet/db",
-    "db:seed": "turbo db:seed --filter=@iut-intranet/db",
-    "db:reset": "turbo db:reset --filter=@iut-intranet/db",
-    "db:push": "turbo db:push --filter=@iut-intranet/db",
-    "db:studio": "turbo db:studio --filter=@iut-intranet/db",
+    "db:seed": "dotenvx run -- turbo db:seed --filter=@iut-intranet/db",
+    "db:reset": "dotenvx run -- turbo db:reset --filter=@iut-intranet/db",
+    "db:push": "dotenvx run -- turbo db:push --filter=@iut-intranet/db",
+    "db:studio": "dotenvx run -- turbo db:studio --filter=@iut-intranet/db",
     "clean": "turbo clean && rimraf node_modules .turbo",
     "prepare": "husky",
     "syncpack:check": "syncpack lint --dependency-types dev,overrides,prod"
@@ -32,11 +32,14 @@
   },
   "packageManager": "npm@10.9.7",
   "devDependencies": {
+    "@commitlint/cli": "20.5.0",
+    "@dotenvx/dotenvx": "1.59.1",
     "@iut-intranet/configs": "*",
     "@types/node": "22.19.15",
     "eslint": "9.39.4",
     "husky": "9.1.7",
     "lint-staged": "16.4.0",
+    "npm-run-all2": "8.0.4",
     "prettier": "3.8.1",
     "rimraf": "6.1.3",
     "syncpack": "14.3.1",
@@ -44,7 +47,8 @@
     "tsx": "4.21.0",
     "turbo": "2.8.21",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.57.2"
+    "typescript-eslint": "8.57.2",
+    "vite": "7.3.1"
   },
   "commitlint": {
     "extends": [
@@ -54,7 +58,9 @@
   "overrides": {
     "@trpc/client": "11.8.1",
     "@trpc/server": "11.8.1",
+    "@vue/runtime-core": "3.5.32",
     "argon2": "0.44.0",
+    "vue": "3.5.32",
     "zod": "4.1.5"
   },
   "lint-staged": {

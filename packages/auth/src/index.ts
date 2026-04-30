@@ -6,6 +6,7 @@ import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { emailAndPasswordConfig } from '@/configs/email-and-password.config'
 import { schemaConfig } from '@/configs/schema.config'
 import { adminPluginConfig } from '@/plugins/admin.plugin'
+import { customSessionPluginConfig } from '@/plugins/custom-session.plugin'
 
 export { fromNodeHeaders } from 'better-auth/node'
 
@@ -40,7 +41,7 @@ export const betterAuthInstance = betterAuth({
   }),
   ...schemaConfig,
   emailAndPassword: emailAndPasswordConfig,
-  plugins: [adminPluginConfig],
+  plugins: [adminPluginConfig, customSessionPluginConfig],
   secret: BETTER_AUTH_SECRET,
   trustedOrigins: [APP_URL],
 })

@@ -2,9 +2,9 @@ import { Prisma } from '@iut-intranet/db'
 import { AppError } from '@iut-intranet/helpers/errors'
 import { TRPCError } from '@trpc/server'
 
-import { procedure } from '@/trpc'
+import { middleware } from '@/trpc'
 
-export const errorMiddleware = procedure.use(async ({ ctx, next }) => {
+export const errorMiddleware = middleware(async ({ ctx, next }) => {
   try {
     return await next()
   } catch (err) {

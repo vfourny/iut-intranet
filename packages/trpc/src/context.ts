@@ -26,6 +26,3 @@ export const createContext = async ({
 }
 
 export type Context = Awaited<ReturnType<typeof createContext>>
-
-export type AuthenticatedContext = Context &
-  Awaited<ReturnType<typeof authService.getSession>>

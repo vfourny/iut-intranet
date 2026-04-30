@@ -1,8 +1,8 @@
 import { TRPCError } from '@trpc/server'
 
-import { procedure } from '@/trpc'
+import { middleware } from '@/trpc'
 
-export const requireAuthMiddleware = procedure.use(async ({ ctx, next }) => {
+export const requireAuthMiddleware = middleware(async ({ ctx, next }) => {
   const session = await ctx.services.auth.getSession(ctx.headers)
   if (!session?.user) {
     throw new TRPCError({
@@ -14,7 +14,6 @@ export const requireAuthMiddleware = procedure.use(async ({ ctx, next }) => {
   return next({
     ctx: {
       ...ctx,
-      activeOrganization: session.activeOrganization,
       user: session.user,
     },
   })

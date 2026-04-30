@@ -5,7 +5,7 @@ services:
     extends:
       file: ./postgres.base.yml
       service: postgres
-    container_name: postgres-local
+    container_name: iut-intranet-postgres-local
     restart: 'no'
     ports:
       - '5432:5432'

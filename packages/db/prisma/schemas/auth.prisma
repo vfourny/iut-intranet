@@ -14,11 +14,11 @@ model User {
   updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
   role          UserRole  @default(USER)
   banned        Boolean?  @default(false)
-  banReason     String?   @map("ban_reason")
-  banExpires    DateTime? @map("ban_expires")
+  banReason     String?
+  banExpires    DateTime?
 
-  sessions Session[]
-  accounts Account[]
+  sessions            Session[]
+  accounts            Account[]
 
   @@map("user")
 }
@@ -43,16 +43,17 @@ model Account {
 }
 
 model Session {
-  id             String   @id @default(cuid())
-  expiresAt      DateTime @map("expires_at")
-  token          String   @unique
-  impersonatedBy String?  @map("impersonated_by")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-  ipAddress      String?  @map("ip_address")
-  userAgent      String?  @map("user_agent")
-  userId         String   @map("user_id")
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                   String   @id @default(cuid())
+  expiresAt            DateTime @map("expires_at")
+  token                String   @unique
+  impersonatedBy       String?  @map("impersonated_by")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  ipAddress            String?  @map("ip_address")
+  userAgent            String?  @map("user_agent")
+  userId               String   @map("user_id")
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?  @map("active_organization_id")
 
   @@map("session")
 }
