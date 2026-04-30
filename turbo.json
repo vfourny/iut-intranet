@@ -11,16 +11,15 @@
     "preview": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^db:generate", "^build"]
+      "dependsOn": ["^build"]
     },
     "dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^db:generate", "^build"]
+      "dependsOn": ["^build"]
     },
     "db:generate": {
       "cache": true,
-      "dependsOn": ["^build"],
       "outputs": ["**/generated/**"]
     },
     "db:migrate": {
@@ -46,15 +45,15 @@
     },
     "lint": {
       "cache": true,
-      "dependsOn": ["^build"]
+      "dependsOn": ["db:generate", "^build"]
     },
     "lint:fix": {
       "cache": false,
-      "dependsOn": ["^build"]
+      "dependsOn": ["db:generate", "^build"]
     },
     "ts:check": {
       "cache": true,
-      "dependsOn": ["^build", "^db:generate", "^ts:check"]
+      "dependsOn": ["^db:generate", "^ts:check"]
     },
     "clean": {
       "cache": false
@@ -65,6 +64,7 @@
     "DATABASE_URL",
     "API_PORT",
     "API_URL",
+    "APP_PORT",
     "APP_URL",
     "BETTER_AUTH_SECRET"
   ]

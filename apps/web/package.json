@@ -1,0 +1,35 @@
+{
+  "dependencies": {
+    "@pinia/colada": "1.1.0",
+    "@tailwindcss/vite": "4.2.2",
+    "@trpc/client": "11.8.1",
+    "pinia": "3.0.4",
+    "primeicons": "7.0.0",
+    "primevue": "4.5.5",
+    "vee-validate": "5.0.0-beta.0",
+    "vue": "3.5.32",
+    "vue-i18n": "11.3.2",
+    "vue-router": "5.0.4",
+    "zod": "4.1.5"
+  },
+  "devDependencies": {
+    "@iut-intranet/configs": "*",
+    "@iut-intranet/helpers": "*",
+    "@iut-intranet/trpc": "*",
+    "@vitejs/plugin-vue": "6.0.5",
+    "vue-tsc": "3.2.6"
+  },
+  "name": "@iut-intranet/web",
+  "private": true,
+  "scripts": {
+    "build": "vue-tsc -b && vite build",
+    "clean": "rimraf dist node_modules .turbo",
+    "dev": "vite",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "preview": "vite preview",
+    "ts:check": "vue-tsc -b --noEmit"
+  },
+  "type": "module",
+  "version": "0.0.1"
+}

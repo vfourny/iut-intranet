@@ -1,0 +1,4 @@
+{
+  "display": "Web Configuration",
+  "extends": "@vfourny/node-toolkit/tsconfig/vue"
+}

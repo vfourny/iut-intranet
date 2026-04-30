@@ -8,7 +8,11 @@ export const envSchema = z.object({
     .default(8000),
   API_URL: z.string().url('API_URL must be a valid URL'),
 
-  // App (frontend, futur)
+  // App (frontend)
+  APP_PORT: z.coerce
+    .number({ error: 'APP_PORT must be a valid number' })
+    .optional()
+    .default(5173),
   APP_URL: z.string().url('APP_URL must be a valid URL'),
 
   // Auth
