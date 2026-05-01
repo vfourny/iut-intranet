@@ -1,0 +1,36 @@
+name: iut-intranet-devcontainer
+
+services:
+  node-dev-env:
+    container_name: node-dev-env
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+
+    volumes:
+      - ..:/app
+      - node_modules:/app/node_modules
+      - turbo_cache:/app/.turbo
+    command: sleep infinity
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgresql://root:root@postgres-dev:5432/iut-intranet-db
+    ports:
+      - '8000:8000'
+    depends_on:
+      postgres-dev:
+        condition: service_healthy
+
+  postgres-dev:
+    container_name: postgres-dev
+    extends:
+      file: ../docker/postgres.base.yml
+      service: postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
+  node_modules:
+  turbo_cache:

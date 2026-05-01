@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "rootDir": "."
+  },
+  "extends": "@iut-intranet/configs/tsconfig/node",
+  "include": ["vite.config.ts"]
+}

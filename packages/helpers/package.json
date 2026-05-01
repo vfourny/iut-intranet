@@ -1,0 +1,48 @@
+{
+  "dependencies": {
+    "@iut-intranet/db": "*",
+    "@trpc/server": "11.8.1",
+    "zod": "4.1.5"
+  },
+  "devDependencies": {
+    "@iut-intranet/configs": "*"
+  },
+  "exports": {
+    "./env": {
+      "source": "./src/env.ts",
+      "types": "./dist/env.d.ts",
+      "default": "./dist/env.js"
+    },
+    "./errors": {
+      "source": "./src/errors.ts",
+      "types": "./dist/errors.d.ts",
+      "default": "./dist/errors.js"
+    },
+    "./schemas/*": {
+      "source": "./src/schemas/*.schema.ts",
+      "types": "./dist/schemas/*.schema.d.ts",
+      "default": "./dist/schemas/*.schema.js"
+    },
+    "./types/*": {
+      "source": "./src/types/*.types.ts",
+      "types": "./dist/types/*.types.d.ts",
+      "default": "./dist/types/*.types.js"
+    },
+    "./utils/*": {
+      "source": "./src/utils/*.util.ts",
+      "types": "./dist/utils/*.util.d.ts",
+      "default": "./dist/utils/*.util.js"
+    }
+  },
+  "name": "@iut-intranet/helpers",
+  "private": true,
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "clean": "rimraf node_modules dist .turbo",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "ts:check": "tsc --noEmit"
+  },
+  "type": "module",
+  "version": "0.0.1"
+}

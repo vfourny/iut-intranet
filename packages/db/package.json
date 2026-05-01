@@ -1,0 +1,46 @@
+{
+  "dependencies": {
+    "@prisma/adapter-pg": "7.2.0",
+    "@prisma/client": "7.6.0",
+    "argon2": "0.44.0"
+  },
+  "devDependencies": {
+    "@iut-intranet/configs": "*",
+    "prisma": "7.6.0"
+  },
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./enums": {
+      "source": "./src/generated/enums.ts",
+      "types": "./dist/generated/enums.d.ts",
+      "default": "./dist/generated/enums.js"
+    },
+    "./models": {
+      "source": "./src/generated/models.ts",
+      "types": "./dist/generated/models.d.ts",
+      "default": "./dist/generated/models.js"
+    }
+  },
+  "name": "@iut-intranet/db",
+  "private": true,
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "clean": "rimraf node_modules **/generated dist .turbo",
+    "db:deploy": "prisma migrate deploy",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev --name",
+    "db:push": "prisma db push",
+    "db:reset": "prisma migrate reset --force && prisma db seed",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "ts:check": "tsc --noEmit"
+  },
+  "type": "module",
+  "version": "0.0.1"
+}

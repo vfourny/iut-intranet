@@ -1,0 +1,4 @@
+{
+  "display": "Node Configuration",
+  "extends": "@vfourny/node-toolkit/tsconfig/node"
+}

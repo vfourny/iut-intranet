@@ -1,0 +1,6 @@
+{
+  "extends": "@vfourny/node-toolkit/tsconfig/base",
+  "compilerOptions": {
+    "noEmit": true
+  }
+}

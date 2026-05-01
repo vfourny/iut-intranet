@@ -1,0 +1,27 @@
+enum Site {
+  BOULOGNE
+  CALAIS
+  DUNKERQUE
+  SAINT_OMER
+}
+
+enum DepartmentCode {
+  GACO
+  GEA
+  TC
+  INFO
+  GEII
+  GIM
+  GB
+  GTE
+}
+
+model Department {
+  id   String         @id @default(cuid())
+  code DepartmentCode @unique
+  site Site
+
+  users User[]
+
+  @@map("department")
+}

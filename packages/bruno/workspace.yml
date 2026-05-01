@@ -1,0 +1,12 @@
+opencollection: 1.0.0
+info:
+  name: 'IUT Intranet'
+  type: workspace
+
+collections:
+  - name: IUT-INTRANET TRPC
+    path: IUT-INTRANET TRPC
+
+specs:
+
+docs: ''

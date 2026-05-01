@@ -1,23 +1,76 @@
 {
-  "name": "website_intranet",
-  "version": "1.0.0",
-  "description": "",
-  "homepage": "https://github.com/vfourny/iut-intranet#readme",
-  "bugs": {
-    "url": "https://github.com/vfourny/iut-intranet/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/vfourny/iut-intranet.git"
-  },
-  "license": "ISC",
-  "author": "",
-  "type": "commonjs",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "name": "iut-intranet",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+    "build": "dotenvx run -- turbo build",
+    "preview": "turbo preview",
+    "dev": "dotenvx run -- turbo watch dev",
+    "ts:check": "turbo ts:check",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix --",
+    "format": "turbo build --filter=@iut-intranet/configs && prettier --write .",
+    "format:check": "turbo build --filter=@iut-intranet/configs && prettier --check .",
+    "db:start": "docker compose -f docker/local.compose.yml up -d",
+    "db:down": "docker compose -f docker/local.compose.yml down",
+    "db:generate": "turbo db:generate --filter=@iut-intranet/db",
+    "db:migrate": "dotenvx run -- turbo db:migrate --filter=@iut-intranet/db",
+    "db:deploy": "turbo db:deploy --filter=@iut-intranet/db",
+    "db:seed": "dotenvx run -- turbo db:seed --filter=@iut-intranet/db",
+    "db:reset": "dotenvx run -- turbo db:reset --filter=@iut-intranet/db",
+    "db:push": "dotenvx run -- turbo db:push --filter=@iut-intranet/db",
+    "db:studio": "dotenvx run -- turbo db:studio --filter=@iut-intranet/db",
+    "clean": "turbo clean && rimraf node_modules .turbo .cache",
+    "prepare": "husky",
+    "syncpack:check": "syncpack lint --dependency-types dev,overrides,prod"
+  },
+  "engines": {
+    "node": "22.22.2"
+  },
+  "packageManager": "npm@10.9.7",
+  "devDependencies": {
+    "@commitlint/cli": "20.5.0",
+    "@dotenvx/dotenvx": "1.59.1",
+    "@iut-intranet/configs": "*",
+    "@types/node": "22.19.15",
+    "cpy-cli": "7.0.0",
+    "eslint": "9.39.4",
+    "husky": "9.1.7",
+    "lint-staged": "16.4.0",
+    "npm-run-all2": "8.0.4",
+    "prettier": "3.8.1",
+    "rimraf": "6.1.3",
+    "syncpack": "14.3.1",
+    "tsc-alias": "1.8.16",
+    "tsx": "4.21.0",
+    "turbo": "2.8.21",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.57.2",
+    "vite": "7.3.1"
+  },
+  "commitlint": {
+    "extends": [
+      "@iut-intranet/configs/commitlint"
+    ]
+  },
+  "overrides": {
+    "@trpc/client": "11.8.1",
+    "@trpc/server": "11.8.1",
+    "@vue/runtime-core": "3.5.32",
+    "argon2": "0.44.0",
+    "vue": "3.5.32",
+    "zod": "4.1.5"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs}": [
+      "npm run lint:fix"
+    ],
+    "*": [
+      "prettier --write --ignore-unknown"
+    ]
+  },
+  "prettier": "@iut-intranet/configs/prettier"
 }

@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "name": "IUT-INTRANET TRPC",
+  "type": "collection",
+  "ignore": ["node_modules", ".git"]
+}

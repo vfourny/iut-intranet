@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/syncpack/schema.json",
+  "customTypes": {
+    "overrides": {
+      "path": "overrides",
+      "strategy": "versionsByName"
+    }
+  },
+  "semverGroups": [
+    {
+      "dependencyTypes": ["dev", "overrides", "prod"],
+      "packages": ["**"],
+      "range": ""
+    }
+  ],
+  "versionGroups": [
+    {
+      "dependencies": ["@iut-intranet/**"],
+      "isIgnored": true,
+      "label": "Ignore internal workspace packages"
+    }
+  ]
+}

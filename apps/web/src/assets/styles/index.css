@@ -1,0 +1,34 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+
+  /* Marque IUT — bleu (primaire) */
+  --color-iut-blue-50: #e6f7fe;
+  --color-iut-blue-100: #ccefFD;
+  --color-iut-blue-200: #99dffb;
+  --color-iut-blue-300: #66cff9;
+  --color-iut-blue-400: #33bff7;
+  --color-iut-blue-500: #00aeef;
+  --color-iut-blue-600: #008bbf;
+  --color-iut-blue-700: #00688f;
+  --color-iut-blue-800: #00455f;
+  --color-iut-blue-900: #002230;
+  --color-iut-blue-950: #001118;
+
+  /* Marque IUT — accents */
+  --color-iut-red: #e3000f;
+  --color-iut-grey: #6d6e70;
+
+  /* Couleurs département (cf. charte ADIUT) */
+  --color-dept-admin: #d7376b;
+  --color-dept-info: #1fa9e0;
+  --color-dept-indus: #566872;
+  --color-dept-bio: #7db72f;
+  --color-dept-energy: #f08200;
+}
+
+html,
+body {
+  font-family: var(--font-sans);
+}
