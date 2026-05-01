@@ -1,0 +1,26 @@
+# Templates
+**/*.hbs
+
+# Dependencies
+node_modules
+
+# Build outputs
+**/dist
+**/build
+**/coverage
+
+# Generated files
+**/generated
+
+# TypeScript build info
+**/*.tsbuildinfo
+
+# Turbo cache
+**/.turbo
+
+# Lock files
+package-lock.json
+
+# Bruno
+Bruno_API_Site_Intranet
+packages/bruno

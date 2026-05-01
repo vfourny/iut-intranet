@@ -1,0 +1,38 @@
+{
+  "dependencies": {
+    "@iut-intranet/auth": "*",
+    "@iut-intranet/db": "*",
+    "@iut-intranet/helpers": "*",
+    "@iut-intranet/services": "*",
+    "@trpc/server": "11.8.1"
+  },
+  "devDependencies": {
+    "@iut-intranet/configs": "*"
+  },
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./context": {
+      "source": "./src/context.ts",
+      "types": "./dist/context.d.ts",
+      "default": "./dist/context.js"
+    }
+  },
+  "name": "@iut-intranet/trpc",
+  "private": true,
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "clean": "rimraf node_modules dist .turbo",
+    "dev": "run-p dev:tsc dev:alias",
+    "dev:alias": "tsc-alias --watch",
+    "dev:tsc": "tsc --watch --preserveWatchOutput",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "ts:check": "tsc --noEmit"
+  },
+  "type": "module",
+  "version": "0.0.1"
+}

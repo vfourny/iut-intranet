@@ -1,0 +1,26 @@
+{
+  "name": "IUT Intranet Remote Dev Container",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "node-dev-env",
+  "workspaceFolder": "/app",
+  "remoteUser": "node",
+  "postCreateCommand": "npm run db:deploy",
+  "forwardPorts": [8000, 5432],
+  "portsAttributes": {
+    "8000": { "label": "API" },
+    "5432": { "label": "PostgreSQL" }
+  },
+  "customizations": {
+    "jetbrains": {
+      "plugins": ["com.prisma.prisma"]
+    },
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+        "prisma.prisma"
+      ]
+    }
+  }
+}

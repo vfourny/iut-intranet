@@ -1,0 +1,79 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "concurrency": "15",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "cache": true,
+      "outputs": ["dist/**"],
+      "dependsOn": ["db:generate", "^db:generate", "^build"]
+    },
+    "preview": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "db:generate": {
+      "cache": true,
+      "outputs": ["**/generated/**"]
+    },
+    "db:migrate": {
+      "cache": false
+    },
+    "db:deploy": {
+      "cache": false
+    },
+    "db:seed": {
+      "cache": false,
+      "dependsOn": ["db:generate"]
+    },
+    "db:reset": {
+      "cache": false,
+      "dependsOn": ["db:generate"]
+    },
+    "db:push": {
+      "cache": false
+    },
+    "db:studio": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "cache": true,
+      "dependsOn": ["db:generate", "^build"]
+    },
+    "lint:fix": {
+      "cache": false,
+      "dependsOn": ["db:generate", "^build"]
+    },
+    "ts:check": {
+      "cache": true,
+      "dependsOn": ["^db:generate", "^ts:check"]
+    },
+    "clean": {
+      "cache": false
+    }
+  },
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "API_PORT",
+    "PUBLIC_API_URL",
+    "APP_PORT",
+    "PUBLIC_APP_URL",
+    "RESEND_API_KEY",
+    "EMAIL_FROM",
+    "BETTER_AUTH_SECRET"
+  ],
+  "globalDependencies": [
+    ".nvmrc",
+    ".npmrc",
+    ".syncpackrc.json",
+    "tsconfig.json"
+  ]
+}

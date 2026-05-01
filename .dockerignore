@@ -5,7 +5,7 @@ node_modules
 
 # Local env files
 .env
-.env.local
+.env.sample
 .env.development.local
 .env.test
 .env.production.local
@@ -16,7 +16,7 @@ coverage
 # Turbo
 .turbo
 
-# Build outputs
+# Build Outputs
 build
 dist
 *.tsbuildinfo
@@ -33,14 +33,31 @@ yarn-error.log*
 # Prisma
 generated
 
+# Git
+.git
+.gitattributes
+.github
+.husky
+
 # IDE
 .idea
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
+.vscode
 
 # Data
 .cache
 
-# Local config
+# Docker
+docker
+
+# API testing
+Bruno_API_Site_Intranet
+packages/bruno
+
+# Docs / meta
+README.md
 *.local.json
+
+# AI
+.claude
+CLAUDE.md
+.mcp.json

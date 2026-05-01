@@ -1,0 +1,56 @@
+name: PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+run-name: 'PR - ${{ github.event.pull_request.title }}'
+
+jobs:
+  check-linked-issue:
+    uses: vfourny/.github/.github/workflows/check-linked-issues.yml@main
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      BETTER_AUTH_SECRET: test-secret-for-testing-only
+      DATABASE_URL: postgresql://root:root@localhost:5432/iut-intranet-db
+      EMAIL_FROM: test@example.com
+      NODE_ENV: test
+      PUBLIC_API_URL: http://localhost:8000
+      PUBLIC_APP_URL: http://localhost:5173
+    services:
+      postgres:
+        image: postgres:15.17
+        env:
+          POSTGRES_DB: iut-intranet-db
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+        ports:
+          - '5432:5432'
+        options: >-
+          --health-cmd "pg_isready -U root -d iut-intranet-db"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.2'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run syncpack:check
+      - run: npm run format:check
+      - run: npm run ts:check
+      - run: npm run lint
+      - run: npm run build
+      - name: Validate PR title with commitlint
+        run: echo "${{ github.event.pull_request.title }}" | npx commitlint

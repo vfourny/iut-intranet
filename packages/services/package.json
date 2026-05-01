@@ -1,0 +1,39 @@
+{
+  "//": "TODO: retirer @rollup/rollup-linux-x64-gnu une fois le bug npm optionalDependencies (npm/cli#4828) confirmé résolu sur notre CI/Docker",
+  "dependencies": {
+    "@iut-intranet/auth": "*",
+    "@iut-intranet/db": "*",
+    "@iut-intranet/helpers": "*"
+  },
+  "devDependencies": {
+    "@iut-intranet/configs": "*"
+  },
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./types/*": {
+      "source": "./src/types/*.types.ts",
+      "types": "./dist/types/*.types.d.ts",
+      "default": "./dist/types/*.types.js"
+    }
+  },
+  "name": "@iut-intranet/services",
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.60.0"
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "clean": "rimraf dist node_modules .turbo",
+    "dev": "run-p dev:tsc dev:alias",
+    "dev:alias": "tsc-alias --watch",
+    "dev:tsc": "tsc --watch --preserveWatchOutput",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "ts:check": "tsc --noEmit "
+  },
+  "type": "module",
+  "version": "1.0.0"
+}

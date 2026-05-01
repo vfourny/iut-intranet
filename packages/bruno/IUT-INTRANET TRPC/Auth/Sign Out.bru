@@ -1,0 +1,20 @@
+meta {
+  name: Sign Out
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{SERVER_URL}}/{{TRPC}}/auth.signOut
+  body: none
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

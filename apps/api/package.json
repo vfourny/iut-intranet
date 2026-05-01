@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "@iut-intranet/configs": "*",
+    "@iut-intranet/helpers": "*",
+    "@iut-intranet/trpc": "*",
+    "@trpc/server": "11.8.1",
+    "cors": "2.8.6",
+    "express": "5.2.1"
+  },
+  "devDependencies": {
+    "@types/cors": "2.8.19",
+    "@types/express": "5.0.6"
+  },
+  "name": "@iut-intranet/api",
+  "private": true,
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "clean": "rimraf dist node_modules .turbo",
+    "dev": "tsx watch src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "ts:check": "tsc --noEmit"
+  },
+  "type": "module",
+  "version": "0.0.0"
+}

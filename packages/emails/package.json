@@ -1,0 +1,36 @@
+{
+  "dependencies": {
+    "@iut-intranet/helpers": "*",
+    "handlebars": "4.7.9",
+    "resend": "6.7.0"
+  },
+  "devDependencies": {
+    "@iut-intranet/configs": "*"
+  },
+  "exports": {
+    "./email-sender": {
+      "source": "./src/email-sender.ts",
+      "types": "./dist/email-sender.d.ts",
+      "default": "./dist/email-sender.js"
+    },
+    "./types": {
+      "source": "./src/types.ts",
+      "types": "./dist/types.d.ts",
+      "default": "./dist/types.js"
+    }
+  },
+  "name": "@iut-intranet/emails",
+  "scripts": {
+    "build": "tsc && tsc-alias && npm run copy-templates",
+    "clean": "rimraf node_modules dist .turbo",
+    "copy-templates": "cpy \"src/templates/**/*\" dist/templates && cpy \"src/partials/**/*\" dist/partials",
+    "dev": "run-p dev:tsc dev:alias",
+    "dev:alias": "tsc-alias --watch",
+    "dev:tsc": "tsc --watch --preserveWatchOutput",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "ts:check": "tsc --noEmit "
+  },
+  "type": "module",
+  "version": "1.0.0"
+}
