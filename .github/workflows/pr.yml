@@ -26,20 +26,6 @@ jobs:
       NODE_ENV: test
       PUBLIC_API_URL: http://localhost:8000
       PUBLIC_APP_URL: http://localhost:5173
-    services:
-      postgres:
-        image: postgres:15.17
-        env:
-          POSTGRES_DB: iut-intranet-db
-          POSTGRES_USER: root
-          POSTGRES_PASSWORD: root
-        ports:
-          - '5432:5432'
-        options: >-
-          --health-cmd "pg_isready -U root -d iut-intranet-db"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
