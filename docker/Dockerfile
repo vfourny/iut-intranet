@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1
 FROM node:22.22.2-slim
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 COPY package.json package-lock.json turbo.json ./

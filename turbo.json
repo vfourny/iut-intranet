@@ -20,7 +20,8 @@
     },
     "db:generate": {
       "cache": true,
-      "outputs": ["**/generated/**"]
+      "outputs": ["**/generated/**"],
+      "dependsOn": ["^build"]
     },
     "db:migrate": {
       "cache": false
