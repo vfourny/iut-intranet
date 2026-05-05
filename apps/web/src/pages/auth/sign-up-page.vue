@@ -151,7 +151,7 @@ const [phone] = defineField('phone')
 const handleSubmit = createSubmitHandler(
   async ({ confirmPassword: _, ...values }) => {
     await signUp(values)
-    router.push({ name: RouteNames.home })
+    await router.push({ name: RouteNames.home })
   },
 )
 </script>

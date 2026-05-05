@@ -79,6 +79,6 @@ const [rememberMe] = defineField('rememberMe')
 
 const handleSubmit = createSubmitHandler(async (values) => {
   await signIn(values)
-  router.push({ name: RouteNames.home })
+  await router.push({ name: RouteNames.home })
 })
 </script>

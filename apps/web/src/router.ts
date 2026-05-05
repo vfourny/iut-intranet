@@ -17,6 +17,10 @@ export const RouteNames = {
     signUp: 'auth.sign-up',
   },
   home: 'home',
+  user: {
+    annuaire: 'user.annuaire',
+    annuaire2: 'user.annuaire2',
+  },
 } as const
 
 export const routes = [
@@ -25,6 +29,18 @@ export const routes = [
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.home,
     path: '/',
+  },
+  {
+    component: () => import('@/pages/user/search-user-page-data-view.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.user.annuaire,
+    path: '/annuaire',
+  },
+  {
+    component: () => import('@/pages/user/search-user-page-data-table.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.user.annuaire2,
+    path: '/annuaire',
   },
   {
     children: [
