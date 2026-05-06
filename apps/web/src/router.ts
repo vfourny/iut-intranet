@@ -73,8 +73,10 @@ export const router = createRouter({
   routes,
 })
 
-router.beforeEach((to) => {
-  const { isAuthenticated } = useSession()
+router.beforeEach(async (to) => {
+  const { isAuthenticated, refresh, status } = useSession()
+
+  if (status.value === 'pending') await refresh()
 
   if (to.meta.access === 'authenticated' && !isAuthenticated.value)
     return { name: RouteNames.auth.signIn }
