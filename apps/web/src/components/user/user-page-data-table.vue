@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { UserWithDepartment } from '@iut-intranet/helpers/types/user'
+import type { TrpcOutput } from '@iut-intranet/trpc'
 import Avatar from 'primevue/avatar'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
@@ -9,7 +9,7 @@ import { RouteNames, router } from '@/router'
 
 const { t } = useI18n()
 
-defineProps<{ users: UserWithDepartment[] }>()
+defineProps<{ users: TrpcOutput['user']['list'] }>()
 </script>
 
 <template>

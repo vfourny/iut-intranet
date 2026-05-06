@@ -68,10 +68,13 @@ export class UserService {
 
   /**
    * Retrieves all users
-   * @returns {Promise<UserModel[]>} Array of all users
    */
-  public async list(): Promise<UserModel[]> {
-    return this.prisma.user.findMany()
+  public async list() {
+    return this.prisma.user.findMany({
+      include: {
+        department: true,
+      },
+    })
   }
 
   /**
