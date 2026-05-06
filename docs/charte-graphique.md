@@ -10,12 +10,12 @@ Référence extraite de la charte officielle de l'IUT (Boulogne s/Mer, Calais, D
 
 Couleurs officielles du logo. Servent de **base de la palette de marque** (à utiliser pour les éléments d'interface principaux : navigation, accents, statuts).
 
-| Rôle      | CMYK (source charte) | HEX approx. | RGB           | Usage suggéré                          |
-| --------- | -------------------- | ----------- | ------------- | -------------------------------------- |
-| **Noir**  | C:0 M:0 J:0 N:100    | `#000000`   | `0, 0, 0`     | Texte principal, titres                |
-| **Rouge** | C:0 M:95 J:100 N:0   | `#E3000F`   | `227, 0, 15`  | Accent fort (la courbe rouge du logo)  |
-| **Bleu**  | C:100 M:0 J:0 N:0    | `#00AEEF`   | `0, 174, 239` | Couleur primaire de marque (recommandé pour `primary` PrimeVue) |
-| **Gris**  | C:0 M:0 J:0 N:60     | `#6D6E70`   | `109, 110, 112` | Texte secondaire, bordures, surfaces |
+| Rôle      | CMYK (source charte) | HEX approx. | RGB             | Usage suggéré                                                   |
+| --------- | -------------------- | ----------- | --------------- | --------------------------------------------------------------- |
+| **Noir**  | C:0 M:0 J:0 N:100    | `#000000`   | `0, 0, 0`       | Texte principal, titres                                         |
+| **Rouge** | C:0 M:95 J:100 N:0   | `#E3000F`   | `227, 0, 15`    | Accent fort (la courbe rouge du logo)                           |
+| **Bleu**  | C:100 M:0 J:0 N:0    | `#00AEEF`   | `0, 174, 239`   | Couleur primaire de marque (recommandé pour `primary` PrimeVue) |
+| **Gris**  | C:0 M:0 J:0 N:60     | `#6D6E70`   | `109, 110, 112` | Texte secondaire, bordures, surfaces                            |
 
 > ⚠️ Les valeurs CMYK sont la **source de vérité** de la charte (impression). Les HEX listés ici sont les équivalents écran les plus proches couramment utilisés pour cette charte (le bleu C100 est rendu en `#00AEEF` plutôt que le cyan pur `#00FFFF`, plus fidèle au visuel imprimé).
 
@@ -25,13 +25,13 @@ Couleurs officielles du logo. Servent de **base de la palette de marque** (à ut
 
 Codes couleurs de l'ADIUT identifiant les 5 spécialités. Utilisés pour les vignettes/cartes de département, les badges de filière, et toute UI contextuelle à un département.
 
-| Spécialité                                  | Départements concernés                                | CMYK              | HEX approx. | RGB             |
-| ------------------------------------------- | ----------------------------------------------------- | ----------------- | ----------- | --------------- |
-| **Administration, Gestion, Commerce**       | GACO (St-Omer), GEA (Calais), TC (Dunkerque)          | C:10 M:90 J:40 N:0 | `#D7376B`  | `215, 55, 107`  |
-| **Électricité, Automatique, Informatique**  | INFO (Calais), GEII (Calais)                          | C:90 M:20 J:0 N:0  | `#1FA9E0`  | `31, 169, 224`  |
-| **Sciences Industrielles, Matériaux, Contrôle** | GIM (St-Omer)                                     | C:30 M:0 J:0 N:70  | `#566872`  | `86, 104, 114`  |
-| **Chimie, Biologie, Procédés Industriels**  | GB (Boulogne-sur-Mer)                                 | C:55 M:0 J:100 N:0 | `#7DB72F`  | `125, 183, 47`  |
-| **Construction, Énergie, Sécurité**         | GTE (Dunkerque)                                       | C:0 M:55 J:100 N:0 | `#F08200`  | `240, 130, 0`   |
+| Spécialité                                      | Départements concernés                       | CMYK               | HEX approx. | RGB            |
+| ----------------------------------------------- | -------------------------------------------- | ------------------ | ----------- | -------------- |
+| **Administration, Gestion, Commerce**           | GACO (St-Omer), GEA (Calais), TC (Dunkerque) | C:10 M:90 J:40 N:0 | `#D7376B`   | `215, 55, 107` |
+| **Électricité, Automatique, Informatique**      | INFO (Calais), GEII (Calais)                 | C:90 M:20 J:0 N:0  | `#1FA9E0`   | `31, 169, 224` |
+| **Sciences Industrielles, Matériaux, Contrôle** | GIM (St-Omer)                                | C:30 M:0 J:0 N:70  | `#566872`   | `86, 104, 114` |
+| **Chimie, Biologie, Procédés Industriels**      | GB (Boulogne-sur-Mer)                        | C:55 M:0 J:100 N:0 | `#7DB72F`   | `125, 183, 47` |
+| **Construction, Énergie, Sécurité**             | GTE (Dunkerque)                              | C:0 M:55 J:100 N:0 | `#F08200`   | `240, 130, 0`  |
 
 > 📐 **Règles d'usage charte :** ces couleurs peuvent être déclinées en différentes valeurs de teinte (camaïeux), mais il est **recommandé de limiter le nombre de teintes par page** pour garantir la sobriété. Éviter les multiples camaïeux mélangés.
 
@@ -68,7 +68,7 @@ La charte impose **Arial** et **Arial Narrow** uniquement.
 ### Recommandation pour PrimeVue / CSS
 
 ```css
-font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
 ```
 
 > Pour respecter strictement la charte web, **ne pas charger de police Google Fonts** (Inter, Roboto, etc.). La police Arial est web-safe et installée sur tous les OS, donc aucun import n'est nécessaire.
@@ -95,11 +95,11 @@ Synthèse prête à l'emploi pour la configuration du thème PrimeVue. Le bleu `
 
 ```ts
 export const brandTokens = {
-  primary:   '#00AEEF', // Bleu IUT
-  accent:    '#E3000F', // Rouge IUT (courbe du logo)
-  neutral:   '#6D6E70', // Gris IUT
-  text:      '#000000', // Noir IUT
-};
+  primary: '#00AEEF', // Bleu IUT
+  accent: '#E3000F', // Rouge IUT (courbe du logo)
+  neutral: '#6D6E70', // Gris IUT
+  text: '#000000', // Noir IUT
+}
 ```
 
 ### Tokens départements
@@ -107,11 +107,11 @@ export const brandTokens = {
 ```ts
 export const departmentTokens = {
   administration: '#D7376B', // GACO, GEA, TC
-  informatique:   '#1FA9E0', // INFO, GEII
-  industriel:     '#566872', // GIM
-  biologie:       '#7DB72F', // GB
-  energie:        '#F08200', // GTE
-};
+  informatique: '#1FA9E0', // INFO, GEII
+  industriel: '#566872', // GIM
+  biologie: '#7DB72F', // GB
+  energie: '#F08200', // GTE
+}
 ```
 
 ### Échelle 50–950 (à générer pour PrimeVue)
@@ -123,19 +123,19 @@ PrimeVue v4 attend une échelle de teintes (`50, 100, …, 900, 950`) pour chaqu
 
 **Suggestion d'ancrage pour `primary` (bleu IUT `#00AEEF` ≈ teinte 500) :**
 
-| Pas | HEX (à valider visuellement)   |
-| --- | ------------------------------ |
-| 50  | `#E6F7FE`                      |
-| 100 | `#CCEFFD`                      |
-| 200 | `#99DFFB`                      |
-| 300 | `#66CFF9`                      |
-| 400 | `#33BFF7`                      |
-| 500 | `#00AEEF` ← **brand**          |
-| 600 | `#008BBF`                      |
-| 700 | `#00688F`                      |
-| 800 | `#00455F`                      |
-| 900 | `#002230`                      |
-| 950 | `#001118`                      |
+| Pas | HEX (à valider visuellement) |
+| --- | ---------------------------- |
+| 50  | `#E6F7FE`                    |
+| 100 | `#CCEFFD`                    |
+| 200 | `#99DFFB`                    |
+| 300 | `#66CFF9`                    |
+| 400 | `#33BFF7`                    |
+| 500 | `#00AEEF` ← **brand**        |
+| 600 | `#008BBF`                    |
+| 700 | `#00688F`                    |
+| 800 | `#00455F`                    |
+| 900 | `#002230`                    |
+| 950 | `#001118`                    |
 
 > Les valeurs ci-dessus sont indicatives — à ajuster avec un outil de génération de palette pour assurer un contraste WCAG AA sur les niveaux 600+ (texte sur fond clair) et 100–300 (texte sombre sur fond clair).
 
@@ -157,14 +157,14 @@ PrimeVue v4 utilise [`@primeuix/themes`](https://primevue.org/theming/) avec un 
 
 ### Rappel charte → application web
 
-| Élément UI                      | Couleur charte recommandée           |
-| ------------------------------- | ------------------------------------ |
-| Boutons primaires, liens        | `#00AEEF` (Bleu IUT)                 |
-| États d'erreur / suppression    | `#E3000F` (Rouge IUT) — usage parcimonieux |
-| Texte principal                 | `#000000`                            |
-| Texte secondaire, bordures      | `#6D6E70`                            |
-| Badge de département            | Couleur du département (cf. §2)      |
-| Fond de page                    | Blanc / gris très clair              |
+| Élément UI                   | Couleur charte recommandée                 |
+| ---------------------------- | ------------------------------------------ |
+| Boutons primaires, liens     | `#00AEEF` (Bleu IUT)                       |
+| États d'erreur / suppression | `#E3000F` (Rouge IUT) — usage parcimonieux |
+| Texte principal              | `#000000`                                  |
+| Texte secondaire, bordures   | `#6D6E70`                                  |
+| Badge de département         | Couleur du département (cf. §2)            |
+| Fond de page                 | Blanc / gris très clair                    |
 
 ---
 
