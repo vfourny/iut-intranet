@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import InputText from 'primevue/inputtext'
+import PrimeInputText from 'primevue/inputtext'
 import { ref } from 'vue'
 
 import { useI18n } from '@/composables/use-i18n'
@@ -18,7 +18,7 @@ const onSearch = () => {
 </script>
 
 <template>
-  <InputText
+  <PrimeInputText
     v-model="searchQuery"
     :placeholder="t('user.search')"
     type="text"

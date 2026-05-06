@@ -1,25 +1,32 @@
 <script setup lang="ts">
 import type { TrpcOutput } from '@iut-intranet/trpc'
-import Avatar from 'primevue/avatar'
-import Column from 'primevue/column'
-import DataTable from 'primevue/datatable'
+import PrimeAvatar from 'primevue/avatar'
+import PrimeColumn from 'primevue/column'
+import PrimeDataTable from 'primevue/datatable'
 
 import { useI18n } from '@/composables/use-i18n'
 import { RouteNames, router } from '@/router'
 
 const { t } = useI18n()
 
-defineProps<{ users: TrpcOutput['user']['list'] }>()
+const getInitials = (user: TrpcOutput['user']['list'][number]) =>
+  `${user.firstName[0]}${user.lastName[0]}`
+
+interface UserDataTableProps {
+  users: TrpcOutput['user']['list']
+}
+
+defineProps<UserDataTableProps>()
 </script>
 
 <template>
-  <DataTable
+  <PrimeDataTable
     :value="users"
     @row-click="
       (e) => router.push({ name: RouteNames.home, params: { id: e.data.id } })
     "
   >
-    <Column>
+    <PrimeColumn>
       <template #body="{ data: user }">
         <Avatar
           v-if="user.image"
@@ -27,17 +34,17 @@ defineProps<{ users: TrpcOutput['user']['list'] }>()
           size="xlarge"
           style="border-radius: 8px"
         />
-        <Avatar
+        <PrimeAvatar
           v-else
-          :label="`${user.firstName[0]}${user.lastName[0]}`"
+          :label="getInitials(user)"
           size="xlarge"
           style="border-radius: 8px"
         />
       </template>
-    </Column>
+    </PrimeColumn>
     <Column field="firstName" :header="t('user.table.prénom')" />
     <Column field="lastName" :header="t('user.table.nom')" />
     <Column field="department.code" :header="t('user.table.department')" />
     <Column field="jobTitle" :header="t('user.table.job')" />
-  </DataTable>
+  </PrimeDataTable>
 </template>

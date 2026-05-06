@@ -1,6 +1,6 @@
 <template>
   <div class="flex gap-4 items-center">
-    <UserSearchCard @search="onSearch" />
+    <UserSearchBar @search="onSearch" />
     <PrimeSelectButton
       :model-value="diplayMode"
       option-value="value"
@@ -35,7 +35,7 @@ import { computed, ref } from 'vue'
 import { useUsers } from '@/api/users.api'
 import UserPageDataTable from '@/components/user/user-page-data-table.vue'
 import UserPageDataView from '@/components/user/user-page-data-view.vue'
-import UserSearchCard from '@/components/user/user-search-card.vue'
+import UserSearchBar from '@/components/user/user-search-bar.vue'
 
 enum DisplayMode {
   DATA_TABLE = 'data-table',

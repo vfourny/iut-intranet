@@ -1,28 +1,35 @@
 <script setup lang="ts">
 import type { TrpcOutput } from '@iut-intranet/trpc'
-import Avatar from 'primevue/avatar'
-import Card from 'primevue/card'
+import PrimeAvatar from 'primevue/avatar'
+import PrimeCard from 'primevue/card'
+import { computed } from 'vue'
 
 import { RouteNames, router } from '@/router'
 
-defineProps<{ user: TrpcOutput['user']['list'][number] }>()
+interface UserCardProps {
+  user: TrpcOutput['user']['list'][number]
+}
+
+const { user } = defineProps<UserCardProps>()
+
+const getInitials = computed(() => `${user.firstName[0]}${user.lastName[0]}`)
 </script>
 
 <template>
-  <Card
+  <PrimeCard
     class="hover:shadow-lg"
     @click="router.push({ name: RouteNames.home, params: { id: user.id } })"
   >
     <template #header>
-      <Avatar
+      <PrimeAvatar
         v-if="user.image"
         :image="user.image"
         size="xlarge"
         style="border-radius: 8px"
       />
-      <Avatar
+      <PrimeAvatar
         v-else
-        :label="`${user.firstName[0]}${user.lastName[0]}`"
+        :label="getInitials"
         size="xlarge"
         style="border-radius: 8px"
       />
@@ -32,5 +39,5 @@ defineProps<{ user: TrpcOutput['user']['list'][number] }>()
     <template #subtitle
       >{{ user.department?.code }} {{ user.jobTitle }}</template
     >
-  </Card>
+  </PrimeCard>
 </template>

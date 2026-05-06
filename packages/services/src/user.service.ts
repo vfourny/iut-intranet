@@ -1,10 +1,7 @@
 import { type BetterAuthInstance } from '@iut-intranet/auth/types'
 import type { prisma } from '@iut-intranet/db'
 import type { UserModel } from '@iut-intranet/db/models'
-import type {
-  UpdateUserInput,
-  UserWithDepartment,
-} from '@iut-intranet/helpers/types/user'
+import type { UpdateUserInput } from '@iut-intranet/helpers/types/user'
 
 export class UserService {
   constructor(
@@ -41,28 +38,6 @@ export class UserService {
       where: {
         id: userId,
       },
-    })
-  }
-
-  /**
-   * Retrieves a user by name
-   * @param {string} name - User(s) firstname or lastname
-   * @returns {Promise<UserModel>} Users tab object
-   * @throws {Error} If user(s) does not exist
-   */
-  public async getByName(name?: string): Promise<UserWithDepartment[]> {
-    return this.prisma.user.findMany({
-      include: {
-        department: true,
-      },
-      where: name
-        ? {
-            OR: [
-              { firstName: { contains: name, mode: 'insensitive' } },
-              { lastName: { contains: name, mode: 'insensitive' } },
-            ],
-          }
-        : undefined,
     })
   }
 
