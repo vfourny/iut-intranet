@@ -84,7 +84,7 @@
     <template #footer>
       {{ t('auth.signUp.footer.alreadyAccount') }}
       <RouterLink
-        class="font-medium text-blue-600 hover:underline"
+        class="font-medium text-primary hover:underline"
         :to="{ name: RouteNames.auth.signIn }"
       >
         {{ t('auth.signUp.footer.signIn') }}

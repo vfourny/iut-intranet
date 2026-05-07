@@ -1,14 +1,13 @@
 <template>
   <div class="flex gap-4 items-center">
-    <UserSearchBar @search="onSearch" />
     <PrimeSelectButton
-      :model-value="diplayMode"
+      :model-value="displayMode"
       option-value="value"
-      :options="options"
+      :options="displayModeOptions"
       @value-change="
-        diplayMode =
+        displayMode =
           $event ??
-          (diplayMode === DisplayMode.DATA_TABLE
+          (displayMode === DisplayMode.DATA_TABLE
             ? DisplayMode.DATA_VIEW
             : DisplayMode.DATA_TABLE)
       "
@@ -17,14 +16,23 @@
         <i :class="slotProps.option.icon"></i>
       </template>
     </PrimeSelectButton>
+    <UserSearchBar @search="onSearch" />
   </div>
-  <UserPageDataTable
-    v-if="diplayMode === DisplayMode.DATA_TABLE"
-    :users="filteredUsers ?? []"
+  <UserDataTable
+    v-if="displayMode === DisplayMode.DATA_TABLE"
+    :loading="paginatedStatus === 'loading'"
+    :page="page"
+    :page-size="USER_PAGE_SIZE"
+    :total="paginatedTotal"
+    :users="paginatedUsers"
+    @update:page="page = $event"
   />
-  <UserPageDataView
-    v-if="diplayMode === DisplayMode.DATA_VIEW"
-    :users="filteredUsers ?? []"
+  <UserDataView
+    v-else
+    :has-next-page="infiniteHasNextPage"
+    :loading="infiniteStatus === 'loading'"
+    :users="infiniteUsers"
+    @load-more="infiniteLoadNextPage()"
   />
 </template>
 
@@ -32,9 +40,13 @@
 import PrimeSelectButton from 'primevue/selectbutton'
 import { computed, ref } from 'vue'
 
-import { useUsers } from '@/api/users.api'
-import UserPageDataTable from '@/components/user/user-page-data-table.vue'
-import UserPageDataView from '@/components/user/user-page-data-view.vue'
+import {
+  USER_PAGE_SIZE,
+  useUsersInfinite,
+  useUsersPaginated,
+} from '@/api/users.api'
+import UserDataTable from '@/components/user/user-data-table.vue'
+import UserDataView from '@/components/user/user-data-view.vue'
 import UserSearchBar from '@/components/user/user-search-bar.vue'
 
 enum DisplayMode {
@@ -42,24 +54,41 @@ enum DisplayMode {
   DATA_VIEW = 'data-view',
 }
 
-const { data: users } = useUsers()
-const searchQuery = ref('')
+const SEARCH_DEBOUNCE_MS = 300
 
-const filteredUsers = computed(() =>
-  users.value?.filter((user) =>
-    (user.firstName + ' ' + user.lastName)
-      .toLowerCase()
-      .includes(searchQuery.value.toLowerCase()),
-  ),
-)
+const search = ref('')
+const page = ref(1)
+const displayMode = ref(DisplayMode.DATA_TABLE)
 
-const onSearch = (name: string) => {
-  searchQuery.value = name
-}
-
-const diplayMode = ref(DisplayMode.DATA_TABLE)
-const options = ref<{ icon: string; value: DisplayMode }[]>([
+const displayModeOptions = ref<{ icon: string; value: DisplayMode }[]>([
   { icon: 'pi pi-table', value: DisplayMode.DATA_TABLE },
   { icon: 'pi pi-th-large', value: DisplayMode.DATA_VIEW },
 ])
+
+const { asyncStatus: paginatedStatus, data: paginatedData } = useUsersPaginated(
+  page,
+  search,
+)
+
+const {
+  asyncStatus: infiniteStatus,
+  data: infiniteData,
+  hasNextPage: infiniteHasNextPage,
+  loadNextPage: infiniteLoadNextPage,
+} = useUsersInfinite(search)
+
+const paginatedUsers = computed(() => paginatedData.value?.items ?? [])
+const paginatedTotal = computed(() => paginatedData.value?.total ?? 0)
+const infiniteUsers = computed(
+  () => infiniteData.value?.pages.flatMap((p) => p.items) ?? [],
+)
+
+let debounceTimer: ReturnType<typeof setTimeout> | undefined
+const onSearch = (value: string) => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    search.value = value
+    page.value = 1
+  }, SEARCH_DEBOUNCE_MS)
+}
 </script>

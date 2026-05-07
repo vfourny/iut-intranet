@@ -5,6 +5,10 @@ export const layout = {
       title: 'IUT Intranet',
     },
   },
+  colorMode: {
+    toDark: 'Passer en mode sombre',
+    toLight: 'Passer en mode clair',
+  },
   default: {
     nav: {
       home: 'Accueil',

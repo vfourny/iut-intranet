@@ -1,3 +1,12 @@
+<template>
+  <PrimeInputText
+    v-model="searchQuery"
+    :placeholder="t('user.search')"
+    type="text"
+    @input="onSearch"
+  />
+</template>
+
 <script setup lang="ts">
 import PrimeInputText from 'primevue/inputtext'
 import { ref } from 'vue'
@@ -16,12 +25,3 @@ const onSearch = () => {
   emit('search', searchQuery.value)
 }
 </script>
-
-<template>
-  <PrimeInputText
-    v-model="searchQuery"
-    :placeholder="t('user.search')"
-    type="text"
-    @input="onSearch"
-  />
-</template>

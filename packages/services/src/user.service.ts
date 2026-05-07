@@ -42,14 +42,35 @@ export class UserService {
   }
 
   /**
-   * Retrieves all users
+   * Retrieves a paginated list of users, optionally filtered by name.
    */
-  public async list() {
-    return this.prisma.user.findMany({
-      include: {
-        department: true,
-      },
-    })
+  public async list(input: {
+    page: number
+    pageSize: number
+    search?: string
+  }) {
+    const { page, pageSize, search } = input
+    const where = search
+      ? {
+          OR: [
+            { firstName: { contains: search, mode: 'insensitive' as const } },
+            { lastName: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}
+
+    const [items, total] = await Promise.all([
+      this.prisma.user.findMany({
+        include: { department: true },
+        orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        where,
+      }),
+      this.prisma.user.count({ where }),
+    ])
+
+    return { items, total }
   }
 
   /**

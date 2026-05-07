@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="flex min-h-[calc(100vh-57px)] flex-col items-center justify-center gap-6 p-6"
-  >
-    <UsersList />
-  </div>
+  <UsersList />
 </template>
 
 <script lang="ts" setup>

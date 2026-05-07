@@ -1,11 +1,13 @@
 <template>
   <div class="flex flex-col gap-1">
-    <label class="text-sm font-medium text-slate-700" :for="toKebabCase(name)">
+    <label class="text-sm font-medium text-foreground" :for="toKebabCase(name)">
       {{ label }}
     </label>
     <slot />
-    <small v-if="error" class="text-xs text-red-500">{{ error }}</small>
-    <small v-else-if="hint" class="text-xs text-slate-400">{{ hint }}</small>
+    <small v-if="error" class="text-xs text-danger">{{ error }}</small>
+    <small v-else-if="hint" class="text-xs text-muted-foreground">{{
+      hint
+    }}</small>
   </div>
 </template>
 

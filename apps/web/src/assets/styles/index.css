@@ -1,9 +1,26 @@
 @import 'tailwindcss';
+@plugin 'tailwindcss-primeui';
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+  /* Coupe les palettes par défaut de Tailwind (slate, blue, red, gray…) :
+   * seules les couleurs définies ci-dessous sont exposées comme classes utilitaires.
+   * → `bg-slate-100`, `text-blue-600`, etc. ne génèrent plus rien. */
+  --color-*: initial;
 
-  /* Marque IUT — bleu (primaire) */
+  /* Neutres universels conservés (utilisés tels quels : bg-white, text-black). */
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --font-sans: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+  --font-narrow: 'Arial Narrow', Arial, 'Helvetica Neue', Helvetica, sans-serif;
+
+  /* ============================================================
+   * Palettes de marque — charte IUT Littoral Côte d'Opale
+   * ============================================================ */
+
+  /* Bleu IUT — couleur principale du logo (CMYK 100/0/0/0 → #00AEEF) */
   --color-iut-blue-50: #e6f7fe;
   --color-iut-blue-100: #cceffd;
   --color-iut-blue-200: #99dffb;
@@ -16,19 +33,233 @@
   --color-iut-blue-900: #002230;
   --color-iut-blue-950: #001118;
 
-  /* Marque IUT — accents */
-  --color-iut-red: #e3000f;
-  --color-iut-grey: #6d6e70;
+  /* Rouge IUT — courbe du logo (CMYK 0/95/100/0 → #E3000F) */
+  --color-iut-red-50: #fee5e7;
+  --color-iut-red-100: #fdcccf;
+  --color-iut-red-200: #fb999f;
+  --color-iut-red-300: #f9666f;
+  --color-iut-red-400: #f7333f;
+  --color-iut-red-500: #e3000f;
+  --color-iut-red-600: #b6000c;
+  --color-iut-red-700: #880009;
+  --color-iut-red-800: #5b0006;
+  --color-iut-red-900: #2d0003;
+  --color-iut-red-950: #160001;
 
-  /* Couleurs département (cf. charte ADIUT) */
-  --color-dept-admin: #d7376b;
-  --color-dept-info: #1fa9e0;
-  --color-dept-indus: #566872;
-  --color-dept-bio: #7db72f;
-  --color-dept-energy: #f08200;
+  /* Gris IUT — texte/séparateurs (CMYK 0/0/0/60 → #6D6E70) */
+  --color-iut-grey-50: #f5f5f5;
+  --color-iut-grey-100: #e9e9ea;
+  --color-iut-grey-200: #d4d4d5;
+  --color-iut-grey-300: #b8b8b9;
+  --color-iut-grey-400: #939395;
+  --color-iut-grey-500: #6d6e70;
+  --color-iut-grey-600: #58585a;
+  --color-iut-grey-700: #424243;
+  --color-iut-grey-800: #2c2c2d;
+  --color-iut-grey-900: #1a1a1b;
+  --color-iut-grey-950: #0d0d0d;
+
+  /* ============================================================
+   * Couleurs des spécialités (charte ADIUT, p.7-8)
+   *   admin  → GACO, GEA, TC      (Administration, Gestion, Commerce)
+   *   info   → INFO, GEII         (Électricité, Automatique, Informatique)
+   *   indus  → GIM                (Sciences Industrielles, Matériaux, Contrôle)
+   *   bio    → GB                 (Chimie, Biologie, Procédés Industriels)
+   *   energy → GTE                (Construction, Énergie, Sécurité)
+   * ============================================================ */
+
+  /* admin — CMYK 10/90/40/0 → #D7376B */
+  --color-dept-admin-50: #fbebf1;
+  --color-dept-admin-100: #f7d6e2;
+  --color-dept-admin-200: #efadc5;
+  --color-dept-admin-300: #e784a8;
+  --color-dept-admin-400: #df5b8b;
+  --color-dept-admin-500: #d7376b;
+  --color-dept-admin-600: #ac2c56;
+  --color-dept-admin-700: #812140;
+  --color-dept-admin-800: #56162b;
+  --color-dept-admin-900: #2b0b15;
+  --color-dept-admin-950: #15050b;
+
+  /* info — CMYK 90/20/0/0 → #1FA9E0 */
+  --color-dept-info-50: #ecf6fc;
+  --color-dept-info-100: #d8eef9;
+  --color-dept-info-200: #b9e3f5;
+  --color-dept-info-300: #8fd4ef;
+  --color-dept-info-400: #5bbfe8;
+  --color-dept-info-500: #1fa9e0;
+  --color-dept-info-600: #1987b3;
+  --color-dept-info-700: #136586;
+  --color-dept-info-800: #0c4459;
+  --color-dept-info-900: #06222d;
+  --color-dept-info-950: #031116;
+
+  /* indus — CMYK 30/0/0/70 → #566872 */
+  --color-dept-indus-50: #eef0f1;
+  --color-dept-indus-100: #dde0e3;
+  --color-dept-indus-200: #bcc1c8;
+  --color-dept-indus-300: #9aa3ac;
+  --color-dept-indus-400: #788591;
+  --color-dept-indus-500: #566872;
+  --color-dept-indus-600: #45535b;
+  --color-dept-indus-700: #343e44;
+  --color-dept-indus-800: #232a2e;
+  --color-dept-indus-900: #111517;
+  --color-dept-indus-950: #090b0c;
+
+  /* bio — CMYK 55/0/100/0 → #7DB72F */
+  --color-dept-bio-50: #f2f9e6;
+  --color-dept-bio-100: #e1f1cf;
+  --color-dept-bio-200: #cbe7af;
+  --color-dept-bio-300: #b1da87;
+  --color-dept-bio-400: #97c95b;
+  --color-dept-bio-500: #7db72f;
+  --color-dept-bio-600: #649226;
+  --color-dept-bio-700: #4b6e1c;
+  --color-dept-bio-800: #324913;
+  --color-dept-bio-900: #192509;
+  --color-dept-bio-950: #0c1205;
+
+  /* energy — CMYK 0/55/100/0 → #F08200 */
+  --color-dept-energy-50: #fef2e6;
+  --color-dept-energy-100: #fde0bf;
+  --color-dept-energy-200: #facd99;
+  --color-dept-energy-300: #f8b466;
+  --color-dept-energy-400: #f59b33;
+  --color-dept-energy-500: #f08200;
+  --color-dept-energy-600: #c06800;
+  --color-dept-energy-700: #904e00;
+  --color-dept-energy-800: #603400;
+  --color-dept-energy-900: #301a00;
+  --color-dept-energy-950: #180d00;
+
+  /* ============================================================
+   * Palettes d'état (status) — feedback UI
+   *   danger  → rouge IUT (#E3000F)
+   *   success → vert spécialité bio (#7DB72F)
+   *   warning → orange spécialité energy (#F08200)
+   *   info    → bleu spécialité info (#1FA9E0)
+   * Valeurs alignées sur les palettes brand pour rester cohérent
+   * avec la charte ; ajustez ici si vous voulez les découpler.
+   * ============================================================ */
+
+  --color-danger-50: #fee5e7;
+  --color-danger-100: #fdcccf;
+  --color-danger-200: #fb999f;
+  --color-danger-300: #f9666f;
+  --color-danger-400: #f7333f;
+  --color-danger-500: #e3000f;
+  --color-danger-600: #b6000c;
+  --color-danger-700: #880009;
+  --color-danger-800: #5b0006;
+  --color-danger-900: #2d0003;
+  --color-danger-950: #160001;
+
+  --color-success-50: #f2f9e6;
+  --color-success-100: #e1f1cf;
+  --color-success-200: #cbe7af;
+  --color-success-300: #b1da87;
+  --color-success-400: #97c95b;
+  --color-success-500: #7db72f;
+  --color-success-600: #649226;
+  --color-success-700: #4b6e1c;
+  --color-success-800: #324913;
+  --color-success-900: #192509;
+  --color-success-950: #0c1205;
+
+  --color-warning-50: #fef2e6;
+  --color-warning-100: #fde0bf;
+  --color-warning-200: #facd99;
+  --color-warning-300: #f8b466;
+  --color-warning-400: #f59b33;
+  --color-warning-500: #f08200;
+  --color-warning-600: #c06800;
+  --color-warning-700: #904e00;
+  --color-warning-800: #603400;
+  --color-warning-900: #301a00;
+  --color-warning-950: #180d00;
+
+  --color-info-50: #ecf6fc;
+  --color-info-100: #d8eef9;
+  --color-info-200: #b9e3f5;
+  --color-info-300: #8fd4ef;
+  --color-info-400: #5bbfe8;
+  --color-info-500: #1fa9e0;
+  --color-info-600: #1987b3;
+  --color-info-700: #136586;
+  --color-info-800: #0c4459;
+  --color-info-900: #06222d;
+  --color-info-950: #031116;
+}
+
+/* ============================================================
+ * Tokens sémantiques — exposés à Tailwind via `@theme inline`
+ * (les `var(--…)` ne sont pas inlinés au build → un toggle `.dark`
+ *  suffit pour basculer toutes les classes utilitaires).
+ *
+ * Utilisation : bg-background, text-foreground, border-border,
+ *               bg-primary, text-danger, bg-card, etc.
+ * ============================================================ */
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-fg);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-fg);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-fg);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-fg);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+}
+
+:root {
+  --bg: #ffffff;
+  --fg: var(--color-iut-grey-900);
+  --muted: var(--color-iut-grey-100);
+  --muted-fg: var(--color-iut-grey-600);
+  --card: #ffffff;
+  --card-fg: var(--color-iut-grey-900);
+  --border: var(--color-iut-grey-200);
+  --input: var(--color-iut-grey-200);
+  --ring: var(--color-iut-blue-500);
+  --primary: var(--color-iut-blue-500);
+  --primary-fg: #ffffff;
+  --danger: var(--color-danger-500);
+  --danger-fg: #ffffff;
+  --success: var(--color-success-600);
+  --warning: var(--color-warning-500);
+  --info: var(--color-info-500);
+}
+
+.dark {
+  --bg: var(--color-iut-grey-950);
+  --fg: var(--color-iut-grey-50);
+  --muted: var(--color-iut-grey-800);
+  --muted-fg: var(--color-iut-grey-400);
+  --card: var(--color-iut-grey-900);
+  --card-fg: var(--color-iut-grey-50);
+  --border: var(--color-iut-grey-700);
+  --input: var(--color-iut-grey-700);
+  --ring: var(--color-iut-blue-400);
+  --primary: var(--color-iut-blue-400);
+  --primary-fg: var(--color-iut-grey-950);
+  --danger: var(--color-danger-400);
+  --danger-fg: var(--color-iut-grey-950);
+  --success: var(--color-success-400);
+  --warning: var(--color-warning-400);
+  --info: var(--color-info-400);
 }
 
 html,
 body {
   font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
