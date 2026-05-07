@@ -1,0 +1,21 @@
+meta {
+  name: listEvent
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{SERVER_URL}}/{{TRPC}}/event.listEventProcedure
+  body: none
+  auth: inherit
+}
+
+vars:pre-request {
+  TRPC: trpc
+  SERVER_URL: http://localhost:8000
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

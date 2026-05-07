@@ -1,0 +1,30 @@
+meta {
+  name: getEventById
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{SERVER_URL}}/{{TRPC}}/event.getEventByIdProcedure?input={"id":"{{activeId}}"}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  input: {"id":"{{activeId}}"}
+}
+
+headers {
+  Set-Cookie: iut-intranet.session_token=tGoQRw4090mWUXJ51jhPqMHx83VGpnBw.NIMW2XNzp75HRaydxVIHkKrt2gW7xPo%2FKPviLIYoYQ8%3D; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax
+}
+
+vars:pre-request {
+  activeId: 1
+  SERVER_URL: http://localhost:8000
+  TRPC: trpc
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
