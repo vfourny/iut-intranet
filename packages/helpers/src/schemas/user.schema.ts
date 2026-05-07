@@ -25,10 +25,6 @@ export const getUserByIdInputSchema = z.object({
   userId: z.cuid(),
 })
 
-export const getUserByNameInputSchema = z.object({
-  name: z.string().optional(),
-})
-
 export const listUsersInputSchema = paginationSchema.extend({
   search: searchSchema,
 })
