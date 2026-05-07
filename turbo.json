@@ -54,7 +54,7 @@
     },
     "ts:check": {
       "cache": true,
-      "dependsOn": ["^db:generate", "^ts:check"]
+      "dependsOn": ["db:generate", "^db:generate", "^ts:check"]
     },
     "clean": {
       "cache": false
