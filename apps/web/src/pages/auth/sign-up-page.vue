@@ -84,7 +84,7 @@
     <template #footer>
       {{ t('auth.signUp.footer.alreadyAccount') }}
       <RouterLink
-        class="font-medium text-blue-600 hover:underline"
+        class="font-medium text-primary hover:underline"
         :to="{ name: RouteNames.auth.signIn }"
       >
         {{ t('auth.signUp.footer.signIn') }}
@@ -151,7 +151,7 @@ const [phone] = defineField('phone')
 const handleSubmit = createSubmitHandler(
   async ({ confirmPassword: _, ...values }) => {
     await signUp(values)
-    router.push({ name: RouteNames.home })
+    await router.push({ name: RouteNames.home })
   },
 )
 </script>

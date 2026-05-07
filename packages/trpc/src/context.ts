@@ -1,12 +1,17 @@
 import { fromNodeHeaders } from '@iut-intranet/auth'
 import { createLogger } from '@iut-intranet/configs/logger'
-import { authService, userService } from '@iut-intranet/services'
+import {
+  authService,
+  departmentService,
+  userService,
+} from '@iut-intranet/services'
 import type { CreateExpressContextOptions } from '@trpc/server/adapters/express'
 
 const logger = createLogger('trpc')
 
 const services = {
   auth: authService,
+  department: departmentService,
   user: userService,
 } as const
 
