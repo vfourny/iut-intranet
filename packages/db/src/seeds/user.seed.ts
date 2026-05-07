@@ -9,6 +9,7 @@ export const ADMIN = {
   departmentCode: DepartmentCode.INFO,
   email: 'admin@iut-intranet.com',
   firstName: 'John',
+  jobTitle: 'Chef de département',
   lastName: 'ADMIN',
   role: UserRole.ADMIN,
 }
@@ -17,6 +18,7 @@ export const USER = {
   departmentCode: DepartmentCode.GACO,
   email: 'user@iut-intranet.com',
   firstName: 'John',
+  jobTitle: 'Enseignant',
   lastName: 'USER',
   role: UserRole.USER,
 }
@@ -49,6 +51,7 @@ export const EDITOR = {
   departmentCode: DepartmentCode.TC,
   email: 'editor@iut-intranet.com',
   firstName: 'Jane',
+  jobTitle: 'Responsable pédagogique',
   lastName: 'EDITOR',
   role: UserRole.EDITOR,
 }

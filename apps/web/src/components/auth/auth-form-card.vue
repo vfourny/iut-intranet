@@ -2,8 +2,8 @@
   <PrimeCard>
     <template #header>
       <div class="px-6 pt-6">
-        <h2 class="text-xl font-semibold text-slate-900">{{ title }}</h2>
-        <p class="mt-0.5 text-sm text-slate-500">{{ subtitle }}</p>
+        <h2 class="text-xl font-semibold text-foreground">{{ title }}</h2>
+        <p class="mt-0.5 text-sm text-muted-foreground">{{ subtitle }}</p>
       </div>
     </template>
     <template #content>
@@ -21,7 +21,7 @@
       </PrimeFluid>
     </template>
     <template v-if="$slots.footer" #footer>
-      <div class="pb-2 text-center text-sm text-slate-500">
+      <div class="pb-2 text-center text-sm text-muted-foreground">
         <slot name="footer" />
       </div>
     </template>

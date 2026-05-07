@@ -1,9 +1,9 @@
+import { listUsersInputSchema } from '@iut-intranet/helpers/schemas/user'
+
 import { adminProcedure } from '@/procedures'
 
-export const listUsersProcedure = adminProcedure.query(async ({ ctx }) => {
-  const users = await ctx.services.user.list()
-  return users.map((user) => {
-    const { email, firstName, id, lastName, role } = user
-    return { email, firstName, id, lastName, role }
+export const listUsersProcedure = adminProcedure
+  .input(listUsersInputSchema)
+  .query(async ({ ctx, input }) => {
+    return ctx.services.user.list(input)
   })
-})
