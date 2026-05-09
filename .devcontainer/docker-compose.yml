@@ -6,6 +6,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+      target: deps
 
     volumes:
       - ..:/app

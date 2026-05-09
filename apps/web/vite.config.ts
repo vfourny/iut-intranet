@@ -13,6 +13,11 @@ export default defineConfig({
     'import.meta.env.PUBLIC_API_URL': JSON.stringify(PUBLIC_API_URL),
   },
   plugins: [vue(), tailwindcss()],
+  preview: {
+    host: true,
+    port: APP_PORT,
+    strictPort: true,
+  },
   resolve: {
     alias: {
       '@': resolve(import.meta.dirname, './src'),
