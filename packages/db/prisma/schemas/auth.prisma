@@ -28,8 +28,8 @@ model User {
 
   sessions Session[]
   accounts Account[]
-  organizedEvents    Event[]
-  eventParticipants  EventParticipant[]
+  organizedEvents   Event[]
+  eventInvitations  EventInvitation[]
 
   @@map("user")
 }

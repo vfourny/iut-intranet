@@ -1,0 +1,20 @@
+meta {
+  name: Get Event By Id
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{SERVER_URL}}/{{TRPC}}/event.getById?input={"eventId":"{{activeEventId}}"}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  input: {"eventId":"{{activeEventId}}"}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

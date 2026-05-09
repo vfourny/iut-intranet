@@ -83,14 +83,14 @@ export class UserService {
     input: UpdateUserInput,
     headers: Headers,
   ): Promise<UserModel> {
-    const { id, lastName, ...restingUserPayload } = input
+    const { lastName, userId, ...restingUserPayload } = input
     const updatedUser = await this.betterAuth.api.adminUpdateUser({
       body: {
         data: {
           ...(lastName && { name: lastName }),
           ...restingUserPayload,
         },
-        userId: id,
+        userId,
       },
       headers,
     })

@@ -1,8 +1,8 @@
 import { getEventByIdProcedure } from '@/modules/event/procedure/get-event-by-id.procedure'
-import { listEventProcedure } from '@/modules/event/procedure/list-event.procedure'
+import { listEventsProcedure } from '@/modules/event/procedure/list-events.procedure'
 import { router } from '@/trpc'
 
 export const eventRouter = router({
-  getEventByIdProcedure,
-  listEventProcedure,
+  getById: getEventByIdProcedure,
+  list: listEventsProcedure,
 })

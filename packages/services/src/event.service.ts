@@ -1,20 +1,21 @@
 import type { prisma } from '@iut-intranet/db'
 import type { Event } from '@iut-intranet/db'
+import type { EventModel } from '@iut-intranet/db/models'
 
 export class EventService {
   constructor(private prisma: prisma) {}
 
-  public async getById(id: string): Promise<Event | null> {
-    return this.prisma.event.findUnique({
+  public async getById(eventId: string): Promise<EventModel> {
+    return this.prisma.event.findUniqueOrThrow({
       include: {
-        departments: true,
-        participants: true,
+        department: true,
+        invitations: true,
       },
-      where: { id },
+      where: { id: eventId },
     })
   }
 
-  public async list(): Promise<Event[] | []> {
+  public async list(): Promise<Event[]> {
     return this.prisma.event.findMany()
   }
 }

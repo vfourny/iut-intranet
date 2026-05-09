@@ -1,9 +1,9 @@
 import { getEventByIdInputSchema } from '@iut-intranet/helpers/schemas/event'
 
-import { adminProcedure } from '@/procedures'
+import { authenticatedProcedure } from '@/procedures'
 
-export const getEventByIdProcedure = adminProcedure
+export const getEventByIdProcedure = authenticatedProcedure
   .input(getEventByIdInputSchema)
   .query(({ ctx, input }) => {
-    return ctx.services.event.getById(input.id)
+    return ctx.services.event.getById(input.eventId)
   })

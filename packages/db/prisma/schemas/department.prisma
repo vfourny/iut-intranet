@@ -22,7 +22,7 @@ model Department {
   site Site
 
   users User[]
-  events EventDepartment[]
+  events Event[]
 
   @@map("department")
 }

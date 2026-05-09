@@ -6,17 +6,12 @@ meta {
 
 post {
   url: {{SERVER_URL}}/{{TRPC}}/auth.signOut
-  body: json
+  body: none
   auth: inherit
 }
 
 headers {
   Content-Type: application/json
-}
-
-vars:pre-request {
-  SERVER_URL: http://localhost:8000
-  TRPC: trpc
 }
 
 settings {

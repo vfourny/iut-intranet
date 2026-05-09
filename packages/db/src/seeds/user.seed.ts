@@ -23,30 +23,6 @@ export const USER = {
   role: UserRole.USER,
 }
 
-export const USER2 = {
-  departmentCode: DepartmentCode.GEII,
-  email: 'user2@iut-intranet.com',
-  firstName: 'Jane',
-  lastName: 'USER2',
-  role: UserRole.USER,
-}
-
-export const USER3 = {
-  departmentCode: DepartmentCode.GIM,
-  email: 'user3@iut-intranet.com',
-  firstName: 'Bob',
-  lastName: 'USER3',
-  role: UserRole.USER,
-}
-
-export const USER4 = {
-  departmentCode: DepartmentCode.GTE,
-  email: 'user4@iut-intranet.com',
-  firstName: 'Alice',
-  lastName: 'USER4',
-  role: UserRole.USER,
-}
-
 export const EDITOR = {
   departmentCode: DepartmentCode.TC,
   email: 'editor@iut-intranet.com',
@@ -68,21 +44,19 @@ export const seedUsers = async () => {
     image: null,
   }
 
-  const users = [ADMIN, USER, EDITOR, USER2, USER3, USER4].map(
-    ({ departmentCode, ...user }) => {
-      const departmentId = departmentIdByCode.get(departmentCode)
-      if (!departmentId) {
-        throw new Error(
-          `Department ${departmentCode} not found — run seedDepartments first`,
-        )
-      }
-      return {
-        ...user,
-        ...defaultUserInput,
-        departmentId,
-      }
-    },
-  )
+  const users = [ADMIN, USER, EDITOR].map(({ departmentCode, ...user }) => {
+    const departmentId = departmentIdByCode.get(departmentCode)
+    if (!departmentId) {
+      throw new Error(
+        `Department ${departmentCode} not found — run seedDepartments first`,
+      )
+    }
+    return {
+      ...user,
+      ...defaultUserInput,
+      departmentId,
+    }
+  })
 
   const createdUsers = await prisma.user.createManyAndReturn({
     data: users,
