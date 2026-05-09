@@ -1,0 +1,52 @@
+name: ${NAME:-iut-intranet}
+
+services:
+  postgres:
+    extends:
+      file: ./postgres.base.yml
+      service: postgres
+    container_name: ${NAME:-iut-intranet}-postgres
+    restart: unless-stopped
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  api:
+    container_name: ${NAME:-iut-intranet}-api
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: api
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgresql://root:root@postgres:5432/iut-intranet-db
+    ports:
+      - '${API_PORT:-8000}:${API_PORT:-8000}'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - 'npx turbo db:deploy --filter=@iut-intranet/db && (npx turbo db:seed --filter=@iut-intranet/db || echo "seed skipped (likely already populated)") && node apps/api/dist/index.js'
+
+  web:
+    container_name: ${NAME:-iut-intranet}-web
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: web
+      args:
+        PUBLIC_API_URL: ${PUBLIC_API_URL}
+        PUBLIC_APP_URL: ${PUBLIC_APP_URL}
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    ports:
+      - '${APP_PORT:-5173}:${APP_PORT:-5173}'
+    depends_on:
+      - api
+
+volumes:
+  db_data:
