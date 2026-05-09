@@ -1,0 +1,31 @@
+enum Status {
+    PENDING
+    ACCEPTED
+    DECLINED
+}
+
+model Event {
+    id           String   @id @default(cuid())
+    titre        String
+    description  String
+    startAt      DateTime
+    endAt        DateTime
+    location     String
+    organizerId  String   @map("user_id")
+    departmentId String   @map("department_id")
+    isPublic     Boolean
+
+    organizer   User              @relation(fields: [organizerId], references: [id])
+    department  Department        @relation(fields: [departmentId], references: [id])
+    invitations EventInvitation[]
+}
+
+model EventInvitation {
+    id String @id @default(cuid())
+    eventId String @map("event_id")
+    userId String @map("user_id")
+    status Status
+
+    event Event @relation(fields: [eventId], references: [id])
+    user User @relation(fields: [userId], references: [id])
+}
