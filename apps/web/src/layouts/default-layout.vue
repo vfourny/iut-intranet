@@ -5,8 +5,10 @@
       <slot />
     </main>
   </div>
+  <FooterBar />
 </template>
 
 <script lang="ts" setup>
+import FooterBar from '@/components/layout/footer-bar.vue'
 import HeaderBar from '@/components/layout/header-bar.vue'
 </script>

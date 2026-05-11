@@ -16,15 +16,22 @@ export const RouteNames = {
     signIn: 'auth.sign-in',
     signUp: 'auth.sign-up',
   },
+  directory: 'annuaire',
   home: 'home',
 } as const
 
 export const routes = [
   {
-    component: () => import('@/pages/home-page.vue'),
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.home,
     path: '/',
+    redirect: '/annuaire',
+  },
+  {
+    component: () => import('@/pages/home-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.directory,
+    path: '/annuaire',
   },
   {
     children: [

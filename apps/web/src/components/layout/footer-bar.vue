@@ -5,12 +5,12 @@
     >
       <span
         >{{ t('layout.footer.location')
-        }}{{ t('layout.footer.contactTel') }}</span
+        }}{{ t('layout.footer.contactPhoneNumber') }}</span
       >
       <span class="font-medium text-slate-700">{{
         t('layout.footer.title')
       }}</span>
-      <span>{{ t('layout.footer.legal') }}</span>
+      <span>{{ t('layout.footer.legals') }}</span>
     </div>
   </footer>
 </template>

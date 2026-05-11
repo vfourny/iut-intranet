@@ -77,6 +77,7 @@
     "@schedule-x/calendar": "4.5.0",
     "@schedule-x/theme-default": "4.5.0",
     "@schedule-x/vue": "4.1.0",
-    "temporal-polyfill": "0.3.2"
+    "temporal-polyfill": "0.3.2",
+    "tailwindcss-primeui": "0.6.1"
   }
 }
