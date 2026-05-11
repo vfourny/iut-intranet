@@ -11,6 +11,7 @@ export const layout = {
   },
   default: {
     nav: {
+      calendar: 'Calendrier',
       directory: 'Annuaire',
       home: 'Accueil',
     },

@@ -78,6 +78,11 @@ const items = ref<MenuItem[]>([
     icon: 'pi pi-users',
     label: t('layout.default.nav.directory'),
   },
+  {
+    command: () => router.push({ name: RouteNames.calendar }),
+    icon: 'pi pi-calendar',
+    label: t('layout.default.nav.calendar'),
+  },
 ])
 
 async function handleSignOut() {
