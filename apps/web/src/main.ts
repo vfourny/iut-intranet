@@ -16,7 +16,6 @@ import Password from 'primevue/password'
 import Select from 'primevue/select'
 import { createApp } from 'vue'
 
-import { useSession } from '@/api/auth.api'
 import App from '@/app.vue'
 import { IutPreset } from '@/lib/primevue-theme'
 import { i18n } from '@/plugins/i18n'
@@ -52,9 +51,7 @@ app.component('PrimeMessage', Message)
 app.component('PrimePassword', Password)
 app.component('PrimeSelect', Select)
 
-app.use(router)
 app.use(i18n)
-
-await useSession().refresh()
+app.use(router)
 
 app.mount('#app')

@@ -5,6 +5,8 @@ import {
   emailSchema,
   firstNameSchema,
   lastNameSchema,
+  paginationSchema,
+  searchSchema,
 } from '@/schemas/common.schema'
 
 const userRoleSchema = z.enum(UserRole)
@@ -12,15 +14,21 @@ const userRoleSchema = z.enum(UserRole)
 export const userSchema = z.object({
   email: emailSchema,
   firstName: firstNameSchema,
-  id: z.cuid(),
   lastName: lastNameSchema,
   role: userRoleSchema,
+  userId: z.cuid(),
 })
 
-export const updateUserInputSchema = userSchema.partial().required({ id: true })
+export const updateUserInputSchema = userSchema
+  .partial()
+  .required({ userId: true })
 
 export const getUserByIdInputSchema = z.object({
   userId: z.cuid(),
+})
+
+export const listUsersInputSchema = paginationSchema.extend({
+  search: searchSchema,
 })
 
 export const deleteUserInputSchema = z.object({

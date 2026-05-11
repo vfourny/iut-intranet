@@ -31,7 +31,7 @@
         input-id="rememberMe"
         name="rememberMe"
       />
-      <label class="cursor-pointer text-sm text-slate-700" for="rememberMe">
+      <label class="cursor-pointer text-sm text-foreground" for="rememberMe">
         {{ t('auth.signIn.fields.rememberMe') }}
       </label>
     </div>
@@ -39,7 +39,7 @@
     <template #footer>
       {{ t('auth.signIn.footer.noAccount') }}
       <RouterLink
-        class="font-medium text-blue-600 hover:underline"
+        class="font-medium text-primary hover:underline"
         :to="{ name: RouteNames.auth.signUp }"
       >
         {{ t('auth.signIn.footer.createAccount') }}
@@ -79,6 +79,6 @@ const [rememberMe] = defineField('rememberMe')
 
 const handleSubmit = createSubmitHandler(async (values) => {
   await signIn(values)
-  router.push({ name: RouteNames.home })
+  await router.push({ name: RouteNames.home })
 })
 </script>

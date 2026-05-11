@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>IUT Intranet</title>
+    <script>
+      // Applique le mode sombre avant le rendu pour éviter le flash blanc.
+      ;(() => {
+        const stored = localStorage.getItem('iut-color-mode')
+        const prefersDark =
+          window.matchMedia &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (stored === 'dark' || (stored !== 'light' && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>
