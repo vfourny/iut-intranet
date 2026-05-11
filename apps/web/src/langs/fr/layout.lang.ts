@@ -11,7 +11,14 @@ export const layout = {
   },
   default: {
     nav: {
+      directory: 'Annuaire',
       home: 'Accueil',
     },
+  },
+  footer: {
+    contactPhoneNumber: ' - 03 21 19 06 00',
+    legals: 'Mentions légales',
+    location: '19 Rue Louis David 62100 Calais',
+    title: "IUT du Littoral Côte d'Opale",
   },
 } as const
