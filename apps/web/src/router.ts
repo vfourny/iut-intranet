@@ -12,11 +12,11 @@ declare module 'vue-router' {
 }
 
 export const RouteNames = {
-  annuaire: 'annuaire',
   auth: {
     signIn: 'auth.sign-in',
     signUp: 'auth.sign-up',
   },
+  directory: 'annuaire',
   home: 'home',
 } as const
 
@@ -30,7 +30,7 @@ export const routes = [
   {
     component: () => import('@/pages/home-page.vue'),
     meta: { access: 'authenticated', layout: 'default' },
-    name: RouteNames.annuaire,
+    name: RouteNames.directory,
     path: '/annuaire',
   },
   {

@@ -74,9 +74,9 @@ const items = ref<MenuItem[]>([
     label: t('layout.default.nav.home'),
   },
   {
-    command: () => router.push({ name: RouteNames.annuaire }),
+    command: () => router.push({ name: RouteNames.directory }),
     icon: 'pi pi-users',
-    label: t('layout.default.nav.annuaire'),
+    label: t('layout.default.nav.directory'),
   },
 ])
 
