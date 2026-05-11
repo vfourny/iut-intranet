@@ -12,6 +12,7 @@ declare module 'vue-router' {
 }
 
 export const RouteNames = {
+  annuaire: 'annuaire',
   auth: {
     signIn: 'auth.sign-in',
     signUp: 'auth.sign-up',
@@ -21,10 +22,16 @@ export const RouteNames = {
 
 export const routes = [
   {
-    component: () => import('@/pages/home-page.vue'),
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.home,
     path: '/',
+    redirect: '/annuaire',
+  },
+  {
+    component: () => import('@/pages/home-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.annuaire,
+    path: '/annuaire',
   },
   {
     children: [

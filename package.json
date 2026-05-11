@@ -72,5 +72,8 @@
       "prettier --write --ignore-unknown"
     ]
   },
-  "prettier": "@iut-intranet/configs/prettier"
+  "prettier": "@iut-intranet/configs/prettier",
+  "dependencies": {
+    "tailwindcss-primeui": "0.6.1"
+  }
 }
