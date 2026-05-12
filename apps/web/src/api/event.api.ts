@@ -4,6 +4,7 @@ import { trpc } from '@/lib/trpc'
 
 export const useVisibleEvents = (userId: string) => {
   return useQuery({
+    enabled: () => !!userId,
     key: () => ['events', 'visible', userId],
     query: () => trpc.event.GetVisibleEventForUserProcedure.query({ userId }),
   })

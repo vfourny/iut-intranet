@@ -74,10 +74,12 @@
   },
   "prettier": "@iut-intranet/configs/prettier",
   "dependencies": {
-    "@schedule-x/calendar": "4.5.0",
-    "@schedule-x/theme-default": "4.5.0",
-    "@schedule-x/vue": "4.1.0",
-    "temporal-polyfill": "0.3.2",
-    "tailwindcss-primeui": "0.6.1"
+    "@fullcalendar/core": "6.1.20",
+    "@fullcalendar/daygrid": "6.1.20",
+    "@fullcalendar/interaction": "6.1.20",
+    "@fullcalendar/timegrid": "6.1.20",
+    "@fullcalendar/vue3": "6.1.20",
+    "tailwindcss-primeui": "0.6.1",
+    "temporal-polyfill": "0.3.0"
   }
 }

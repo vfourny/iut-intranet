@@ -1,6 +1,7 @@
-import type { Event, prisma } from '@iut-intranet/db'
+import type { prisma } from '@iut-intranet/db'
 import { UserRole } from '@iut-intranet/db'
 import type { EventModel } from '@iut-intranet/db/models'
+import type { EventWithDepartment } from '@iut-intranet/helpers/types/event'
 
 export class EventService {
   constructor(private prisma: prisma) {}
@@ -15,7 +16,9 @@ export class EventService {
     })
   }
 
-  public async getVisibleEventsForUser(userId: string): Promise<Event[]> {
+  public async getVisibleEventsForUser(
+    userId: string,
+  ): Promise<EventWithDepartment[]> {
     const user = await this.prisma.user.findFirst({
       where: {
         id: userId,
@@ -28,13 +31,20 @@ export class EventService {
       return this.list()
     }
     return this.prisma.event.findMany({
+      include: {
+        department: true,
+      },
       where: {
         departmentId: user.departmentId,
       },
     })
   }
 
-  public async list(): Promise<Event[]> {
-    return this.prisma.event.findMany()
+  public async list(): Promise<EventWithDepartment[]> {
+    return this.prisma.event.findMany({
+      include: {
+        department: true,
+      },
+    })
   }
 }
