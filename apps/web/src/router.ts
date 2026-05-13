@@ -16,7 +16,11 @@ export const RouteNames = {
     signIn: 'auth.sign-in',
     signUp: 'auth.sign-up',
   },
-  directory: 'annuaire',
+  calendar: 'calendar',
+  directory: 'directory',
+  event: {
+    create: 'event.create',
+  },
   home: 'home',
 } as const
 
@@ -25,13 +29,25 @@ export const routes = [
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.home,
     path: '/',
-    redirect: '/annuaire',
+    redirect: '/directory',
   },
   {
     component: () => import('@/pages/home-page.vue'),
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.directory,
-    path: '/annuaire',
+    path: '/directory',
+  },
+  {
+    component: () => import('@/pages/event/event-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.calendar,
+    path: '/calendar',
+  },
+  {
+    component: () => import('@/pages/event/add-event-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.event.create,
+    path: '/event/create',
   },
   {
     children: [

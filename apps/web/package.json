@@ -1,5 +1,10 @@
 {
   "dependencies": {
+    "@fullcalendar/core": "6.1.20",
+    "@fullcalendar/daygrid": "6.1.20",
+    "@fullcalendar/interaction": "6.1.20",
+    "@fullcalendar/timegrid": "6.1.20",
+    "@fullcalendar/vue3": "6.1.20",
     "@pinia/colada": "1.1.0",
     "@primeuix/themes": "2.0.3",
     "@tailwindcss/vite": "4.2.2",
@@ -8,6 +13,7 @@
     "primeicons": "7.0.0",
     "primevue": "4.5.5",
     "tailwindcss-primeui": "0.6.1",
+    "temporal-polyfill": "0.3.0",
     "vee-validate": "5.0.0-beta.0",
     "vue": "3.5.32",
     "vue-i18n": "11.3.2",

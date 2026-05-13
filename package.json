@@ -74,6 +74,6 @@
   },
   "prettier": "@iut-intranet/configs/prettier",
   "dependencies": {
-    "tailwindcss-primeui": "0.6.1"
+    "@primevue/forms": "4.5.5"
   }
 }
