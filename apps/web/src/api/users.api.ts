@@ -2,15 +2,16 @@ import { useInfiniteQuery, useQuery } from '@pinia/colada'
 import { type MaybeRefOrGetter, toValue } from 'vue'
 
 import { trpc } from '@/lib/trpc'
+import type { QueryKey } from '@/types/api.type'
 
 export const USER_PAGE_SIZE = 10
 
 export const USER_KEYS = {
-  infinite: (pageSize: number, search: string) =>
-    ['user', 'list', 'infinite', { pageSize, search }] as const,
-  paginated: (page: number, pageSize: number, search: string) =>
+  list: (page: number, pageSize: number, search: string) =>
     ['user', 'list', { page, pageSize, search }] as const,
-}
+  listInfinite: (pageSize: number, search: string) =>
+    ['user', 'list', 'infinite', { pageSize, search }] as const,
+} as const satisfies QueryKey<'user'>
 
 const normalizeSearch = (value: string) => value.trim() || undefined
 
@@ -20,7 +21,7 @@ export const useUsersPaginated = (
   pageSize: number = USER_PAGE_SIZE,
 ) => {
   return useQuery({
-    key: () => USER_KEYS.paginated(toValue(page), pageSize, toValue(search)),
+    key: () => USER_KEYS.list(toValue(page), pageSize, toValue(search)),
     placeholderData: (previous) => previous,
     query: () =>
       trpc.user.list.query({
@@ -44,7 +45,7 @@ export const useUsersInfinite = (
       return loaded < lastPage.total ? allPages.length + 1 : null
     },
     initialPageParam: 1,
-    key: () => USER_KEYS.infinite(pageSize, toValue(search)),
+    key: () => USER_KEYS.listInfinite(pageSize, toValue(search)),
     query: ({ pageParam }) =>
       trpc.user.list.query({
         page: pageParam,

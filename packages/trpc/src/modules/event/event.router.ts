@@ -5,6 +5,6 @@ import { router } from '@/trpc'
 
 export const eventRouter = router({
   getById: getEventByIdProcedure,
-  getVisibleEventForUserProcedure: getVisibleEventsForUserProcedure,
+  getVisibleEventsForUser: getVisibleEventsForUserProcedure,
   list: listEventsProcedure,
 })

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CalendarObject :events="formattedEvents ?? []" />
+    <CalendarObject :events="events ?? []" />
   </div>
 </template>
 
@@ -14,14 +14,4 @@ import CalendarObject from '@/components/event/calendar-object.vue'
 const { currentSession } = useSession()
 const userId = computed(() => currentSession.value?.user.id ?? '')
 const { data: events } = useVisibleEvents(userId.value)
-
-const formattedEvents = computed(() => {
-  if (!events.value) return []
-
-  return events.value.map((event) => ({
-    ...event,
-    endAt: new Date(event.endAt),
-    startAt: new Date(event.startAt),
-  }))
-})
 </script>

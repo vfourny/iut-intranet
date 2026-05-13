@@ -1,20 +1,3 @@
-<script lang="ts" setup>
-defineProps<{
-  description: string
-  end: Date
-  location: string
-  organizer: string
-  start: Date
-  title: string
-  x: number
-  y: number
-}>()
-
-const emit = defineEmits<{
-  close: []
-}>()
-</script>
-
 <template>
   <div
     class="bg-white border border-gray-200 rounded-xl shadow-lg p-4 min-w-52"
@@ -42,3 +25,22 @@ const emit = defineEmits<{
     <p class="text-sm text-gray-600">{{ organizer }}</p>
   </div>
 </template>
+
+<script lang="ts" setup>
+interface EventClickBoxProps {
+  description: string
+  end: Date
+  location: string
+  organizer: string
+  start: Date
+  title: string
+  x: number
+  y: number
+}
+
+defineProps<EventClickBoxProps>()
+
+const emit = defineEmits<{
+  close: []
+}>()
+</script>

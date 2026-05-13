@@ -1,42 +1,46 @@
+<template>
+  <div style="position: relative">
+    <FullCalendar :options="calendar" />
+
+    <EventClickBox
+      v-if="selectedEvent"
+      v-bind="selectedEvent"
+      @close="selectedEvent = null"
+    />
+
+    <div
+      v-if="selectedEvent"
+      style="position: fixed; inset: 0; z-index: 999"
+      @click="selectedEvent = null"
+    />
+  </div>
+</template>
+
 <script lang="ts" setup>
 import type { EventClickArg } from '@fullcalendar/core/index.js'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import FullCalendar from '@fullcalendar/vue3'
-import type { EventWithDepartment } from '@iut-intranet/helpers/types/event'
+import type { DepartmentCode } from '@iut-intranet/db/enums'
+import type { TrpcOutput } from '@iut-intranet/trpc'
 import { computed, ref } from 'vue'
 
 import EventClickBox from '@/components/event/event-click-box.vue'
+import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
 
-function defineColor(code: string) {
-  switch (code) {
-    case 'GACO':
-    case 'GEA':
-    case 'TC':
-      return '#e6197a'
-    case 'INFO':
-    case 'GEII':
-      return '#00a0d2'
-    case 'GIM':
-      return '#4d5f6e'
-    case 'GB':
-      return '#4dab1a'
-    case 'GTE':
-      return '#ff7300'
-    default:
-      return '#4d5f6e'
-  }
+function getDepartmentColor(code: DepartmentCode) {
+  const specialty = SPECIALTY_BY_DEPARTMENT[code]
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(`--color-dept-${specialty}-500`)
+    .trim()
 }
 
-const props = withDefaults(
-  defineProps<{
-    events?: EventWithDepartment[]
-  }>(),
-  {
-    events: () => [],
-  },
-)
+interface CalendarObjectProps {
+  events: TrpcOutput['event']['getVisibleEventsForUser']
+}
+
+const { events } = defineProps<CalendarObjectProps>()
 
 const isMobile = window.innerWidth < 768
 
@@ -66,8 +70,8 @@ const calendar = computed(() => ({
       y: pos.top + window.scrollY,
     }
   },
-  events: props.events.map((event) => ({
-    backgroundColor: defineColor(event.department.code),
+  events: events.map((event) => ({
+    backgroundColor: getDepartmentColor(event.department.code),
     end: event.endAt,
     id: event.id,
     start: event.startAt,
@@ -93,21 +97,3 @@ const calendar = computed(() => ({
   slotMinTime: '07:00:00',
 }))
 </script>
-
-<template>
-  <div style="position: relative">
-    <FullCalendar :options="calendar" />
-
-    <EventClickBox
-      v-if="selectedEvent"
-      v-bind="selectedEvent"
-      @close="selectedEvent = null"
-    />
-
-    <div
-      v-if="selectedEvent"
-      style="position: fixed; inset: 0; z-index: 999"
-      @click="selectedEvent = null"
-    />
-  </div>
-</template>
