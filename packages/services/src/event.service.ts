@@ -1,7 +1,7 @@
 import type { prisma } from '@iut-intranet/db'
-import { UserRole } from '@iut-intranet/db'
 import type { EventModel } from '@iut-intranet/db/models'
 import type { EventWithDepartment } from '@iut-intranet/helpers/types/event'
+import { isAdminRole } from '@iut-intranet/helpers/utils/role'
 
 export class EventService {
   constructor(private prisma: prisma) {}
@@ -19,15 +19,12 @@ export class EventService {
   public async getVisibleEventsForUser(
     userId: string,
   ): Promise<EventWithDepartment[]> {
-    const user = await this.prisma.user.findFirst({
+    const user = await this.prisma.user.findFirstOrThrow({
       where: {
         id: userId,
       },
     })
-    if (!user) {
-      throw new Error('User not exist')
-    }
-    if (user.role === UserRole.ADMIN || user.role === UserRole.EDITOR) {
+    if (isAdminRole(user.role)) {
       return this.list()
     }
     return this.prisma.event.findMany({
@@ -35,7 +32,18 @@ export class EventService {
         department: true,
       },
       where: {
-        departmentId: user.departmentId,
+        OR: [
+          {
+            departmentId: user.departmentId,
+            isPublic: true,
+          },
+          {
+            invitations: {
+              some: { userId },
+            },
+            isPublic: false,
+          },
+        ],
       },
     })
   }
