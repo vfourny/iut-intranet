@@ -5,9 +5,13 @@ import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import FullCalendar from '@fullcalendar/vue3'
 import type { EventWithDepartment } from '@iut-intranet/helpers/types/event'
+import PrimeButton from 'primevue/button'
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import EventClickBox from '@/components/event/event-click-box.vue'
+import { useI18n } from '@/composables/use-i18n'
+import { RouteNames } from '@/router'
 
 function defineColor(code: string) {
   switch (code) {
@@ -28,6 +32,9 @@ function defineColor(code: string) {
       return '#4d5f6e'
   }
 }
+
+const router = useRouter()
+const { t } = useI18n()
 
 const props = withDefaults(
   defineProps<{
@@ -96,6 +103,13 @@ const calendar = computed(() => ({
 
 <template>
   <div style="position: relative">
+    <div class="mb-4 flex justify-end">
+      <PrimeButton
+        icon="pi pi-plus"
+        :label="t('event.addEvent')"
+        @click="router.push({ name: RouteNames.event.create })"
+      />
+    </div>
     <FullCalendar :options="calendar" />
 
     <EventClickBox

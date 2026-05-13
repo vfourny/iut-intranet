@@ -18,6 +18,9 @@ export const RouteNames = {
   },
   calendar: 'calendar',
   directory: 'directory',
+  event: {
+    create: 'event.create',
+  },
   home: 'home',
 } as const
 
@@ -39,6 +42,12 @@ export const routes = [
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.calendar,
     path: '/calendar',
+  },
+  {
+    component: () => import('@/pages/event/add-event-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.event.create,
+    path: '/event/create',
   },
   {
     children: [

@@ -72,5 +72,8 @@
       "prettier --write --ignore-unknown"
     ]
   },
-  "prettier": "@iut-intranet/configs/prettier"
+  "prettier": "@iut-intranet/configs/prettier",
+  "dependencies": {
+    "@primevue/forms": "4.5.5"
+  }
 }
