@@ -2,7 +2,6 @@ import type { Prisma } from '@iut-intranet/db'
 import type { z } from 'zod'
 
 import type {
-  createEventFormulaireInputSchema,
   getEventByIdInputSchema,
   getVisibleEventsForUserInputSchema,
 } from '@/schemas/event.schema'
@@ -16,7 +15,3 @@ export type getVisibleEventsForUserInput = z.infer<
 export type EventWithDepartment = Prisma.EventGetPayload<{
   include: { department: true }
 }>
-
-export type createEventFormulaireInput = z.infer<
-  typeof createEventFormulaireInputSchema
->
