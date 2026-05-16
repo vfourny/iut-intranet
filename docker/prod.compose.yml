@@ -30,7 +30,7 @@ services:
       - traefik.enable=true
       - traefik.http.routers.${NAME}.entryPoints=websecure
       - 'traefik.http.services.${NAME}.loadbalancer.server.port=3000'
-      - traefik.http.routers.${NAME}.rule=Host(`${NAME}.jrcan.dev`)
+      - traefik.http.routers.${NAME}.rule=Host(localhost) && PathPrefix(/app)
       - traefik.http.routers.${NAME}.tls=true
       - traefik.http.routers.${NAME}.tls.certresolver=myresolver
     command:
