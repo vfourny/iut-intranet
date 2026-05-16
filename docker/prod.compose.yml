@@ -21,11 +21,18 @@ services:
       - ../.env
     environment:
       DATABASE_URL: postgresql://root:root@postgres:5432/iut-intranet-db
-    ports:
-      - '${API_PORT:-8000}:${API_PORT:-8000}'
+    # ports:
+    #   - '${API_PORT:-8000}:${API_PORT:-8000}'
     depends_on:
       postgres:
         condition: service_healthy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${NAME}.entryPoints=websecure
+      - 'traefik.http.services.${NAME}.loadbalancer.server.port=3000'
+      - traefik.http.routers.${NAME}.rule=Host(`${NAME}.jrcan.dev`)
+      - traefik.http.routers.${NAME}.tls=true
+      - traefik.http.routers.${NAME}.tls.certresolver=myresolver
     command:
       - sh
       - -c
@@ -43,10 +50,17 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
-    ports:
-      - '${APP_PORT:-5173}:${APP_PORT:-5173}'
+    # ports:
+    #   - '${APP_PORT:-5173}:${APP_PORT:-5173}'
     depends_on:
       - api
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${NAME}.entryPoints=websecure
+      - 'traefik.http.services.${NAME}.loadbalancer.server.port=3000'
+      - traefik.http.routers.${NAME}.rule=Host(`${NAME}.jrcan.dev`)
+      - traefik.http.routers.${NAME}.tls=true
+      - traefik.http.routers.${NAME}.tls.certresolver=myresolver
 
 volumes:
   db_data:
