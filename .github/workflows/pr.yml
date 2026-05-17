@@ -24,7 +24,7 @@ jobs:
       DATABASE_URL: postgresql://root:root@localhost:5432/iut-intranet-db
       EMAIL_FROM: test@example.com
       NODE_ENV: test
-      PUBLIC_API_URL: http://localhost:8000
+      PUBLIC_API_URL: http://localhost:8000/api
       PUBLIC_APP_URL: http://localhost:5173
     steps:
       - uses: actions/checkout@v4
