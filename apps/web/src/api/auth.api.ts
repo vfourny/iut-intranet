@@ -13,15 +13,15 @@ import {
 import { computed } from 'vue'
 
 import { trpc } from '@/lib/trpc'
+import type { QueryKey } from '@/types/api.type'
 
 export const AUTH_KEYS = {
-  root: ['auth'] as const,
-  session: ['auth', 'session'] as const,
-}
+  session: () => ['auth', 'session'] as const,
+} as const satisfies QueryKey<'auth'>
 
 export const useSession = defineQuery(() => {
   const { data, ...rest } = useQuery({
-    key: AUTH_KEYS.session,
+    key: AUTH_KEYS.session(),
     query: () => trpc.auth.getSession.query(),
     staleTime: Infinity,
   })
@@ -45,7 +45,8 @@ export const useSignIn = defineMutation(() => {
   return useMutation({
     mutation: (input: SignInWithPasswordInput) =>
       trpc.auth.signInWithPassword.mutate(input),
-    onSuccess: (session) => queryCache.setQueryData(AUTH_KEYS.session, session),
+    onSuccess: (session) =>
+      queryCache.setQueryData(AUTH_KEYS.session(), session),
   })
 })
 
@@ -54,7 +55,8 @@ export const useSignUp = defineMutation(() => {
   return useMutation({
     mutation: (input: SignUpWithPasswordInput) =>
       trpc.auth.signUpWithPassword.mutate(input),
-    onSuccess: (session) => queryCache.setQueryData(AUTH_KEYS.session, session),
+    onSuccess: (session) =>
+      queryCache.setQueryData(AUTH_KEYS.session(), session),
   })
 })
 
@@ -62,6 +64,6 @@ export const useSignOut = defineMutation(() => {
   const queryCache = useQueryCache()
   return useMutation({
     mutation: () => trpc.auth.signOut.mutate(),
-    onSuccess: () => queryCache.setQueryData(AUTH_KEYS.session, undefined),
+    onSuccess: () => queryCache.setQueryData(AUTH_KEYS.session(), undefined),
   })
 })
