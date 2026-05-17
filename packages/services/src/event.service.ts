@@ -1,9 +1,6 @@
 import type { prisma } from '@iut-intranet/db'
 import type { EventModel } from '@iut-intranet/db/models'
-import type {
-  createEventFormulaireInput,
-  EventWithDepartment,
-} from '@iut-intranet/helpers/types/event'
+import type { createEventFormulaireInput } from '@iut-intranet/helpers/types/event'
 import { isAdminRole } from '@iut-intranet/helpers/utils/role'
 
 export class EventService {
@@ -37,9 +34,16 @@ export class EventService {
     })
   }
 
-  public async getVisibleEventsForUser(
-    userId: string,
-  ): Promise<EventWithDepartment[]> {
+  public async list() {
+    return this.prisma.event.findMany({
+      include: {
+        department: true,
+        organizer: true,
+      },
+    })
+  }
+
+  public async listVisibleEventsForUser(userId: string) {
     const user = await this.prisma.user.findFirstOrThrow({
       where: {
         id: userId,
@@ -51,28 +55,22 @@ export class EventService {
     return this.prisma.event.findMany({
       include: {
         department: true,
+        organizer: true,
       },
       where: {
         OR: [
           {
-            departmentId: user.departmentId,
             isPublic: true,
           },
           {
             invitations: {
               some: { userId },
             },
-            isPublic: false,
+          },
+          {
+            organizerId: userId,
           },
         ],
-      },
-    })
-  }
-
-  public async list(): Promise<EventWithDepartment[]> {
-    return this.prisma.event.findMany({
-      include: {
-        department: true,
       },
     })
   }

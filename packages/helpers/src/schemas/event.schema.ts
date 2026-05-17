@@ -4,7 +4,7 @@ export const getEventByIdInputSchema = z.object({
   eventId: z.cuid(),
 })
 
-export const getVisibleEventsForUserInputSchema = z.object({
+export const listVisibleEventsForUserInputSchema = z.object({
   userId: z.cuid(),
 })
 

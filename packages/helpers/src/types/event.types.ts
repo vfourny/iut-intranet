@@ -4,13 +4,13 @@ import type { z } from 'zod'
 import type {
   createEventFormulaireInputSchema,
   getEventByIdInputSchema,
-  getVisibleEventsForUserInputSchema,
+  listVisibleEventsForUserInputSchema,
 } from '@/schemas/event.schema'
 
 export type getEventByIdInput = z.infer<typeof getEventByIdInputSchema>
 
-export type getVisibleEventsForUserInput = z.infer<
-  typeof getVisibleEventsForUserInputSchema
+export type listVisibleEventsForUserInput = z.infer<
+  typeof listVisibleEventsForUserInputSchema
 >
 
 export type EventWithDepartment = Prisma.EventGetPayload<{
