@@ -11,6 +11,6 @@ export const useVisibleEvents = (userId: string) => {
   return useQuery({
     enabled: () => !!userId,
     key: () => EVENT_KEYS.visibleForUser(userId),
-    query: () => trpc.event.getVisibleEventsForUser.query({ userId }),
+    query: () => trpc.event.listVisibleEventsForUser.query({ userId }),
   })
 }

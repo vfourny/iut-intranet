@@ -15,7 +15,15 @@ export class EventService {
     })
   }
 
-  public async getVisibleEventsForUser(userId: string) {
+  public async list() {
+    return this.prisma.event.findMany({
+      include: {
+        department: true,
+      },
+    })
+  }
+
+  public async listVisibleEventsForUser(userId: string) {
     const user = await this.prisma.user.findFirstOrThrow({
       where: {
         id: userId,
@@ -42,14 +50,6 @@ export class EventService {
             organizerId: userId,
           },
         ],
-      },
-    })
-  }
-
-  public async list() {
-    return this.prisma.event.findMany({
-      include: {
-        department: true,
       },
     })
   }

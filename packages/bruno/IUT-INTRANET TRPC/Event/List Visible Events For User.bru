@@ -1,0 +1,20 @@
+meta {
+  name: List Visible Events For User
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{SERVER_URL}}/{{TRPC}}/event.listVisibleEventsForUser?input={"userId":"{{activeUserId}}"}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  input: {"userId":"{{activeUserId}}"}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

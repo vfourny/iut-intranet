@@ -37,7 +37,7 @@ function getDepartmentColor(code: DepartmentCode) {
 }
 
 interface CalendarObjectProps {
-  events: TrpcOutput['event']['getVisibleEventsForUser']
+  events: TrpcOutput['event']['listVisibleEventsForUser']
 }
 
 const { events } = defineProps<CalendarObjectProps>()
