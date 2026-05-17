@@ -1,18 +1,7 @@
 <template>
-  <div style="position: relative">
+  <div>
     <FullCalendar :options="calendar" />
-
-    <EventClickBox
-      v-if="selectedEvent"
-      v-bind="selectedEvent"
-      @close="selectedEvent = null"
-    />
-
-    <div
-      v-if="selectedEvent"
-      style="position: fixed; inset: 0; z-index: 999"
-      @click="selectedEvent = null"
-    />
+    <EventClickBox ref="clickBox" :event="selectedEvent" />
   </div>
 </template>
 
@@ -29,12 +18,7 @@ import { computed, ref } from 'vue'
 import EventClickBox from '@/components/event/event-click-box.vue'
 import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
 
-function getDepartmentColor(code: DepartmentCode) {
-  const specialty = SPECIALTY_BY_DEPARTMENT[code]
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(`--color-dept-${specialty}-500`)
-    .trim()
-}
+type VisibleEvent = TrpcOutput['event']['listVisibleEventsForUser'][number]
 
 interface CalendarObjectProps {
   events: TrpcOutput['event']['listVisibleEventsForUser']
@@ -42,37 +26,28 @@ interface CalendarObjectProps {
 
 const { events } = defineProps<CalendarObjectProps>()
 
+function getDepartmentColor(code: DepartmentCode) {
+  const specialty = SPECIALTY_BY_DEPARTMENT[code]
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(`--color-dept-${specialty}-500`)
+    .trim()
+}
+
 const isMobile = window.innerWidth < 768
 
-const selectedEvent = ref<null | {
-  description: string
-  end: Date
-  location: string
-  organizer: string
-  start: Date
-  title: string
-  x: number
-  y: number
-}>(null)
+const selectedEvent = ref<null | VisibleEvent>(null)
+const clickBox = ref<InstanceType<typeof EventClickBox> | null>(null)
 
 const calendar = computed(() => ({
   editable: true,
   eventClick: (info: EventClickArg) => {
-    const pos = info.el.getBoundingClientRect()
-    selectedEvent.value = {
-      description: info.event.extendedProps.description,
-      end: info.event.end ?? new Date(),
-      location: info.event.extendedProps.location,
-      organizer: info.event.extendedProps.organizer,
-      start: info.event.start ?? new Date(),
-      title: info.event.title,
-      x: pos.left + window.scrollX,
-      y: pos.top + window.scrollY,
-    }
+    selectedEvent.value = info.event.extendedProps.source as VisibleEvent
+    clickBox.value?.show(info.jsEvent, info.el)
   },
   events: events.map((event) => ({
     backgroundColor: getDepartmentColor(event.department.code),
     end: event.endAt,
+    extendedProps: { source: event },
     id: event.id,
     start: event.startAt,
     title: event.titre,

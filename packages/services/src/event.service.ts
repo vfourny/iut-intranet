@@ -19,6 +19,7 @@ export class EventService {
     return this.prisma.event.findMany({
       include: {
         department: true,
+        organizer: true,
       },
     })
   }
@@ -35,6 +36,7 @@ export class EventService {
     return this.prisma.event.findMany({
       include: {
         department: true,
+        organizer: true,
       },
       where: {
         OR: [
