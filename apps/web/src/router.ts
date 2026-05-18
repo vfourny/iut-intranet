@@ -20,6 +20,7 @@ export const RouteNames = {
   directory: 'directory',
   event: {
     create: 'event.create',
+    update: 'event.update',
   },
   home: 'home',
 } as const
@@ -48,6 +49,12 @@ export const routes = [
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.event.create,
     path: '/event/create',
+  },
+  {
+    component: () => import('@/pages/event/add-event-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.event.update,
+    path: '/event/:id/update',
   },
   {
     children: [

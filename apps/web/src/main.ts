@@ -8,12 +8,14 @@ import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Checkbox from 'primevue/checkbox'
 import PrimeVue from 'primevue/config'
+import ConfirmationService from 'primevue/confirmationservice'
 import Fluid from 'primevue/fluid'
 import InputText from 'primevue/inputtext'
 import Menubar from 'primevue/menubar'
 import Message from 'primevue/message'
 import Password from 'primevue/password'
 import Select from 'primevue/select'
+import ToastService from 'primevue/toastservice'
 import { createApp } from 'vue'
 
 import App from '@/app.vue'
@@ -53,5 +55,7 @@ app.component('PrimeSelect', Select)
 
 app.use(i18n)
 app.use(router)
+app.use(ConfirmationService)
+app.use(ToastService)
 
 app.mount('#app')

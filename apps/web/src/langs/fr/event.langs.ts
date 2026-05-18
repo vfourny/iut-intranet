@@ -1,6 +1,13 @@
 export const event = {
   addEvent: 'Nouvel évènement',
   createEvent: "Créer l'évènement",
+  deleteConfirm: {
+    cancel: 'Annuler',
+    confirm: 'Confirmer',
+    header: "Supprimer l'évènement",
+    message: 'Êtes-vous sûr de vouloir supprimer cet évènement ?',
+  },
+  deleteEvent: "Supprimer l'évènement",
   department: 'Département',
   description: 'Description',
   endAt: 'Fin',
@@ -14,4 +21,11 @@ export const event = {
   publicEvent: 'Événement public',
   startAt: 'Début',
   titre: 'Titre',
+  toast: {
+    created: 'Évènement créé avec succès',
+    deleted: 'Évènement supprimé avec succès',
+    error: 'Une erreur est survenue',
+    updated: 'Évènement modifié avec succès',
+  },
+  updateEvent: "Modifier l'évènement",
 }

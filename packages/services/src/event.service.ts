@@ -1,6 +1,9 @@
 import type { prisma } from '@iut-intranet/db'
 import type { EventModel } from '@iut-intranet/db/models'
-import type { createEventFormulaireInput } from '@iut-intranet/helpers/types/event'
+import type {
+  createEventFormulaireInput,
+  updateEventFormulaireInput,
+} from '@iut-intranet/helpers/types/event'
 import { isAdminRole } from '@iut-intranet/helpers/utils/role'
 
 export class EventService {
@@ -21,6 +24,15 @@ export class EventService {
         startAt: event.startAt,
         titre: event.titre,
       },
+    })
+  }
+
+  public async deleteEvent(id: string) {
+    await this.prisma.eventInvitation.deleteMany({
+      where: { eventId: id },
+    })
+    return this.prisma.event.delete({
+      where: { id },
     })
   }
 
@@ -72,6 +84,21 @@ export class EventService {
           },
         ],
       },
+    })
+  }
+
+  public async updateEvent(id: string, event: updateEventFormulaireInput) {
+    return this.prisma.event.update({
+      data: {
+        departmentId: event.departmentId,
+        description: event.description ?? '',
+        endAt: event.endAt,
+        isPublic: event.isPublic,
+        location: event.location,
+        startAt: event.startAt,
+        titre: event.titre,
+      },
+      where: { id },
     })
   }
 }

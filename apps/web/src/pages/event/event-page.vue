@@ -20,8 +20,8 @@ const formattedEvents = computed(() => {
 
   return events.value.map((event) => ({
     ...event,
-    endAt: new Date(event.endAt),
-    startAt: new Date(event.startAt),
+    endAt: new Date(event.endAt).toISOString(),
+    startAt: new Date(event.startAt).toISOString(),
   }))
 })
 </script>

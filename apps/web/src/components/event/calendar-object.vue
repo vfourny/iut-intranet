@@ -9,18 +9,35 @@
     </div>
     <FullCalendar :options="calendar" />
     <EventClickBox ref="clickBox" :event="selectedEvent" />
+
+    <PrimePopover ref="datePopover">
+      <div class="min-w-52">
+        <p class="mb-3 text-sm text-gray-600">
+          {{ formatClickedDate(clickedDate) }}
+        </p>
+        <PrimeButton
+          class="w-full"
+          icon="pi pi-plus"
+          :label="t('event.addEvent')"
+          size="small"
+          @click="navigateToCreate"
+        />
+      </div>
+    </PrimePopover>
   </div>
 </template>
 
 <script lang="ts" setup>
 import type { EventClickArg } from '@fullcalendar/core/index.js'
 import dayGridPlugin from '@fullcalendar/daygrid'
+import { type DateClickArg } from '@fullcalendar/interaction'
 import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import FullCalendar from '@fullcalendar/vue3'
 import type { DepartmentCode } from '@iut-intranet/db/enums'
 import type { TrpcOutput } from '@iut-intranet/trpc'
 import PrimeButton from 'primevue/button'
+import PrimePopover from 'primevue/popover'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -52,7 +69,33 @@ const isMobile = window.innerWidth < 768
 const selectedEvent = ref<null | VisibleEvent>(null)
 const clickBox = ref<InstanceType<typeof EventClickBox> | null>(null)
 
+const datePopover = ref<InstanceType<typeof PrimePopover> | null>(null)
+const clickedDate = ref<Date | null>(null)
+
+function formatClickedDate(date: Date | null) {
+  if (!date) return ''
+  return date.toLocaleString('fr-FR', {
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    month: 'long',
+    weekday: 'long',
+  })
+}
+
+function navigateToCreate() {
+  datePopover.value?.hide()
+  router.push({
+    name: RouteNames.event.create,
+    query: { startAt: clickedDate.value?.toISOString() },
+  })
+}
+
 const calendar = computed(() => ({
+  dateClick: (info: DateClickArg) => {
+    clickedDate.value = info.date
+    datePopover.value?.show(info.jsEvent, info.jsEvent.target as HTMLElement)
+  },
   editable: true,
   eventClick: (info: EventClickArg) => {
     selectedEvent.value = info.event.extendedProps.source as VisibleEvent
@@ -82,6 +125,7 @@ const calendar = computed(() => ({
   initialView: isMobile ? 'timeGridDay' : 'timeGridWeek',
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
   scrollTime: '08:00:00',
+  selectable: true,
   slotMaxTime: '20:00:00',
   slotMinTime: '07:00:00',
 }))

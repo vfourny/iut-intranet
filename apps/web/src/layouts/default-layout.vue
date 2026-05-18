@@ -6,9 +6,12 @@
     </main>
   </div>
   <FooterBar />
+  <Toast />
 </template>
 
 <script lang="ts" setup>
+import Toast from 'primevue/toast'
+
 import FooterBar from '@/components/layout/footer-bar.vue'
 import HeaderBar from '@/components/layout/header-bar.vue'
 </script>

@@ -18,3 +18,15 @@ export const createEventFormulaireInputSchema = z.object({
   startAt: z.coerce.date(),
   titre: z.string().max(200).min(1),
 })
+
+export const updateEventFormulaireInputSchema = createEventFormulaireInputSchema
+  .omit({ organizerId: true })
+  .extend({ id: z.cuid() })
+  .refine((data) => data.endAt > data.startAt, {
+    message: 'La date de fin doit être après la date de début',
+    path: ['endAt'],
+  })
+
+export const deleteEventInputSchema = z.object({
+  id: z.cuid(),
+})
