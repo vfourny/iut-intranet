@@ -15,8 +15,17 @@ const DEPARTMENT_SITES: Record<DepartmentCode, Site> = {
 export const seedDepartments = async () => {
   await Promise.all(
     Object.entries(DEPARTMENT_SITES).map(([code, site]) =>
-      prisma.department.create({
-        data: { code: code as DepartmentCode, site },
+      prisma.department.upsert({
+        create: {
+          code: code as DepartmentCode,
+          site,
+        },
+        update: {
+          site,
+        },
+        where: {
+          code: code as DepartmentCode,
+        },
       }),
     ),
   )

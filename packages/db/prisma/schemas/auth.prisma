@@ -30,6 +30,7 @@ model User {
   accounts Account[]
   organizedEvents   Event[]
   eventInvitations  EventInvitation[]
+  articles Article[]
 
   @@map("user")
 }
