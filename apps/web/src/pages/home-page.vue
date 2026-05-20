@@ -45,9 +45,9 @@ import {
   useUsersInfinite,
   useUsersPaginated,
 } from '@/api/users.api'
+import UserSearchBar from '@/components/ui/search-bar.vue'
 import UserDataTable from '@/components/user/user-data-table.vue'
 import UserDataView from '@/components/user/user-data-view.vue'
-import UserSearchBar from '@/components/user/user-search-bar.vue'
 
 enum DisplayMode {
   DATA_TABLE = 'data-table',

@@ -14,6 +14,7 @@ export const layout = {
       calendar: 'Calendrier',
       directory: 'Annuaire',
       home: 'Accueil',
+      news: 'Actualités',
     },
   },
   footer: {
@@ -22,4 +23,5 @@ export const layout = {
     location: '19 Rue Louis David 62100 Calais',
     title: "IUT du Littoral Côte d'Opale",
   },
+  search: 'Rechercher',
 } as const

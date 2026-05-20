@@ -19,6 +19,7 @@ export const RouteNames = {
   calendar: 'calendar',
   directory: 'directory',
   home: 'home',
+  news: 'news',
 } as const
 
 export const routes = [
@@ -39,6 +40,12 @@ export const routes = [
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.calendar,
     path: '/calendar',
+  },
+  {
+    component: () => import('@/pages/article/article-list-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.news,
+    path: '/actualites',
   },
   {
     children: [

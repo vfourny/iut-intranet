@@ -89,6 +89,22 @@ export class ArticleService {
     }
 
     return this.prisma.article.findMany({
+      include: {
+        author: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+        targetDepartments: {
+          select: {
+            code: true,
+          },
+        },
+      },
+      orderBy: {
+        publishedAt: 'desc',
+      },
       where: {
         OR: [
           { targetDepartments: { none: {} } },
