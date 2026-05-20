@@ -1,0 +1,28 @@
+meta {
+  name: Delete Article
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{SERVER_URL}}/{{TRPC}}/articles.deleteArticle
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "articleId": "{{ARTICLE_ID}}"
+  }
+}
+
+vars:pre-request {
+  SERVER_URL: http://localhost:8000
+  TRPC: api/trpc
+  ARTICLE_ID: cmpdsz5wd00004soituz0d7pk
+}
+
+settings {
+  encodeUrl: false
+  timeout: 0
+}

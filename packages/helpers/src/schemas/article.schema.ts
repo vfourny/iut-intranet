@@ -5,13 +5,13 @@ export const createArticleInputSchema = z.object({
   authorId: z.cuid(),
   content: z.record(z.string(), z.unknown()),
   coverUrl: z.string().optional(),
-  createAt: z.date(),
+  createAt: z.coerce.date(),
   excerpt: z.string().optional(),
-  publishedAt: z.date(),
+  publishedAt: z.coerce.date().optional(),
   status: z.enum(ArticleStatus),
   targetDepartmentIds: z.array(z.string()).default([]),
   title: z.string(),
-  updateAt: z.date(),
+  updateAt: z.coerce.date(),
 })
 
 export const updateArticleInputSchema = createArticleInputSchema.partial()

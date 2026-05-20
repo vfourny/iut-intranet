@@ -1,0 +1,34 @@
+meta {
+  name: Update Article
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{SERVER_URL}}/{{TRPC}}/articles.updateArticle
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "articleId": "{{ARTICLE_ID}}",
+    "title": "Mon article modifié",
+    "excerpt": "Résumé mis à jour",
+    "content": { "blocks": [] },
+    "status": "PUBLISHED",
+    "publishedAt": "2026-01-01T10:00:00.000Z",
+    "updateAt": "2026-05-20T10:00:00.000Z"
+  }
+}
+
+vars:pre-request {
+  SERVER_URL: http://localhost:8000
+  TRPC: api/trpc
+  ARTICLE_ID: cmpdsz5wd00004soituz0d7pk
+}
+
+settings {
+  encodeUrl: false
+  timeout: 0
+}
