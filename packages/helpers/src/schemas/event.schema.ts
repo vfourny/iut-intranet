@@ -12,7 +12,7 @@ export const createEventFormulaireInputSchema = z.object({
   departmentId: z.cuid(),
   description: z.string().max(2000).optional(),
   endAt: z.coerce.date(),
-  isPublic: z.boolean(),
+  isPublic: z.boolean().default(false),
   location: z.string().min(1),
   organizerId: z.cuid(),
   startAt: z.coerce.date(),
@@ -20,9 +20,10 @@ export const createEventFormulaireInputSchema = z.object({
 })
 
 export const updateEventFormulaireInputSchema = createEventFormulaireInputSchema
+  .partial()
   .omit({ organizerId: true })
   .extend({ id: z.cuid() })
-  .refine((data) => data.endAt > data.startAt, {
+  .refine((data) => !data.endAt || !data.startAt || data.endAt > data.startAt, {
     message: 'La date de fin doit être après la date de début',
     path: ['endAt'],
   })

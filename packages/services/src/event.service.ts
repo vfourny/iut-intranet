@@ -28,9 +28,6 @@ export class EventService {
   }
 
   public async deleteEvent(id: string) {
-    await this.prisma.eventInvitation.deleteMany({
-      where: { eventId: id },
-    })
     return this.prisma.event.delete({
       where: { id },
     })
@@ -89,15 +86,7 @@ export class EventService {
 
   public async updateEvent(id: string, event: updateEventFormulaireInput) {
     return this.prisma.event.update({
-      data: {
-        departmentId: event.departmentId,
-        description: event.description ?? '',
-        endAt: event.endAt,
-        isPublic: event.isPublic,
-        location: event.location,
-        startAt: event.startAt,
-        titre: event.titre,
-      },
+      data: { ...event },
       where: { id },
     })
   }
