@@ -1,4 +1,5 @@
 import { prisma } from '@/client'
+import { seedArticles } from '@/seeds/articles.seed'
 import { seedDepartments } from '@/seeds/department.seed'
 import { seedEvents } from '@/seeds/event.seed'
 import { seedUsers } from '@/seeds/user.seed'
@@ -7,6 +8,7 @@ async function main() {
   await seedDepartments()
   await seedUsers()
   await seedEvents()
+  await seedArticles()
 
   return
 }

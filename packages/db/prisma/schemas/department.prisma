@@ -23,6 +23,7 @@ model Department {
 
   users User[]
   events Event[]
+  targetedByArticles Article[]
 
   @@map("department")
 }
