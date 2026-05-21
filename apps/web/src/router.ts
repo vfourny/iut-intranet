@@ -19,6 +19,7 @@ export const RouteNames = {
   calendar: 'calendar',
   directory: 'directory',
   home: 'home',
+  profil: 'profil',
 } as const
 
 export const routes = [
@@ -39,6 +40,12 @@ export const routes = [
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.calendar,
     path: '/calendar',
+  },
+  {
+    component: () => import('@/pages/profil/profil-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.profil,
+    path: '/profil',
   },
   {
     children: [

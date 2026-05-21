@@ -98,5 +98,10 @@ const profilMenuItem = ref<MenuItem[]>([
     icon: 'pi pi-sign-out',
     label: t('auth.signOut.label'),
   },
+  {
+    command: () => router.push({ name: RouteNames.profil }),
+    icon: 'pi pi-user',
+    label: t('profil.access_profil'),
+  },
 ])
 </script>
