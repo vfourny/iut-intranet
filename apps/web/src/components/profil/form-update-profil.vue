@@ -1,0 +1,101 @@
+<script setup lang="ts">
+import type { getMeWithDepartmentInput } from '@iut-intranet/helpers/types/user'
+import {
+  formatPhoneInternational,
+  formatPhoneToE164,
+} from '@iut-intranet/helpers/utils/phone'
+import { useToast } from 'primevue/usetoast'
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+import { useUpdateOwnProfile } from '@/api/users.api'
+
+const { t } = useI18n()
+
+const props = defineProps<{
+  user: getMeWithDepartmentInput
+}>()
+
+const phone = ref<string>(
+  props.user.phone ? formatPhoneInternational(props.user.phone) : '',
+)
+const jobTitle = ref<string>(props.user.jobTitle ?? '')
+const isModificated = ref(false)
+const toast = useToast()
+
+const { isLoading, mutate } = useUpdateOwnProfile()
+
+const onSubmit = async () => {
+  try {
+    await mutate({
+      jobTitle: jobTitle.value || undefined,
+      phone: (phone.value
+        ? formatPhoneToE164(phone.value)
+        : undefined) as Exclude<typeof props.user.phone, null>,
+    })
+    isModificated.value = false
+    toast.add({ life: 3000, severity: 'success', summary: t('profil.saved') })
+  } catch (err: unknown) {
+    toast.add({
+      detail: err instanceof Error ? err.message : undefined,
+      life: 5000,
+      severity: 'error',
+      summary: t('profil.savedFailed'),
+    })
+  }
+}
+
+const onInput = () => {
+  isModificated.value = true
+}
+</script>
+
+<template>
+  <div class="max-w-5xl mx-auto w-full px-6 py-8 bg-white rounded-xl shadow-md">
+    <form class="flex flex-col gap-6" @submit.prevent="onSubmit">
+      <div class="flex flex-col gap-1.5">
+        <label
+          class="text-sm font-medium text-surface-700 dark:text-surface-300"
+          for="phone"
+        >
+          {{ t('profil.fields.phone') }}
+        </label>
+        <PrimeInputText
+          id="phone"
+          v-model="phone"
+          autocomplete="tel"
+          class="w-full"
+          inputmode="tel"
+          placeholder="+33 6 12 34 56 78"
+          @input="onInput"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label
+          class="text-sm font-medium text-surface-700 dark:text-surface-300"
+          for="jobTitle"
+        >
+          {{ t('profil.fields.jobTitle') }}
+        </label>
+        <PrimeInputText
+          id="jobTitle"
+          v-model="jobTitle"
+          autocomplete="organization-title"
+          class="w-full"
+          maxlength="150"
+          @input="onInput"
+        />
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <PrimeButton
+          :disabled="!isModificated"
+          :label="t('profil.save')"
+          :loading="isLoading"
+          type="submit"
+        />
+      </div>
+    </form>
+  </div>
+</template>
