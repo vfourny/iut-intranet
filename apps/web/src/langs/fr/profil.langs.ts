@@ -11,7 +11,7 @@ export const profil = {
   },
   readOnlyNote:
     "Pour modifier votre identité (nom, prénom) ou votre rattachement (départment, manager, email), contactez l'administration",
-  save: 'Sauvegarder les modifications de profil',
+  save: 'Sauvegarder les modifications du profil',
   saved: 'Changements sauvegardés',
   savedFailed: 'Changements annulés',
 }
