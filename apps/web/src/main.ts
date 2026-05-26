@@ -14,6 +14,8 @@ import Menubar from 'primevue/menubar'
 import Message from 'primevue/message'
 import Password from 'primevue/password'
 import Select from 'primevue/select'
+import Toast from 'primevue/toast'
+import ToastService from 'primevue/toastservice'
 import { createApp } from 'vue'
 
 import App from '@/app.vue'
@@ -26,6 +28,7 @@ const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
 app.use(PiniaColada)
+app.use(ToastService)
 
 app.use(PrimeVue, {
   theme: {
@@ -50,6 +53,7 @@ app.component('PrimeMenubar', Menubar)
 app.component('PrimeMessage', Message)
 app.component('PrimePassword', Password)
 app.component('PrimeSelect', Select)
+app.component('Toast', Toast)
 
 app.use(i18n)
 app.use(router)
