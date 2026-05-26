@@ -8,6 +8,5 @@ import { authenticatedProcedure } from '@/procedures'
 export const updateArticleProcedure = authenticatedProcedure
   .input(getByIdInputSchema.merge(updateArticleInputSchema))
   .mutation(({ ctx, input }) => {
-    const { articleId, ...data } = input
-    return ctx.services.article.update(articleId, data)
+    return ctx.services.article.update(input)
   })

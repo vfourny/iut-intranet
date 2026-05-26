@@ -36,11 +36,11 @@
 </template>
 
 <script lang="ts" setup>
+import type { ArticleList } from '@iut-intranet/helpers/types/article'
 import PrimeMultiSelect from 'primevue/multiselect'
 import PrimePaginator from 'primevue/paginator'
 import { computed, ref, watch } from 'vue'
 
-import type { ArticleList } from '@/api/article.api'
 import { useVisibleArticles } from '@/api/article.api'
 import { useSession } from '@/api/auth.api'
 import ArticleCard from '@/components/article/article-card.vue'

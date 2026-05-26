@@ -53,12 +53,28 @@ export class ArticleService {
         },
         title: input.title,
       },
+      include: {
+        author: {
+          select: { firstName: true, lastName: true },
+        },
+        targetDepartments: {
+          select: { code: true },
+        },
+      },
     })
   }
 
   async delete(articleId: string) {
     await this.getById(articleId)
     return this.prisma.article.delete({
+      include: {
+        author: {
+          select: { firstName: true, lastName: true },
+        },
+        targetDepartments: {
+          select: { code: true },
+        },
+      },
       where: {
         id: articleId,
       },
@@ -74,7 +90,24 @@ export class ArticleService {
   }
 
   async list() {
-    return this.prisma.article.findMany()
+    return this.prisma.article.findMany({
+      include: {
+        author: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+        targetDepartments: {
+          select: {
+            code: true,
+          },
+        },
+      },
+      orderBy: {
+        publishedAt: 'desc',
+      },
+    })
   }
 
   async listVisibleForUser(userId: string) {
@@ -115,8 +148,8 @@ export class ArticleService {
     })
   }
 
-  async update(articleId: string, input: updateArticleInput) {
-    const article = await this.getById(articleId)
+  async update(input: updateArticleInput) {
+    const article = await this.getById(input.articleId)
     const status = input.status ?? article.status
     validateStatus(status, input.publishedAt)
 
@@ -129,10 +162,19 @@ export class ArticleService {
         status: status,
         targetDepartments: {
           connect: (input.targetDepartmentIds ?? []).map((id) => ({ id })),
+          set: [],
         },
         title: input.title,
       },
-      where: { id: articleId },
+      include: {
+        author: {
+          select: { firstName: true, lastName: true },
+        },
+        targetDepartments: {
+          select: { code: true },
+        },
+      },
+      where: { id: input.articleId },
     })
   }
 }

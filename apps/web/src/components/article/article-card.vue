@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import type { DepartmentCode } from '@iut-intranet/db/enums'
+import type { ArticleList } from '@iut-intranet/helpers/types/article'
 import PrimeProgressSpinner from 'primevue/progressspinner'
 import { useRouter } from 'vue-router'
 
-import type { ArticleList } from '@/api/article.api'
 import DepartmentTag from '@/components/department/department-tag.vue'
 import { RouteNames } from '@/router'
 

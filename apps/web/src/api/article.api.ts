@@ -1,30 +1,44 @@
-import type { DepartmentCode } from '@iut-intranet/db/enums'
-import type { UseQueryReturn } from '@pinia/colada'
-import { useQuery } from '@pinia/colada'
+import { articleSchema } from '@iut-intranet/helpers/schemas/article'
+import type {
+  Article,
+  ArticleList,
+  createArticleInput,
+  updateArticleInput,
+} from '@iut-intranet/helpers/types/article'
+import type { UseMutationReturn, UseQueryReturn } from '@pinia/colada'
+import { useMutation, useQuery } from '@pinia/colada'
+import z from 'zod'
 
 import { trpc } from '@/lib/trpc'
 import type { QueryKey } from '@/types/api.type'
 
-interface Article {
-  author: {
-    firstName: string
-    lastName: string
-  }
-  coverUrl: string | null
-  excerpt: string | null
-  id: string
-  publishedAt: string
-  targetDepartments: {
-    code: DepartmentCode
-  }[]
-  title: string
-}
-
-export type ArticleList = Article[]
-
 export const ARTICLE_KEYS = {
+  all: () => ['article', 'all'] as const,
   visibleForUser: (userId: string) => ['article', 'visible', userId] as const,
 } as const satisfies QueryKey<'article'>
+
+export const useAllArticles = (): UseQueryReturn<ArticleList> => {
+  return useQuery({
+    key: ARTICLE_KEYS.all,
+    query: async (): Promise<ArticleList> => {
+      const result = await trpc.articles.listArticle.query()
+      return z.array(articleSchema).parse(result)
+    },
+  })
+}
+
+export const useCreateArticle = (): UseMutationReturn<
+  Article,
+  createArticleInput,
+  Error
+> => {
+  return useMutation({
+    mutation: async (data: createArticleInput): Promise<Article> => {
+      const result = await trpc.articles.createArticle.mutate(data)
+      return articleSchema.parse(result)
+    },
+  })
+}
 
 export const useVisibleArticles = (
   userId: string,
@@ -36,8 +50,21 @@ export const useVisibleArticles = (
       const result = await trpc.articles.listVisibleArticlesForUser.query({
         userId,
       })
-      return result as ArticleList
+      return z.array(articleSchema).parse(result)
     },
     staleTime: 30_000,
-  }) as UseQueryReturn<ArticleList>
+  })
+}
+
+export const useUpdateArticles = (): UseMutationReturn<
+  Article,
+  updateArticleInput,
+  Error
+> => {
+  return useMutation({
+    mutation: async (data: updateArticleInput): Promise<Article> => {
+      const result = await trpc.articles.updateArticle.mutate(data)
+      return articleSchema.parse(result)
+    },
+  })
 }
