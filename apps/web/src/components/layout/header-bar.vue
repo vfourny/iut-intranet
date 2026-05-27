@@ -84,7 +84,7 @@ const items = ref<MenuItem[]>([
     label: t('layout.default.nav.calendar'),
   },
   {
-    command: () => router.push({ name: RouteNames.news }),
+    command: () => router.push({ name: RouteNames.article.news }),
     icon: 'pi pi-file',
     label: t('layout.default.nav.news'),
   },
@@ -98,6 +98,11 @@ async function handleSignOut() {
 const profilMenu = ref()
 
 const profilMenuItem = ref<MenuItem[]>([
+  {
+    command: () => router.push({ name: RouteNames.profil.private }),
+    icon: 'pi pi-user',
+    label: t('profil.access_profil'),
+  },
   {
     command: () => handleSignOut(),
     icon: 'pi pi-sign-out',

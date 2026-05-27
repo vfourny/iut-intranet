@@ -13,8 +13,6 @@ export const editorJsContentSchema = z.object({
   version: z.string().optional(),
 })
 
-export type EditorJsContent = z.infer<typeof editorJsContentSchema>
-
 export const articleSchema = z.object({
   author: z.object({
     firstName: z.string(),
@@ -25,9 +23,10 @@ export const articleSchema = z.object({
   excerpt: z.string().nullable(),
   id: z.string().cuid(),
   publishedAt: z.coerce.date().nullable(),
+  status: z.enum(ArticleStatus),
   targetDepartments: z.array(
     z.object({
-      code: z.nativeEnum(DepartmentCode),
+      code: z.enum(DepartmentCode),
     }),
   ),
   title: z.string(),
@@ -38,9 +37,6 @@ export const createArticleInputSchema = z.object({
   content: editorJsContentSchema,
   coverUrl: z.string().optional(),
   createAt: z.coerce.date(),
-  excerpt: z.string().optional(),
-  publishedAt: z.coerce.date().nullable(),
-  status: z.enum(ArticleStatus),
   targetDepartmentIds: z.array(z.string()).default([]),
   title: z.string(),
   updateAt: z.coerce.date(),
@@ -50,7 +46,10 @@ export const updateArticleInputSchema = createArticleInputSchema
   .partial()
   .extend({
     articleId: z.string(),
+    publishedAt: z.coerce.date().nullable(),
+    status: z.enum(ArticleStatus),
   })
+  .omit({ createAt: true })
 
 export const getByIdInputSchema = z.object({
   articleId: z.string().cuid(),

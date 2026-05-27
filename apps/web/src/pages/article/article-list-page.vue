@@ -1,10 +1,21 @@
 <template>
   <div class="flex flex-col gap-6 p-6">
-    <h1 class="text-3xl font-bold text-gray-900">
-      {{ t('article.list.title') }}
-    </h1>
+    <div
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+    >
+      <h1 class="text-3xl font-bold text-gray-900">
+        {{ t('article.list.title') }}
+      </h1>
 
-    <div class="flex gap-4">
+      <PrimeButton
+        class="w-full sm:w-auto"
+        icon="pi pi-plus"
+        label="Créer un article"
+        @click="router.push({ name: RouteNames.article.create })"
+      />
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-4">
       <UserSearchBar @search="onSearch" />
       <PrimeMultiSelect
         v-model="selectedDepartments"
@@ -25,7 +36,11 @@
       {{ t('article.list.empty') }}
     </div>
 
-    <ArticleCard :articles="articles" :loading="isLoading" />
+    <ArticleCard
+      :articles="articles"
+      :is-admin="isAdmin"
+      :loading="isLoading"
+    />
 
     <PrimePaginator
       :rows="PAGE_SIZE"
@@ -36,6 +51,7 @@
 </template>
 
 <script lang="ts" setup>
+import { UserRole } from '@iut-intranet/db/enums'
 import type { ArticleList } from '@iut-intranet/helpers/types/article'
 import PrimeMultiSelect from 'primevue/multiselect'
 import PrimePaginator from 'primevue/paginator'
@@ -47,9 +63,14 @@ import ArticleCard from '@/components/article/article-card.vue'
 import UserSearchBar from '@/components/ui/search-bar.vue'
 import { useI18n } from '@/composables/use-i18n'
 import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
+import { RouteNames, router } from '@/router'
 
 const { t } = useI18n()
 const { currentSession } = useSession()
+
+const isAdmin =
+  currentSession.value?.user.role === UserRole.ADMIN ||
+  currentSession.value?.user.role === UserRole.EDITOR
 
 const search = ref('')
 

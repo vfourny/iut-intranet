@@ -1,7 +1,10 @@
 import { type BetterAuthInstance } from '@iut-intranet/auth/types'
 import type { prisma } from '@iut-intranet/db'
 import type { UserModel } from '@iut-intranet/db/models'
-import type { UpdateUserInput } from '@iut-intranet/helpers/types/user'
+import type {
+  updateOwnProfileInput,
+  UpdateUserInput,
+} from '@iut-intranet/helpers/types/user'
 
 export class UserService {
   constructor(
@@ -38,6 +41,13 @@ export class UserService {
       where: {
         id: userId,
       },
+    })
+  }
+
+  async getByIdWithDepartment(id: string) {
+    return this.prisma.user.findUniqueOrThrow({
+      include: { department: true },
+      where: { id },
     })
   }
 
@@ -96,5 +106,16 @@ export class UserService {
     })
 
     return this.getById(updatedUser.id)
+  }
+
+  public async updateOwnUser(user: updateOwnProfileInput, userId: string) {
+    return this.prisma.user.update({
+      data: {
+        image: user.image,
+        jobTitle: user.jobTitle,
+        phone: user.phone,
+      },
+      where: { id: userId },
+    })
   }
 }

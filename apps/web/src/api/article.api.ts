@@ -7,6 +7,8 @@ import type {
 } from '@iut-intranet/helpers/types/article'
 import type { UseMutationReturn, UseQueryReturn } from '@pinia/colada'
 import { useMutation, useQuery } from '@pinia/colada'
+import type { MaybeRefOrGetter } from 'vue'
+import { toValue } from 'vue'
 import z from 'zod'
 
 import { trpc } from '@/lib/trpc'
@@ -14,18 +16,9 @@ import type { QueryKey } from '@/types/api.type'
 
 export const ARTICLE_KEYS = {
   all: () => ['article', 'all'] as const,
+  getById: (articleId: string) => ['article', articleId] as const,
   visibleForUser: (userId: string) => ['article', 'visible', userId] as const,
 } as const satisfies QueryKey<'article'>
-
-export const useAllArticles = (): UseQueryReturn<ArticleList> => {
-  return useQuery({
-    key: ARTICLE_KEYS.all,
-    query: async (): Promise<ArticleList> => {
-      const result = await trpc.articles.listArticle.query()
-      return z.array(articleSchema).parse(result)
-    },
-  })
-}
 
 export const useCreateArticle = (): UseMutationReturn<
   Article,
@@ -64,6 +57,21 @@ export const useUpdateArticles = (): UseMutationReturn<
   return useMutation({
     mutation: async (data: updateArticleInput): Promise<Article> => {
       const result = await trpc.articles.updateArticle.mutate(data)
+      return articleSchema.parse(result)
+    },
+  })
+}
+
+export const useArticleId = (
+  articleId: MaybeRefOrGetter<string | null>,
+): UseQueryReturn<Article> => {
+  return useQuery({
+    enabled: () => !!toValue(articleId),
+    key: () => ARTICLE_KEYS.getById(toValue(articleId) ?? ''),
+    query: async (): Promise<Article> => {
+      const id = toValue(articleId)
+      if (!id) throw new Error('articleId is required')
+      const result = await trpc.articles.getArticleById.query({ articleId: id })
       return articleSchema.parse(result)
     },
   })

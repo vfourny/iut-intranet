@@ -4,13 +4,23 @@ import type { ArticleList } from '@iut-intranet/helpers/types/article'
 import PrimeProgressSpinner from 'primevue/progressspinner'
 import { useRouter } from 'vue-router'
 
+import ArticleTag from '@/components/article/article-tag.vue'
 import DepartmentTag from '@/components/department/department-tag.vue'
+import { useI18n } from '@/composables/use-i18n'
 import { RouteNames } from '@/router'
 
-defineProps<{
-  loading?: boolean
-  articles: ArticleList
-}>()
+const { t } = useI18n()
+
+withDefaults(
+  defineProps<{
+    articles: ArticleList
+    isAdmin?: boolean
+    loading?: boolean
+  }>(),
+  {
+    isAdmin: false,
+  },
+)
 
 function formatDate(date: string | Date) {
   return new Date(date).toLocaleDateString('fr-FR', {
@@ -33,7 +43,10 @@ const router = useRouter()
       :key="article.id"
       class="cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
       @click="
-        router.push({ name: RouteNames.news, params: { id: article.id } })
+        router.push({
+          name: RouteNames.article.news,
+          params: { id: article.id },
+        })
       "
     >
       <img
@@ -63,15 +76,32 @@ const router = useRouter()
         </div>
 
         <div
-          v-if="article.targetDepartments.length > 0"
-          class="flex flex-wrap gap-1"
+          v-if="article.targetDepartments.length > 0 || article.status"
+          class="flex flex-wrap items-center gap-1"
         >
+          <ArticleTag :key="article.id" :status="article.status" />
           <DepartmentTag
             v-for="dept in article.targetDepartments"
             :key="dept.code"
             :code="dept.code as DepartmentCode"
           />
         </div>
+      </div>
+
+      <div v-if="isAdmin" class="flex justify-start px-4 py-2">
+        <PrimeButton
+          icon="pi pi-pencil"
+          :label="t('article.update')"
+          severity="secondary"
+          size="small"
+          text
+          @click.stop="
+            router.push({
+              name: RouteNames.article.update,
+              params: { id: article.id },
+            })
+          "
+        />
       </div>
     </div>
   </div>

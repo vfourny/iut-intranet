@@ -1,4 +1,4 @@
-import type { prisma } from '@iut-intranet/db'
+import type { DepartmentCode, prisma } from '@iut-intranet/db'
 import type { Prisma } from '@iut-intranet/db'
 import { ArticleStatus } from '@iut-intranet/db'
 import { AppError } from '@iut-intranet/helpers/errors'
@@ -6,6 +6,7 @@ import type {
   createArticleInput,
   updateArticleInput,
 } from '@iut-intranet/helpers/types/article'
+import { isEditorRole } from '@iut-intranet/helpers/utils/role'
 
 function validateStatus(status: ArticleStatus, publishedAt?: Date | null) {
   const now = new Date()
@@ -39,17 +40,20 @@ export class ArticleService {
   constructor(private prisma: prisma) {}
 
   async create(input: createArticleInput) {
-    validateStatus(input.status, input.publishedAt)
+    const departments = await this.prisma.department.findMany({
+      select: { id: true },
+      where: {
+        code: { in: input.targetDepartmentIds as DepartmentCode[] },
+      },
+    })
     return this.prisma.article.create({
       data: {
         authorId: input.authorId,
         content: input.content as Prisma.InputJsonValue,
         coverUrl: input.coverUrl,
-        excerpt: input.excerpt,
-        publishedAt: input.publishedAt,
-        status: input.status ?? 'DRAFT',
+        status: ArticleStatus.DRAFT,
         targetDepartments: {
-          connect: (input.targetDepartmentIds ?? []).map((id) => ({ id })),
+          connect: departments.map((d) => ({ id: d.id })),
         },
         title: input.title,
       },
@@ -83,6 +87,26 @@ export class ArticleService {
 
   async getById(articleId: string) {
     const article = await this.prisma.article.findUnique({
+      include: {
+        author: {
+          select: { firstName: true, lastName: true },
+        },
+        targetDepartments: {
+          select: { code: true },
+        },
+      },
+      where: { id: articleId },
+    })
+    if (!article) throw new AppError('NOT_FOUND', 'Article not found')
+    return article
+  }
+
+  async getByIdWithRelations(articleId: string) {
+    const article = await this.prisma.article.findUnique({
+      include: {
+        author: { select: { firstName: true, lastName: true } },
+        targetDepartments: { select: { code: true } },
+      },
       where: { id: articleId },
     })
     if (!article) throw new AppError('NOT_FOUND', 'Article not found')
@@ -120,6 +144,15 @@ export class ArticleService {
     if (!user) {
       throw new AppError('NOT_FOUND', 'User not found')
     }
+    const whereClause = !isEditorRole(user.role)
+      ? {
+          OR: [
+            { targetDepartments: { none: {} } },
+            { targetDepartments: { some: { id: user.departmentId } } },
+          ],
+          status: ArticleStatus.PUBLISHED,
+        }
+      : {}
 
     return this.prisma.article.findMany({
       include: {
@@ -138,13 +171,7 @@ export class ArticleService {
       orderBy: {
         publishedAt: 'desc',
       },
-      where: {
-        OR: [
-          { targetDepartments: { none: {} } },
-          { targetDepartments: { some: { id: user.departmentId } } },
-        ],
-        status: ArticleStatus.PUBLISHED,
-      },
+      where: whereClause,
     })
   }
 
@@ -153,26 +180,34 @@ export class ArticleService {
     const status = input.status ?? article.status
     validateStatus(status, input.publishedAt)
 
+    const departments = await this.prisma.department.findMany({
+      select: { id: true },
+      where: {
+        code: { in: input.targetDepartmentIds as DepartmentCode[] },
+      },
+    })
+
+    await this.prisma.article.update({
+      data: {
+        targetDepartments: { set: [] },
+      },
+      where: { id: input.articleId },
+    })
+
     return this.prisma.article.update({
       data: {
         content: input.content as Prisma.InputJsonValue,
-        coverUrl: input.coverUrl,
-        excerpt: input.excerpt,
+        coverUrl: input.coverUrl ?? null,
         publishedAt: input.publishedAt,
         status: status,
         targetDepartments: {
-          connect: (input.targetDepartmentIds ?? []).map((id) => ({ id })),
-          set: [],
+          connect: departments.map((department) => ({ id: department.id })),
         },
         title: input.title,
       },
       include: {
-        author: {
-          select: { firstName: true, lastName: true },
-        },
-        targetDepartments: {
-          select: { code: true },
-        },
+        author: { select: { firstName: true, lastName: true } },
+        targetDepartments: { select: { code: true } },
       },
       where: { id: input.articleId },
     })

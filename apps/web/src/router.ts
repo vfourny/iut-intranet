@@ -12,6 +12,11 @@ declare module 'vue-router' {
 }
 
 export const RouteNames = {
+  article: {
+    create: 'createArticle',
+    news: 'news',
+    update: 'updateArticle',
+  },
   auth: {
     signIn: 'auth.sign-in',
     signUp: 'auth.sign-up',
@@ -19,7 +24,10 @@ export const RouteNames = {
   calendar: 'calendar',
   directory: 'directory',
   home: 'home',
-  news: 'news',
+  profil: {
+    private: 'profil.private',
+    public: 'profil.public',
+  },
 } as const
 
 export const routes = [
@@ -44,8 +52,26 @@ export const routes = [
   {
     component: () => import('@/pages/article/article-list-page.vue'),
     meta: { access: 'authenticated', layout: 'default' },
-    name: RouteNames.news,
+    name: RouteNames.article.news,
     path: '/actualites',
+  },
+  {
+    component: () => import('@/pages/article/article-form-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.article.create,
+    path: '/actualites/create',
+  },
+  {
+    component: () => import('@/pages/article/article-form-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.article.update,
+    path: '/actualites/update/:id',
+  },
+  {
+    component: () => import('@/pages/profil/profil-page-private.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.profil.private,
+    path: '/profil',
   },
   {
     children: [
