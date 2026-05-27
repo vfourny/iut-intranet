@@ -8,6 +8,7 @@ import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Checkbox from 'primevue/checkbox'
 import PrimeVue from 'primevue/config'
+import ConfirmationService from 'primevue/confirmationservice'
 import Fluid from 'primevue/fluid'
 import InputText from 'primevue/inputtext'
 import Menubar from 'primevue/menubar'
@@ -57,5 +58,7 @@ app.component('Toast', Toast)
 
 app.use(i18n)
 app.use(router)
+app.use(ConfirmationService)
+app.use(ToastService)
 
 app.mount('#app')
