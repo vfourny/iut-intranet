@@ -7,6 +7,7 @@
     </main>
   </div>
   <FooterBar />
+  <Toast />
 </template>
 
 <script lang="ts" setup>
