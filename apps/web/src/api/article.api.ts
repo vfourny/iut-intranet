@@ -5,8 +5,8 @@ import type {
   createArticleInput,
   updateArticleInput,
 } from '@iut-intranet/helpers/types/article'
-import type { UseMutationReturn, UseQueryReturn } from '@pinia/colada'
-import { useMutation, useQuery } from '@pinia/colada'
+import type { UseQueryReturn } from '@pinia/colada'
+import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import z from 'zod'
@@ -20,19 +20,18 @@ export const ARTICLE_KEYS = {
   visibleForUser: (userId: string) => ['article', 'visible', userId] as const,
 } as const satisfies QueryKey<'article'>
 
-export const useCreateArticle = (): UseMutationReturn<
-  Article,
-  createArticleInput,
-  Error
-> => {
+export const useCreateArticle = () => {
+  const queryCache = useQueryCache()
   return useMutation({
     mutation: async (data: createArticleInput): Promise<Article> => {
       const result = await trpc.articles.createArticle.mutate(data)
       return articleSchema.parse(result)
     },
+    onSuccess() {
+      queryCache.invalidateQueries({ key: ['article'] })
+    },
   })
 }
-
 export const useVisibleArticles = (
   userId: string,
 ): UseQueryReturn<ArticleList> => {
@@ -49,15 +48,15 @@ export const useVisibleArticles = (
   })
 }
 
-export const useUpdateArticles = (): UseMutationReturn<
-  Article,
-  updateArticleInput,
-  Error
-> => {
+export const useUpdateArticles = () => {
+  const queryCache = useQueryCache()
   return useMutation({
     mutation: async (data: updateArticleInput): Promise<Article> => {
       const result = await trpc.articles.updateArticle.mutate(data)
       return articleSchema.parse(result)
+    },
+    onSuccess() {
+      queryCache.invalidateQueries({ key: ['article'] })
     },
   })
 }

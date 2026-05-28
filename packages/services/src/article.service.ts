@@ -101,7 +101,11 @@ export class ArticleService {
     return article
   }
 
-  async getByIdWithRelations(articleId: string) {
+  async getByIdWithRelations(articleId: string, userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } })
+    if (!user || !isEditorRole(user?.role)) {
+      throw new AppError('NOT_FOUND', 'User not found')
+    }
     const article = await this.prisma.article.findUnique({
       include: {
         author: { select: { firstName: true, lastName: true } },
@@ -175,7 +179,12 @@ export class ArticleService {
     })
   }
 
-  async update(input: updateArticleInput) {
+  async update(input: updateArticleInput, userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } })
+    if (!user || !isEditorRole(user?.role)) {
+      throw new AppError('NOT_FOUND', 'User not found')
+    }
+
     const article = await this.getById(input.articleId)
     const status = input.status ?? article.status
     validateStatus(status, input.publishedAt)
