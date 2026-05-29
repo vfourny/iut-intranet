@@ -1,0 +1,30 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.808.0",
+    "@iut-intranet/helpers": "*"
+  },
+  "devDependencies": {
+    "@iut-intranet/configs": "*"
+  },
+  "exports": {
+    "./*": {
+      "source": "./src/*.provider.ts",
+      "types": "./dist/*.provider.d.ts",
+      "default": "./dist/*.provider.js"
+    }
+  },
+  "name": "@iut-intranet/providers",
+  "private": true,
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "clean": "rimraf node_modules dist .turbo",
+    "dev": "run-p dev:tsc dev:alias",
+    "dev:alias": "tsc-alias --watch",
+    "dev:tsc": "tsc --watch --preserveWatchOutput",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "ts:check": "tsc --noEmit"
+  },
+  "type": "module",
+  "version": "0.0.1"
+}

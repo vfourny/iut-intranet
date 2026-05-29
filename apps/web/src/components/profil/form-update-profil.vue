@@ -4,11 +4,14 @@ import {
   formatPhoneInternational,
   formatPhoneToE164,
 } from '@iut-intranet/helpers/utils/phone'
+import type { FileUploadUploaderEvent } from 'primevue/fileupload'
+import PrimeFileUpload from 'primevue/fileupload'
 import { useToast } from 'primevue/usetoast'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { useUpdateOwnProfile } from '@/api/users.api'
+import { useUpdateOwnProfile, useUploadAvatar } from '@/api/users.api'
+import { fileToAvatarInput } from '@/lib/file'
 
 const { t } = useI18n()
 
@@ -23,7 +26,37 @@ const jobTitle = ref<string>(props.user.jobTitle ?? '')
 const isModificated = ref(false)
 const toast = useToast()
 
+const { mutateAsync: mutateAvatar } = useUploadAvatar()
 const { isLoading, mutate } = useUpdateOwnProfile()
+
+const onAvatarUpload = async (event: FileUploadUploaderEvent) => {
+  const file = Array.isArray(event.files) ? event.files[0] : event.files
+  if (!file) return
+
+  const contentType = file.type
+  if (
+    contentType !== 'image/jpeg' &&
+    contentType !== 'image/png' &&
+    contentType !== 'image/webp'
+  ) {
+    return
+  }
+
+  try {
+    await mutateAvatar(await fileToAvatarInput(file))
+    toast.add({
+      life: 3000,
+      severity: 'success',
+      summary: t('profil.avatar.success'),
+    })
+  } catch {
+    toast.add({
+      life: 5000,
+      severity: 'error',
+      summary: t('profil.avatar.fail'),
+    })
+  }
+}
 
 const onSubmit = async () => {
   try {
@@ -35,9 +68,8 @@ const onSubmit = async () => {
     })
     isModificated.value = false
     toast.add({ life: 3000, severity: 'success', summary: t('profil.saved') })
-  } catch (err: unknown) {
+  } catch {
     toast.add({
-      detail: err instanceof Error ? err.message : undefined,
       life: 5000,
       severity: 'error',
       summary: t('profil.savedFailed'),
@@ -87,6 +119,16 @@ const onInput = () => {
           @input="onInput"
         />
       </div>
+
+      <PrimeFileUpload
+        accept="image/jpeg,image/png,image/webp"
+        auto
+        choose-label="Changer d'avatar"
+        custom-upload
+        :max-file-size="2_000_000"
+        mode="basic"
+        @uploader="onAvatarUpload"
+      />
 
       <div class="flex justify-end pt-2">
         <PrimeButton

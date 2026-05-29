@@ -1,3 +1,4 @@
+import type { uploadAvatarInput } from '@iut-intranet/helpers/types/storage'
 import type {
   getMeWithDepartmentInput,
   updateOwnProfileInput,
@@ -87,6 +88,22 @@ export const useUpdateOwnProfile = () => {
   return useMutation({
     mutation: (input: Omit<updateOwnProfileInput, 'userId'>) =>
       trpc.user.updateOwnUser.mutate(input),
+    onSuccess: () => {
+      queryCache.invalidateQueries({ key: ['user', 'list'] })
+      queryCache.invalidateQueries({
+        key: ['user', 'me', currentSession.value?.user.id ?? null],
+      })
+    },
+  })
+}
+
+export const useUploadAvatar = () => {
+  const queryCache = useQueryCache()
+  const { currentSession } = useSession()
+
+  return useMutation({
+    mutation: (input: uploadAvatarInput) =>
+      trpc.user.uploadAvatar.mutate(input),
     onSuccess: () => {
       queryCache.invalidateQueries({ key: ['user', 'list'] })
       queryCache.invalidateQueries({

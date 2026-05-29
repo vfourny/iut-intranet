@@ -5,6 +5,7 @@ import { getUserByIdProcedure } from '@/modules/user/procedures/get-user-by-id.p
 import { listUsersProcedure } from '@/modules/user/procedures/list-users.procedure'
 import { updateOwnUserProcedure } from '@/modules/user/procedures/update-own-user.procedure'
 import { updateUserProcedure } from '@/modules/user/procedures/update-user.procedure'
+import { uploadAvatarProcedure } from '@/modules/user/procedures/upload-avatar.procedure'
 import { router } from '@/trpc'
 
 export const userRouter = router({
@@ -15,4 +16,5 @@ export const userRouter = router({
   list: listUsersProcedure,
   update: updateUserProcedure,
   updateOwnUser: updateOwnUserProcedure,
+  uploadAvatar: uploadAvatarProcedure,
 })

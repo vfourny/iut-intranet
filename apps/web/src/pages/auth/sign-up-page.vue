@@ -61,6 +61,14 @@
       :placeholder="t('auth.signUp.fields.phone.placeholder')"
     />
 
+    <PrimeFileUpload
+      accept="image/jpeg,image/png,image/webp"
+      choose-label="Changer d'avatar"
+      :max-file-size="2_000_000"
+      mode="basic"
+      @select="onAvatarSelect"
+    />
+
     <PasswordField
       v-model="password"
       autocomplete="new-password"
@@ -96,22 +104,45 @@
 <script lang="ts" setup>
 import { DepartmentCode } from '@iut-intranet/db/enums'
 import { signUpWithPasswordInputSchema } from '@iut-intranet/helpers/schemas/auth'
+import type { FileUploadSelectEvent } from 'primevue/fileupload'
+import PrimeFileUpload from 'primevue/fileupload'
 import { useForm } from 'vee-validate'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
 
 import { useSignUp } from '@/api/auth.api'
+import { useUploadAvatar } from '@/api/users.api'
 import AuthFormCard from '@/components/auth/auth-form-card.vue'
 import InputField from '@/components/ui/input-field.vue'
 import PasswordField from '@/components/ui/password-field.vue'
 import SelectField from '@/components/ui/select-field.vue'
 import { useI18n } from '@/composables/use-i18n'
+import { fileToAvatarInput } from '@/lib/file'
 import { RouteNames } from '@/router'
 
 const { t } = useI18n()
 const router = useRouter()
 const { mutateAsync: signUp, status: signUpStatus } = useSignUp()
+const { mutateAsync: mutateAvatar } = useUploadAvatar()
+
+const selectedAvatarFile = ref<File | null>(null)
+
+const onAvatarSelect = (event: FileUploadSelectEvent) => {
+  const file = Array.isArray(event.files) ? event.files[0] : event.files
+  if (!file) return
+
+  const contentType = file.type
+  if (
+    contentType !== 'image/jpeg' &&
+    contentType !== 'image/png' &&
+    contentType !== 'image/webp'
+  ) {
+    return
+  }
+
+  selectedAvatarFile.value = file
+}
 
 const departmentOptions = computed(() =>
   Object.values(DepartmentCode).map((code) => ({
@@ -151,6 +182,10 @@ const [phone] = defineField('phone')
 const handleSubmit = createSubmitHandler(
   async ({ confirmPassword: _, ...values }) => {
     await signUp(values)
+
+    if (selectedAvatarFile.value) {
+      await mutateAvatar(await fileToAvatarInput(selectedAvatarFile.value))
+    }
     await router.push({ name: RouteNames.home })
   },
 )

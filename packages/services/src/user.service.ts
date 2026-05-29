@@ -1,10 +1,12 @@
 import { type BetterAuthInstance } from '@iut-intranet/auth/types'
 import type { prisma } from '@iut-intranet/db'
 import type { UserModel } from '@iut-intranet/db/models'
+import type { uploadAvatarInput } from '@iut-intranet/helpers/types/storage'
 import type {
   updateOwnProfileInput,
   UpdateUserInput,
 } from '@iut-intranet/helpers/types/user'
+import { uploadUserAvatarObject } from '@iut-intranet/providers/s3'
 
 export class UserService {
   constructor(
@@ -115,6 +117,24 @@ export class UserService {
         jobTitle: user.jobTitle,
         phone: user.phone,
       },
+      where: { id: userId },
+    })
+  }
+
+  /**
+   * Uploads a user avatar to object storage and persists its public URL
+   * @param {UploadUserAvatarInput} payload - Base64 image and its content type
+   * @param {string} userId - Owner of the avatar
+   * @returns {Promise<UserModel>} The updated user
+   */
+  public async uploadAvatar(
+    payload: uploadAvatarInput,
+    userId: string,
+  ): Promise<UserModel> {
+    const imageUrl = await uploadUserAvatarObject({ ...payload, userId })
+
+    return this.prisma.user.update({
+      data: { image: imageUrl },
       where: { id: userId },
     })
   }

@@ -1,5 +1,9 @@
 export const profil = {
   access_profil: 'Accéder à mon profil',
+  avatar: {
+    fail: 'Avatar non sauvegardé',
+    success: 'Avatar sauvegardé',
+  },
   fields: {
     jobTitle: 'Intitulé du poste',
     phone: 'Téléphone',
