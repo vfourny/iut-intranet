@@ -10,6 +10,11 @@ get {
   auth: inherit
 }
 
+vars:pre-request {
+  SERVER_URL: http://localhost:8000/api
+  TRPC: trp
+}
+
 settings {
   encodeUrl: true
   timeout: 0
