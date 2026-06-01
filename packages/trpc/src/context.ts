@@ -5,6 +5,7 @@ import {
   authService,
   departmentService,
   eventService,
+  imageService,
   userService,
 } from '@iut-intranet/services'
 import type { CreateExpressContextOptions } from '@trpc/server/adapters/express'
@@ -16,6 +17,7 @@ const services = {
   auth: authService,
   department: departmentService,
   event: eventService,
+  image: imageService,
   user: userService,
 } as const
 

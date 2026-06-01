@@ -1,94 +1,49 @@
-<template>
-  <div class="flex gap-4 items-center">
-    <PrimeSelectButton
-      :model-value="displayMode"
-      option-value="value"
-      :options="displayModeOptions"
-      @value-change="
-        displayMode =
-          $event ??
-          (displayMode === DisplayMode.DATA_TABLE
-            ? DisplayMode.DATA_VIEW
-            : DisplayMode.DATA_TABLE)
-      "
-    >
-      <template #option="slotProps">
-        <i :class="slotProps.option.icon"></i>
-      </template>
-    </PrimeSelectButton>
-    <UserSearchBar @search="onSearch" />
-  </div>
-  <UserDataTable
-    v-if="displayMode === DisplayMode.DATA_TABLE"
-    :loading="paginatedStatus === 'loading'"
-    :page="page"
-    :page-size="USER_PAGE_SIZE"
-    :total="paginatedTotal"
-    :users="paginatedUsers"
-    @update:page="page = $event"
-  />
-  <UserDataView
-    v-else
-    :has-next-page="infiniteHasNextPage"
-    :loading="infiniteStatus === 'loading'"
-    :users="infiniteUsers"
-    @load-more="infiniteLoadNextPage()"
-  />
-</template>
-
 <script lang="ts" setup>
-import PrimeSelectButton from 'primevue/selectbutton'
-import { computed, ref } from 'vue'
+import type { FileUploadUploaderEvent } from 'primevue/fileupload'
+import PrimeFileUpload from 'primevue/fileupload'
+import { useI18n } from 'vue-i18n'
 
-import {
-  USER_PAGE_SIZE,
-  useUsersInfinite,
-  useUsersPaginated,
-} from '@/api/users.api'
-import UserSearchBar from '@/components/ui/search-bar.vue'
-import UserDataTable from '@/components/user/user-data-table.vue'
-import UserDataView from '@/components/user/user-data-view.vue'
+import { useImages, useUploadImage } from '@/api/image.api'
+import ImageCarousel from '@/components/image/carroussel-image.vue'
 
-enum DisplayMode {
-  DATA_TABLE = 'data-table',
-  DATA_VIEW = 'data-view',
-}
+const { t } = useI18n()
+const { mutate: uploadImage } = useUploadImage()
+const { data: images, refetch } = useImages()
 
-const SEARCH_DEBOUNCE_MS = 300
+const handleUpload = async (event: FileUploadUploaderEvent) => {
+  const file = Array.isArray(event.files) ? event.files[0] : event.files
+  if (!file) return
 
-const search = ref('')
-const page = ref(1)
-const displayMode = ref(DisplayMode.DATA_TABLE)
+  const base64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve((reader.result as string).split(',')[1])
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
 
-const displayModeOptions = ref<{ icon: string; value: DisplayMode }[]>([
-  { icon: 'pi pi-table', value: DisplayMode.DATA_TABLE },
-  { icon: 'pi pi-th-large', value: DisplayMode.DATA_VIEW },
-])
-
-const { asyncStatus: paginatedStatus, data: paginatedData } = useUsersPaginated(
-  page,
-  search,
-)
-
-const {
-  asyncStatus: infiniteStatus,
-  data: infiniteData,
-  hasNextPage: infiniteHasNextPage,
-  loadNextPage: infiniteLoadNextPage,
-} = useUsersInfinite(search)
-
-const paginatedUsers = computed(() => paginatedData.value?.items ?? [])
-const paginatedTotal = computed(() => paginatedData.value?.total ?? 0)
-const infiniteUsers = computed(
-  () => infiniteData.value?.pages.flatMap((p) => p.items) ?? [],
-)
-
-let debounceTimer: ReturnType<typeof setTimeout> | undefined
-const onSearch = (value: string) => {
-  clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => {
-    search.value = value
-    page.value = 1
-  }, SEARCH_DEBOUNCE_MS)
+  await uploadImage({
+    base64,
+    contentType: file.type as 'image/jpeg' | 'image/png' | 'image/webp',
+  })
+  await refetch()
 }
 </script>
+
+<template>
+  <div class="flex flex-col gap-6 p-6">
+    <div class="h-[200px] overflow-hidden">
+      <ImageCarousel :images="images ?? []" />
+    </div>
+    <div class="flex justify-center">
+      <PrimeFileUpload
+        accept="image/jpeg,image/png,image/webp"
+        auto
+        :choose-label="t('home.addPicture')"
+        custom-upload
+        :max-file-size="2_000_000"
+        mode="basic"
+        @uploader="handleUpload"
+      />
+    </div>
+  </div>
+</template>

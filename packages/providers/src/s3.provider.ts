@@ -44,6 +44,11 @@ export interface UploadUserAvatarObjectPayload {
   userId: string
 }
 
+export interface UploadImageObjectPayload {
+  base64: string
+  contentType: AvatarContentType
+}
+
 export const uploadUserAvatarObject = async (
   payload: UploadUserAvatarObjectPayload,
 ): Promise<string> => {
@@ -58,6 +63,34 @@ export const uploadUserAvatarObject = async (
   }
 
   const key = `avatars/${userId}/${randomUUID()}.${extensionByContentType[contentType]}`
+
+  await s3Client.send(
+    new PutObjectCommand({
+      ACL: 'public-read',
+      Body: body,
+      Bucket: S3_AVATARS_BUCKET,
+      ContentType: contentType,
+      Key: key,
+    }),
+  )
+
+  return `${S3_ENDPOINT}/${S3_AVATARS_BUCKET}/${key}`
+}
+
+export const uploadImageObject = async (
+  payload: UploadImageObjectPayload,
+): Promise<string> => {
+  const { base64, contentType } = payload
+
+  const body = Buffer.from(base64, 'base64')
+  if (body.byteLength > MAX_AVATAR_BYTES) {
+    throw new AppError(
+      'PAYLOAD_TOO_LARGE',
+      'Avatar exceeds the maximum size of 2MB',
+    )
+  }
+
+  const key = `image/${randomUUID()}.${extensionByContentType[contentType]}`
 
   await s3Client.send(
     new PutObjectCommand({

@@ -1,3 +1,3 @@
 export const home = {
-  greeting: 'Hello world',
+  addPicture: 'Ajouter une photo au carroussel',
 } as const

@@ -32,13 +32,13 @@ export const RouteNames = {
 
 export const routes = [
   {
+    component: () => import('@/pages/home-page.vue'),
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.home,
     path: '/',
-    redirect: '/directory',
   },
   {
-    component: () => import('@/pages/home-page.vue'),
+    component: () => import('@/pages/user/user-list.vue'),
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.directory,
     path: '/directory',
