@@ -1,6 +1,10 @@
 import { randomUUID } from 'node:crypto'
 
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import {
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3'
 import { getServerEnv } from '@iut-intranet/helpers/env'
 import { AppError } from '@iut-intranet/helpers/errors'
 
@@ -27,6 +31,8 @@ const extensionByContentType = {
 } as const
 
 type AvatarContentType = keyof typeof extensionByContentType
+
+const CAROUSEL_IMAGE_PREFIX = 'image/'
 
 const s3Client = new S3Client({
   credentials: {
@@ -90,7 +96,7 @@ export const uploadImageObject = async (
     )
   }
 
-  const key = `image/${randomUUID()}.${extensionByContentType[contentType]}`
+  const key = `${CAROUSEL_IMAGE_PREFIX}${randomUUID()}.${extensionByContentType[contentType]}`
 
   await s3Client.send(
     new PutObjectCommand({
@@ -103,4 +109,29 @@ export const uploadImageObject = async (
   )
 
   return `${S3_ENDPOINT}/${S3_AVATARS_BUCKET}/${key}`
+}
+
+export interface CarouselImageObject {
+  id: string
+  url: string
+}
+
+export const listImageObjects = async (): Promise<CarouselImageObject[]> => {
+  const { Contents } = await s3Client.send(
+    new ListObjectsV2Command({
+      Bucket: S3_AVATARS_BUCKET,
+      Prefix: CAROUSEL_IMAGE_PREFIX,
+    }),
+  )
+
+  return (Contents ?? [])
+    .filter((object) => object.Key && object.Key !== CAROUSEL_IMAGE_PREFIX)
+    .sort(
+      (a, b) =>
+        (b.LastModified?.getTime() ?? 0) - (a.LastModified?.getTime() ?? 0),
+    )
+    .map((object) => ({
+      id: object.Key as string,
+      url: `${S3_ENDPOINT}/${S3_AVATARS_BUCKET}/${object.Key as string}`,
+    }))
 }

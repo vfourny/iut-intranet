@@ -1,105 +1,52 @@
 import { prisma } from '@/client'
-import type { Prisma } from '@/generated/client'
-import { ArticleStatus, DepartmentCode } from '@/generated/enums'
+import { ArticleStatus } from '@/generated/enums'
+import {
+  fakeArticleContent,
+  fakeArticleExcerpt,
+  fakeArticleTitle,
+  fakeCoverUrl,
+} from '@/seeds/faker'
 
 interface ArticleSeed {
-  authorId: string
-  content: Prisma.InputJsonValue
-  coverUrl?: string
   createdAtDayOffset: number
   createdAtHour: number
-  excerpt?: string
   publishedAtDay?: number
   publishedAtHour?: number
   status: ArticleStatus
-  targetDepartments: DepartmentCode[]
-  title: string
+  // Cas « article nu » (brouillon sans accroche ni visuel) — porte un sens
+  // d'affichage, on le garde explicite plutôt que de le laisser à faker.
+  withCover?: boolean
+  withExcerpt?: boolean
 }
 
 const ARTICLES: ArticleSeed[] = [
   {
-    authorId: '',
-    content: {
-      blocks: [
-        {
-          data: { text: 'Bienvenue sur notre nouveau portail académique.' },
-          type: 'paragraph',
-        },
-      ],
-    },
-    coverUrl: '',
     createdAtDayOffset: -5,
     createdAtHour: 10,
-    excerpt: 'Mot de bienvenue de la direction pour l’ouverture du portail.',
     publishedAtDay: -5,
     publishedAtHour: 11,
     status: ArticleStatus.PUBLISHED,
-    targetDepartments: [
-      DepartmentCode.INFO,
-      DepartmentCode.GACO,
-      DepartmentCode.TC,
-    ],
-    title: 'Ouverture du nouveau portail de l’IUT',
   },
   {
-    authorId: '',
-    content: {
-      blocks: [
-        {
-          data: {
-            text: 'Les sujets de cette année porteront sur l’IA et le Web3.',
-          },
-          type: 'paragraph',
-        },
-      ],
-    },
     createdAtDayOffset: 0,
     createdAtHour: 9,
-    excerpt: 'Consignes importantes pour les soutenances de cette semaine.',
     publishedAtDay: 0,
     publishedAtHour: 10,
     status: ArticleStatus.PUBLISHED,
-    targetDepartments: [DepartmentCode.INFO],
-    title: 'Consignes pour les soutenances de projets INFO',
   },
   {
-    authorId: '',
-    content: {
-      blocks: [
-        {
-          data: {
-            text: 'Le salon étudiant approche à grands pas. Préparez vos badges !',
-          },
-          type: 'paragraph',
-        },
-      ],
-    },
     createdAtDayOffset: 2,
     createdAtHour: 14,
-    excerpt: 'Informations logistiques pour le stand GACO au parc des expos.',
     publishedAtDay: 4,
     publishedAtHour: 8,
     status: ArticleStatus.SCHEDULED,
-    targetDepartments: [DepartmentCode.GACO],
-    title: 'Organisation logistique : Salon étudiant',
   },
   {
-    authorId: '',
-    content: {
-      blocks: [
-        {
-          data: {
-            text: 'Brouillon d’article sur le futur tournoi de gestion...',
-          },
-          type: 'paragraph',
-        },
-      ],
-    },
     createdAtDayOffset: 3,
     createdAtHour: 16,
     status: ArticleStatus.DRAFT,
-    targetDepartments: [DepartmentCode.GACO, DepartmentCode.TC],
-    title: 'Préparation du Tournoi de Gestion',
+    withCover: false,
+    withExcerpt: false,
   },
 ]
 
@@ -157,16 +104,16 @@ export const seedArticles = async () => {
     await prisma.article.create({
       data: {
         authorId: user.id,
-        content: article.content,
-        coverUrl: article.coverUrl || null,
+        content: fakeArticleContent(),
+        coverUrl: article.withCover === false ? null : fakeCoverUrl(),
         createdAt,
-        excerpt: article.excerpt || null,
+        excerpt: article.withExcerpt === false ? null : fakeArticleExcerpt(),
         publishedAt,
         status: article.status,
         targetDepartments: {
           connect: { id: assignedDepartment.id },
         },
-        title: article.title,
+        title: fakeArticleTitle(),
       },
     })
   }

@@ -12,7 +12,7 @@ const userService = new UserService(betterAuthInstance, prisma)
 const departmentService = new DepartmentService(prisma)
 const eventService = new EventService(prisma)
 const articleService = new ArticleService(prisma)
-const imageService = new ImageService(prisma)
+const imageService = new ImageService()
 const authService = new AuthService(
   betterAuthInstance,
   userService,

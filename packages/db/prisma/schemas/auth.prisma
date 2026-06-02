@@ -31,7 +31,6 @@ model User {
   organizedEvents   Event[]
   eventInvitations  EventInvitation[]
   articles Article[]
-  images Image[]
 
   @@map("user")
 }
