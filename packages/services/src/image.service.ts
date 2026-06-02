@@ -17,12 +17,12 @@ export class ImageService {
   async upload(
     payload: uploadImageInput & { userId: string },
   ): Promise<string> {
-    const { base64, contentType, userId } = payload
+    const { base64, contentType, name, userId } = payload
 
     const url = await uploadImageObject({ base64, contentType })
 
     await this.prisma.image.create({
-      data: { url, userId },
+      data: { name, url, userId },
     })
 
     return url

@@ -58,5 +58,6 @@ export const getByIdInputSchema = z.object({
 export const deleteArticleInputSchema = getByIdInputSchema
 
 export const listVisibleArticlesForUser = z.object({
+  status: z.enum(ArticleStatus),
   userId: z.string().cuid(),
 })

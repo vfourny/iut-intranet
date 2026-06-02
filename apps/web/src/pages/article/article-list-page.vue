@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import { UserRole } from '@iut-intranet/db/enums'
+import { ArticleStatus, UserRole } from '@iut-intranet/db/enums'
 import type { ArticleList } from '@iut-intranet/helpers/types/article'
 import PrimeMultiSelect from 'primevue/multiselect'
 import PrimePaginator from 'primevue/paginator'
@@ -95,6 +95,7 @@ const onSearch = (value: string) => {
 
 const { data: rawArticles, isLoading } = useVisibleArticles(
   currentSession.value?.user.id ?? '',
+  ArticleStatus.PUBLISHED,
 )
 
 const filteredArticles = computed(

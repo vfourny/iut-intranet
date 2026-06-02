@@ -117,7 +117,7 @@ export class ArticleService {
     return article
   }
 
-  async list() {
+  async listByStatus(status: ArticleStatus) {
     return this.prisma.article.findMany({
       include: {
         author: {
@@ -135,10 +135,13 @@ export class ArticleService {
       orderBy: {
         publishedAt: 'desc',
       },
+      where: {
+        status,
+      },
     })
   }
 
-  async listVisibleForUser(userId: string) {
+  async listVisibleForUser(userId: string, status: ArticleStatus) {
     const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
@@ -148,35 +151,20 @@ export class ArticleService {
     if (!user) {
       throw new AppError('NOT_FOUND', 'User not found')
     }
-    const whereClause = !isEditorRole(user.role)
-      ? {
-          OR: [
-            { targetDepartments: { none: {} } },
-            { targetDepartments: { some: { id: user.departmentId } } },
-          ],
-          status: ArticleStatus.PUBLISHED,
-        }
-      : {}
 
-    return this.prisma.article.findMany({
-      include: {
-        author: {
-          select: {
-            firstName: true,
-            lastName: true,
-          },
-        },
-        targetDepartments: {
-          select: {
-            code: true,
-          },
-        },
-      },
-      orderBy: {
-        publishedAt: 'desc',
-      },
-      where: whereClause,
-    })
+    const articlesListByStatus = await this.listByStatus(status)
+
+    if (
+      [ArticleStatus.DRAFT, ArticleStatus.SCHEDULED].some(
+        (artStatus) => artStatus === status,
+      )
+    ) {
+      return articlesListByStatus.filter((article) => {
+        return article.authorId === userId
+      })
+    }
+
+    return articlesListByStatus
   }
 
   async update(input: updateArticleInput, userId: string) {

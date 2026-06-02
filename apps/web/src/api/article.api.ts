@@ -1,3 +1,4 @@
+import type { ArticleStatus } from '@iut-intranet/db/enums'
 import { articleSchema } from '@iut-intranet/helpers/schemas/article'
 import type {
   Article,
@@ -34,12 +35,14 @@ export const useCreateArticle = () => {
 }
 export const useVisibleArticles = (
   userId: string,
+  status: ArticleStatus,
 ): UseQueryReturn<ArticleList> => {
   return useQuery({
     enabled: () => !!userId,
     key: () => ARTICLE_KEYS.visibleForUser(userId),
     query: async (): Promise<ArticleList> => {
       const result = await trpc.articles.listVisibleArticlesForUser.query({
+        status,
         userId,
       })
       return z.array(articleSchema).parse(result)
