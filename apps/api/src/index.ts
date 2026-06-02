@@ -32,6 +32,7 @@ app.use(
   '/api/trpc',
   createExpressMiddleware({
     createContext,
+    maxBodySize: 5 * 1024 * 1024,
     router: appRouter,
   }),
 )

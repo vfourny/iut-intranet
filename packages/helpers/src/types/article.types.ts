@@ -1,16 +1,18 @@
 import type z from 'zod'
 
 import type {
+  articleSchema,
   createArticleInputSchema,
   deleteArticleInputSchema,
+  editorJsContentSchema,
   getByIdInputSchema,
   updateArticleInputSchema,
 } from '@/schemas/article.schema'
 
 export type createArticleInput = z.infer<typeof createArticleInputSchema>
-
 export type updateArticleInput = z.infer<typeof updateArticleInputSchema>
-
 export type deleteArticleInput = z.infer<typeof deleteArticleInputSchema>
-
 export type getByIdInput = z.infer<typeof getByIdInputSchema>
+export type Article = z.infer<typeof articleSchema>
+export type ArticleList = Article[]
+export type EditorJsContent = z.infer<typeof editorJsContentSchema>

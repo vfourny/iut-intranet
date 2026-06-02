@@ -5,5 +5,8 @@ import { authenticatedProcedure } from '@/procedures'
 export const getArticleByIdProcedure = authenticatedProcedure
   .input(getByIdInputSchema)
   .query(({ ctx, input }) => {
-    return ctx.services.article.getById(input.articleId)
+    return ctx.services.article.getByIdWithRelations(
+      input.articleId,
+      ctx.user.id,
+    )
   })

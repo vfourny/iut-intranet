@@ -35,7 +35,12 @@
 
       <PrimeButton severity="secondary" text @click="profilMenu.toggle($event)">
         <div class="flex items-center gap-2">
-          <PrimeAvatar icon="pi pi-user" shape="circle" />
+          <PrimeAvatar
+            v-if="currentSession?.user.image"
+            :image="currentSession.user.image"
+            shape="circle"
+          />
+          <PrimeAvatar v-else icon="pi pi-user" shape="circle" />
           <span
             >{{ currentSession?.user.firstName }}
             {{ currentSession?.user.lastName }}</span
@@ -82,6 +87,11 @@ const items = ref<MenuItem[]>([
     command: () => router.push({ name: RouteNames.calendar }),
     icon: 'pi pi-calendar',
     label: t('layout.default.nav.calendar'),
+  },
+  {
+    command: () => router.push({ name: RouteNames.article.news }),
+    icon: 'pi pi-file',
+    label: t('layout.default.nav.news'),
   },
 ])
 

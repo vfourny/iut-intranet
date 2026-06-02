@@ -3,7 +3,8 @@
   "dependencies": {
     "@iut-intranet/auth": "*",
     "@iut-intranet/db": "*",
-    "@iut-intranet/helpers": "*"
+    "@iut-intranet/helpers": "*",
+    "@iut-intranet/providers": "*"
   },
   "devDependencies": {
     "@iut-intranet/configs": "*"

@@ -1,7 +1,7 @@
 <template>
   <PrimeInputText
     v-model="searchQuery"
-    :placeholder="t('user.search')"
+    :placeholder="t('layout.search')"
     type="text"
     @input="onSearch"
   />

@@ -12,6 +12,11 @@ declare module 'vue-router' {
 }
 
 export const RouteNames = {
+  article: {
+    create: 'createArticle',
+    news: 'news',
+    update: 'updateArticle',
+  },
   auth: {
     signIn: 'auth.sign-in',
     signUp: 'auth.sign-up',
@@ -31,13 +36,13 @@ export const RouteNames = {
 
 export const routes = [
   {
+    component: () => import('@/pages/home-page.vue'),
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.home,
     path: '/',
-    redirect: '/directory',
   },
   {
-    component: () => import('@/pages/home-page.vue'),
+    component: () => import('@/pages/user/user-list.vue'),
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.directory,
     path: '/directory',
@@ -47,6 +52,24 @@ export const routes = [
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.calendar,
     path: '/calendar',
+  },
+  {
+    component: () => import('@/pages/article/article-list-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.article.news,
+    path: '/actualites',
+  },
+  {
+    component: () => import('@/pages/article/article-form-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.article.create,
+    path: '/actualites/create',
+  },
+  {
+    component: () => import('@/pages/article/article-form-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.article.update,
+    path: '/actualites/update/:id',
   },
   {
     component: () => import('@/pages/event/add-event-page.vue'),
