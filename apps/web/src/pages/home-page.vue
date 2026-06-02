@@ -24,7 +24,6 @@ const handleUpload = async (event: FileUploadUploaderEvent) => {
   await uploadImage({
     base64,
     contentType: file.type as 'image/jpeg' | 'image/png' | 'image/webp',
-    name: file.name,
   })
   await refetch()
 }
