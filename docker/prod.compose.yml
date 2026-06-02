@@ -10,6 +10,33 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
+  minio:
+    extends:
+      file: ./minio.base.yml
+      service: minio
+    container_name: ${NAME:-iut-intranet}-minio
+    restart: unless-stopped
+    volumes:
+      - minio_data:/data
+    labels:
+      # Exposed publicly because uploaded object URLs are built from S3_ENDPOINT
+      # and must be reachable by the browser (see packages/providers/src/s3.provider.ts).
+      - traefik.enable=true
+      - traefik.http.routers.minio.entryPoints=websecure
+      - 'traefik.http.services.minio.loadbalancer.server.port=9000'
+      - traefik.http.routers.minio.rule=Host(`s3.${NAME}.jrcan.dev`)
+      - traefik.http.routers.minio.tls=true
+      - traefik.http.routers.minio.tls.certresolver=myresolver
+
+  minio-init:
+    extends:
+      file: ./minio.base.yml
+      service: minio-init
+    container_name: ${NAME:-iut-intranet}-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+
   api:
     container_name: ${NAME:-iut-intranet}-api
     build:
@@ -24,11 +51,16 @@ services:
       - ../.env
     environment:
       DATABASE_URL: postgresql://root:root@postgres:5432/iut-intranet-db
+      # Public endpoint: stored object URLs must resolve from the browser, so this
+      # points at the Traefik-exposed MinIO host, not the internal http://minio:9000.
+      S3_ENDPOINT: https://s3.${NAME}.jrcan.dev
     # ports:
     #   - '${API_PORT:-8000}:${API_PORT:-8000}'
     depends_on:
       postgres:
         condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
     labels:
       - traefik.enable=true
       - traefik.http.routers.api.entryPoints=websecure
@@ -51,8 +83,11 @@ services:
         PUBLIC_API_URL: ${PUBLIC_API_URL}
         PUBLIC_APP_URL: ${PUBLIC_APP_URL}
     restart: unless-stopped
-    env_file:
-      - ../.env
+    # PUBLIC_* are baked in at build time (build args). The only runtime env the
+    # static `vite preview` needs is APP_PORT (preview.port), so we don't inject
+    # the whole ../.env (and its server-side secrets) here.
+    environment:
+      APP_PORT: ${APP_PORT:-5173}
     # ports:
     #   - '${APP_PORT:-5173}:${APP_PORT:-5173}'
     depends_on:
@@ -67,3 +102,4 @@ services:
 
 volumes:
   db_data:
+  minio_data:
