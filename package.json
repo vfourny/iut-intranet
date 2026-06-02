@@ -1,5 +1,6 @@
 {
   "name": "iut-intranet",
+  "author": "VFourny",
   "private": true,
   "workspaces": [
     "apps/*",
