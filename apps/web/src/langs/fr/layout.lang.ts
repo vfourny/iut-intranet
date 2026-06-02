@@ -17,6 +17,7 @@ export const layout = {
       news: 'Actualités',
     },
   },
+  error: 'Erreur',
   footer: {
     contactPhoneNumber: ' - 03 21 19 06 00',
     legals: 'Mentions légales',
@@ -24,4 +25,5 @@ export const layout = {
     title: "IUT du Littoral Côte d'Opale",
   },
   search: 'Rechercher',
+  success: 'Succès',
 } as const

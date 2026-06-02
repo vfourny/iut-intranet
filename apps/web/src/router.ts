@@ -23,6 +23,10 @@ export const RouteNames = {
   },
   calendar: 'calendar',
   directory: 'directory',
+  event: {
+    create: 'event.create',
+    update: 'event.update',
+  },
   home: 'home',
   profil: {
     private: 'profil.private',
@@ -66,6 +70,18 @@ export const routes = [
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.article.update,
     path: '/actualites/update/:id',
+  },
+  {
+    component: () => import('@/pages/event/add-event-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.event.create,
+    path: '/event/create',
+  },
+  {
+    component: () => import('@/pages/event/add-event-page.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.event.update,
+    path: '/event/:id/update',
   },
   {
     component: () => import('@/pages/profil/profil-page-private.vue'),

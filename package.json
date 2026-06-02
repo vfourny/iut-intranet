@@ -80,6 +80,7 @@
     "@editorjs/list": "2.0.9",
     "@editorjs/paragraph": "2.11.7",
     "@editorjs/quote": "2.7.6",
-    "vue3-carousel": "0.17.0"
+    "vue3-carousel": "0.17.0",
+    "@primevue/forms": "4.5.5"
   }
 }

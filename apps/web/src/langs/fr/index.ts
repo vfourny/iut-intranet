@@ -1,6 +1,7 @@
 import { article } from '@/langs/fr/article.langs'
 import { auth } from '@/langs/fr/auth.lang'
 import { department } from '@/langs/fr/department.lang'
+import { event } from '@/langs/fr/event.langs'
 import { home } from '@/langs/fr/home.lang'
 import { layout } from '@/langs/fr/layout.lang'
 import { profil } from '@/langs/fr/profil.langs'
@@ -10,6 +11,7 @@ export const fr = {
   article,
   auth,
   department,
+  event,
   home,
   layout,
   profil,
