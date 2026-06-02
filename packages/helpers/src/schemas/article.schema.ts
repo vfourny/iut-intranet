@@ -46,6 +46,8 @@ export const updateArticleInputSchema = createArticleInputSchema
   .partial()
   .extend({
     articleId: z.string(),
+    // `undefined` = couverture inchangée, `null` = suppression, clé = remplacement.
+    coverUrl: z.string().nullable().optional(),
     publishedAt: z.coerce.date().nullable(),
     status: z.enum(ArticleStatus),
   })

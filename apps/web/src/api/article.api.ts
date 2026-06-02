@@ -6,6 +6,7 @@ import type {
   createArticleInput,
   updateArticleInput,
 } from '@iut-intranet/helpers/types/article'
+import type { uploadImageInput } from '@iut-intranet/helpers/types/image'
 import type { UseQueryReturn } from '@pinia/colada'
 import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
 import type { MaybeRefOrGetter } from 'vue'
@@ -33,6 +34,14 @@ export const useCreateArticle = () => {
     },
   })
 }
+export const useUploadArticleCover = () => {
+  return useMutation({
+    mutation: async (data: uploadImageInput): Promise<string> => {
+      return await trpc.articles.uploadCover.mutate(data)
+    },
+  })
+}
+
 export const useVisibleArticles = (
   userId: string,
   status: ArticleStatus,

@@ -51,8 +51,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ArticleStatus, UserRole } from '@iut-intranet/db/enums'
+import { ArticleStatus } from '@iut-intranet/db/enums'
 import type { ArticleList } from '@iut-intranet/helpers/types/article'
+import { isEditorRole } from '@iut-intranet/helpers/utils/role'
 import PrimeMultiSelect from 'primevue/multiselect'
 import PrimePaginator from 'primevue/paginator'
 import { computed, ref, watch } from 'vue'
@@ -69,8 +70,7 @@ const { t } = useI18n()
 const { currentSession } = useSession()
 
 const isAdmin =
-  currentSession.value?.user.role === UserRole.ADMIN ||
-  currentSession.value?.user.role === UserRole.EDITOR
+  !!currentSession.value && isEditorRole(currentSession.value.user.role)
 
 const search = ref('')
 

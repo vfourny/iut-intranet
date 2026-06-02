@@ -1,4 +1,5 @@
 import { prisma } from '@/client'
+import type { Prisma } from '@/generated/client'
 import { DepartmentCode, Status } from '@/generated/enums'
 import {
   fakeEventDescription,
@@ -205,7 +206,7 @@ export const seedEvents = async () => {
 
   const monday = getMondayThisWeek()
 
-  const eventsData = EVENTS.map((event) => {
+  const eventsData: Prisma.EventCreateManyInput[] = EVENTS.map((event) => {
     const departmentId = departmentIdByCode.get(event.departmentCode)
     if (!departmentId) {
       throw new Error(
@@ -246,20 +247,23 @@ export const seedEvents = async () => {
     skipDuplicates: true,
   })
 
-  const invitationsData = EVENTS.flatMap((event) =>
-    event.invitees.map((invitee) => {
-      const userId = userIdByEmail.get(invitee.email)
-      if (!userId) {
-        throw new Error(`User ${invitee.email} not found — run seedUsers first`)
-      }
-      return {
-        eventId: event.id,
-        id: `${event.id}-inv-${invitee.email.split('@')[0]}`,
-        status: invitee.status,
-        userId,
-      }
-    }),
-  )
+  const invitationsData: Prisma.EventInvitationCreateManyInput[] =
+    EVENTS.flatMap((event) =>
+      event.invitees.map((invitee) => {
+        const userId = userIdByEmail.get(invitee.email)
+        if (!userId) {
+          throw new Error(
+            `User ${invitee.email} not found — run seedUsers first`,
+          )
+        }
+        return {
+          eventId: event.id,
+          id: `${event.id}-inv-${invitee.email.split('@')[0]}`,
+          status: invitee.status,
+          userId,
+        }
+      }),
+    )
 
   if (invitationsData.length > 0) {
     await prisma.eventInvitation.createMany({

@@ -6,7 +6,9 @@ import type {
   createArticleInput,
   updateArticleInput,
 } from '@iut-intranet/helpers/types/article'
+import type { uploadImageInput } from '@iut-intranet/helpers/types/image'
 import { isEditorRole } from '@iut-intranet/helpers/utils/role'
+import { getSignedObjectUrl, uploadObject } from '@iut-intranet/providers/s3'
 
 function validateStatus(status: ArticleStatus, publishedAt?: Date | null) {
   const now = new Date()
@@ -46,7 +48,7 @@ export class ArticleService {
         code: { in: input.targetDepartmentIds as DepartmentCode[] },
       },
     })
-    return this.prisma.article.create({
+    const article = await this.prisma.article.create({
       data: {
         authorId: input.authorId,
         content: input.content as Prisma.InputJsonValue,
@@ -66,11 +68,12 @@ export class ArticleService {
         },
       },
     })
+    return this.withSignedCover(article)
   }
 
   async delete(articleId: string) {
     await this.getById(articleId)
-    return this.prisma.article.delete({
+    const article = await this.prisma.article.delete({
       include: {
         author: {
           select: { firstName: true, lastName: true },
@@ -83,6 +86,7 @@ export class ArticleService {
         id: articleId,
       },
     })
+    return this.withSignedCover(article)
   }
 
   async getById(articleId: string) {
@@ -98,7 +102,7 @@ export class ArticleService {
       where: { id: articleId },
     })
     if (!article) throw new AppError('NOT_FOUND', 'Article not found')
-    return article
+    return this.withSignedCover(article)
   }
 
   async getByIdWithRelations(articleId: string, userId: string) {
@@ -114,11 +118,11 @@ export class ArticleService {
       where: { id: articleId },
     })
     if (!article) throw new AppError('NOT_FOUND', 'Article not found')
-    return article
+    return this.withSignedCover(article)
   }
 
   async listByStatus(status: ArticleStatus) {
-    return this.prisma.article.findMany({
+    const articles = await this.prisma.article.findMany({
       include: {
         author: {
           select: {
@@ -139,6 +143,7 @@ export class ArticleService {
         status,
       },
     })
+    return Promise.all(articles.map((article) => this.withSignedCover(article)))
   }
 
   async listVisibleForUser(userId: string, status: ArticleStatus) {
@@ -191,10 +196,13 @@ export class ArticleService {
       where: { id: input.articleId },
     })
 
-    return this.prisma.article.update({
+    const updated = await this.prisma.article.update({
       data: {
         content: input.content as Prisma.InputJsonValue,
-        coverUrl: input.coverUrl ?? null,
+        // `undefined` laisse la couverture inchangée (Prisma ignore le champ) ;
+        // `null` la supprime ; une clé la remplace. Le form n'envoie une clé
+        // que sur un nouvel upload, jamais l'URL signée lue précédemment.
+        coverUrl: input.coverUrl,
         publishedAt: input.publishedAt,
         status: status,
         targetDepartments: {
@@ -208,5 +216,31 @@ export class ArticleService {
       },
       where: { id: input.articleId },
     })
+    return this.withSignedCover(updated)
+  }
+
+  /**
+   * Uploads an article cover image and returns its object key, to be persisted
+   * on the article via {@link create} / {@link update}. The bucket is private,
+   * so the key is turned into a signed URL only on read.
+   */
+  async uploadCover(payload: uploadImageInput): Promise<string> {
+    return uploadObject({ ...payload, folder: 'cover' })
+  }
+
+  /**
+   * Replaces a stored cover object key with a temporary signed URL the browser
+   * can load. The bucket is private, so URLs are generated on read, never
+   * persisted (mirrors the avatar flow in {@link UserService}).
+   */
+  private async withSignedCover<T extends { coverUrl: string | null }>(
+    article: T,
+  ): Promise<T> {
+    return {
+      ...article,
+      coverUrl: article.coverUrl
+        ? await getSignedObjectUrl(article.coverUrl)
+        : null,
+    }
   }
 }

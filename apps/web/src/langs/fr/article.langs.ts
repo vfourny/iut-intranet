@@ -1,9 +1,11 @@
 export const article = {
+  coverUploadFail: 'Téléversement de la couverture échoué',
   create: {
     fail: 'Article non sauvegardé',
     succes: 'Article sauvegardé en tant que brouillon',
   },
   form: {
+    chooseCover: 'Choisir une image',
     content: "Le texte de l'article",
     coverUrl: 'Image de couverture',
     publishedAt: 'Date de publication',

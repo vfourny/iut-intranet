@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { MAX_UPLOAD_BYTES } from '@iut-intranet/helpers/schemas/storage'
 import type { getMeWithDepartmentInput } from '@iut-intranet/helpers/types/user'
 import {
-  formatPhoneInternational,
-  formatPhoneToE164,
+  formatPhoneForStorage,
+  formatPhoneNational,
+  parsePhone,
 } from '@iut-intranet/helpers/utils/phone'
 import type { FileUploadUploaderEvent } from 'primevue/fileupload'
 import PrimeFileUpload from 'primevue/fileupload'
@@ -19,9 +21,7 @@ const props = defineProps<{
   user: getMeWithDepartmentInput
 }>()
 
-const phone = ref<string>(
-  props.user.phone ? formatPhoneInternational(props.user.phone) : '',
-)
+const phone = ref<string>(parsePhone(props.user.phone ?? '')?.national ?? '')
 const jobTitle = ref<string>(props.user.jobTitle ?? '')
 const isModificated = ref(false)
 const toast = useToast()
@@ -63,7 +63,7 @@ const onSubmit = async () => {
     await mutate({
       jobTitle: jobTitle.value || undefined,
       phone: (phone.value
-        ? formatPhoneToE164(phone.value)
+        ? formatPhoneForStorage(phone.value)
         : undefined) as Exclude<typeof props.user.phone, null>,
     })
     isModificated.value = false
@@ -79,6 +79,14 @@ const onSubmit = async () => {
 
 const onInput = () => {
   isModificated.value = true
+}
+
+const onPhoneInput = (event: Event) => {
+  isModificated.value = true
+  // Ne pas reformater lors d'une suppression : AsYouType ré-insérerait les
+  // séparateurs et empêcherait d'effacer un espace.
+  if ((event as InputEvent).inputType?.startsWith('delete')) return
+  phone.value = formatPhoneNational(phone.value)
 }
 </script>
 
@@ -98,8 +106,8 @@ const onInput = () => {
           autocomplete="tel"
           class="w-full"
           inputmode="tel"
-          placeholder="+33 6 12 34 56 78"
-          @input="onInput"
+          placeholder="06 12 34 56 78"
+          @input="onPhoneInput"
         />
       </div>
 
@@ -125,7 +133,7 @@ const onInput = () => {
         auto
         choose-label="Changer d'avatar"
         custom-upload
-        :max-file-size="2_000_000"
+        :max-file-size="MAX_UPLOAD_BYTES"
         mode="basic"
         @uploader="onAvatarUpload"
       />

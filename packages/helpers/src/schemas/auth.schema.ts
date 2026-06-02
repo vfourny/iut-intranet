@@ -6,7 +6,7 @@ import {
   firstNameSchema,
   jobTitleSchema,
   lastNameSchema,
-  phoneSchema,
+  phoneValueSchema,
 } from '@/schemas/common.schema'
 import { PASSWORD_REGEX } from '@/utils/regex.util'
 
@@ -24,7 +24,7 @@ export const signUpWithPasswordInputSchema = z.object({
   jobTitle: jobTitleSchema.optional(),
   lastName: lastNameSchema,
   password: passwordSchema,
-  phone: phoneSchema.optional(),
+  phone: phoneValueSchema.optional(),
 })
 
 export const signInWithPasswordInputSchema = z.object({

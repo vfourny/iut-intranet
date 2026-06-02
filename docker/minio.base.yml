@@ -17,6 +17,5 @@ services:
     entrypoint: >
       /bin/sh -c "
       until mc alias set local http://minio:9000 ${S3_ACCESS_KEY_ID:-minioadmin} ${S3_SECRET_ACCESS_KEY:-minioadmin}; do sleep 1; done;
-      mc mb --ignore-existing local/${S3_AVATARS_BUCKET:-iut-intranet-avatars};
-      mc anonymous set download local/${S3_AVATARS_BUCKET:-iut-intranet-avatars};
+      mc mb --ignore-existing local/${S3_BUCKET:-iut-intranet-storage};
       "

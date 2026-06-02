@@ -1,5 +1,4 @@
 import { DepartmentCode, Site, UserRole } from '@iut-intranet/db/enums'
-import { parsePhoneNumberWithError } from 'libphonenumber-js'
 import { z } from 'zod'
 
 import {
@@ -7,16 +6,11 @@ import {
   firstNameSchema,
   lastNameSchema,
   paginationSchema,
+  phoneValueSchema,
   searchSchema,
 } from '@/schemas/common.schema'
-import { isValidPhone } from '@/utils/phone.util'
 
 const userRoleSchema = z.enum(UserRole)
-
-export const phoneValueSchema = z
-  .string()
-  .refine(isValidPhone)
-  .transform((phone) => parsePhoneNumberWithError(phone).number)
 
 export const userSchema = z.object({
   email: emailSchema,
@@ -39,7 +33,9 @@ export const updateOwnProfileInputSchema = updateUserInputSchema
     userId: true,
   })
   .extend({
-    image: z.string().optional(),
+    // Pas d'`image` ici : l'avatar passe par `uploadAvatar` (clé S3 stockée,
+    // signée à la lecture). L'accepter ici risquerait d'écraser la clé par une
+    // URL signée renvoyée par le client.
     jobTitle: z.string().optional(),
     phone: phoneValueSchema.optional(),
   })

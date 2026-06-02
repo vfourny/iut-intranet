@@ -129,6 +129,3 @@ export const fakeArticleContent = (): Prisma.InputJsonValue => ({
     type: 'paragraph',
   })),
 })
-
-export const fakeCoverUrl = (): string =>
-  faker.image.urlPicsumPhotos({ height: 630, width: 1200 })

@@ -1,28 +1,17 @@
 import { randomUUID } from 'node:crypto'
 
 import {
+  GetObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
-  S3Client,
 } from '@aws-sdk/client-s3'
-import { getServerEnv } from '@iut-intranet/helpers/env'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { AppError } from '@iut-intranet/helpers/errors'
+import { MAX_UPLOAD_BYTES } from '@iut-intranet/helpers/schemas/storage'
 
-const {
-  S3_ACCESS_KEY_ID,
-  S3_AVATARS_BUCKET,
-  S3_ENDPOINT,
-  S3_REGION,
-  S3_SECRET_ACCESS_KEY,
-} = getServerEnv(
-  'S3_ACCESS_KEY_ID',
-  'S3_AVATARS_BUCKET',
-  'S3_ENDPOINT',
-  'S3_REGION',
-  'S3_SECRET_ACCESS_KEY',
-)
+import { S3_BUCKET_NAME, s3Client } from '@/s3.client'
 
-const MAX_AVATAR_BYTES = 2 * 1024 * 1024
+const SIGNED_URL_TTL_SECONDS = 24 * 60 * 60
 
 const extensionByContentType = {
   'image/jpeg': 'jpg',
@@ -32,83 +21,85 @@ const extensionByContentType = {
 
 type AvatarContentType = keyof typeof extensionByContentType
 
-const CAROUSEL_IMAGE_PREFIX = 'image/'
+const STORAGE_FOLDERS = {
+  avatars: 'avatars/',
+  carousel: 'image/',
+  cover: 'covers/',
+} as const
 
-const s3Client = new S3Client({
-  credentials: {
-    accessKeyId: S3_ACCESS_KEY_ID,
-    secretAccessKey: S3_SECRET_ACCESS_KEY,
-  },
-  endpoint: S3_ENDPOINT,
-  forcePathStyle: true,
-  region: S3_REGION,
-})
+type StorageFolder = keyof typeof STORAGE_FOLDERS
 
-export interface UploadUserAvatarObjectPayload {
+export const CAROUSEL_IMAGE_PREFIX = STORAGE_FOLDERS.carousel
+
+/**
+ * Generates a temporary presigned URL granting read access to a private object.
+ * The bucket is private, so stored object keys are turned into usable URLs only
+ * at read time — never persisted (the signature expires).
+ */
+export const getSignedObjectUrl = (key: string): Promise<string> =>
+  getSignedUrl(
+    s3Client,
+    new GetObjectCommand({ Bucket: S3_BUCKET_NAME, Key: key }),
+    {
+      expiresIn: SIGNED_URL_TTL_SECONDS,
+    },
+  )
+
+interface UploadObjectBase {
   base64: string
   contentType: AvatarContentType
-  userId: string
 }
 
-export interface UploadImageObjectPayload {
-  base64: string
-  contentType: AvatarContentType
-}
+/** Folders whose objects are partitioned by a {@link subPath} segment in their key. */
+const SCOPED_FOLDERS = ['avatars'] as const satisfies StorageFolder[]
+type ScopedFolder = (typeof SCOPED_FOLDERS)[number]
 
-export const uploadUserAvatarObject = async (
-  payload: UploadUserAvatarObjectPayload,
+export type UploadObjectPayload = UploadObjectBase &
+  (
+    | {
+        folder: ScopedFolder
+        /** Segment inserted between the folder and the generated uuid (e.g. a userId). */
+        subPath: string
+      }
+    | {
+        folder: Exclude<StorageFolder, ScopedFolder>
+        subPath?: string
+      }
+  )
+
+/**
+ * Uploads an object to private storage under the given folder.
+ * @returns The object key (e.g. `avatars/<userId>/<uuid>.png`), to be persisted
+ * and later turned into a usable URL via {@link getSignedObjectUrl} (or listed
+ * and signed via {@link listImageObjects} for the carousel folder).
+ */
+export const uploadObject = async (
+  payload: UploadObjectPayload,
 ): Promise<string> => {
-  const { base64, contentType, userId } = payload
+  const { base64, contentType, folder, subPath } = payload
 
   const body = Buffer.from(base64, 'base64')
-  if (body.byteLength > MAX_AVATAR_BYTES) {
+  if (body.byteLength > MAX_UPLOAD_BYTES) {
     throw new AppError(
       'PAYLOAD_TOO_LARGE',
-      'Avatar exceeds the maximum size of 2MB',
+      'File exceeds the maximum upload size',
     )
   }
 
-  const key = `avatars/${userId}/${randomUUID()}.${extensionByContentType[contentType]}`
+  const base = STORAGE_FOLDERS[folder]
+  const prefix = subPath ? `${base}${subPath}/` : base
+  const key = `${prefix}${randomUUID()}.${extensionByContentType[contentType]}`
 
   await s3Client.send(
     new PutObjectCommand({
-      ACL: 'public-read',
       Body: body,
-      Bucket: S3_AVATARS_BUCKET,
+      Bucket: S3_BUCKET_NAME,
       ContentType: contentType,
       Key: key,
     }),
   )
 
-  return `${S3_ENDPOINT}/${S3_AVATARS_BUCKET}/${key}`
-}
-
-export const uploadImageObject = async (
-  payload: UploadImageObjectPayload,
-): Promise<string> => {
-  const { base64, contentType } = payload
-
-  const body = Buffer.from(base64, 'base64')
-  if (body.byteLength > MAX_AVATAR_BYTES) {
-    throw new AppError(
-      'PAYLOAD_TOO_LARGE',
-      'Avatar exceeds the maximum size of 2MB',
-    )
-  }
-
-  const key = `${CAROUSEL_IMAGE_PREFIX}${randomUUID()}.${extensionByContentType[contentType]}`
-
-  await s3Client.send(
-    new PutObjectCommand({
-      ACL: 'public-read',
-      Body: body,
-      Bucket: S3_AVATARS_BUCKET,
-      ContentType: contentType,
-      Key: key,
-    }),
-  )
-
-  return `${S3_ENDPOINT}/${S3_AVATARS_BUCKET}/${key}`
+  return key
 }
 
 export interface CarouselImageObject {
@@ -119,19 +110,26 @@ export interface CarouselImageObject {
 export const listImageObjects = async (): Promise<CarouselImageObject[]> => {
   const { Contents } = await s3Client.send(
     new ListObjectsV2Command({
-      Bucket: S3_AVATARS_BUCKET,
+      Bucket: S3_BUCKET_NAME,
       Prefix: CAROUSEL_IMAGE_PREFIX,
     }),
   )
 
-  return (Contents ?? [])
+  const objects = (Contents ?? [])
     .filter((object) => object.Key && object.Key !== CAROUSEL_IMAGE_PREFIX)
     .sort(
       (a, b) =>
         (b.LastModified?.getTime() ?? 0) - (a.LastModified?.getTime() ?? 0),
     )
-    .map((object) => ({
-      id: object.Key as string,
-      url: `${S3_ENDPOINT}/${S3_AVATARS_BUCKET}/${object.Key as string}`,
-    }))
+
+  return Promise.all(
+    objects.map(async (object) => {
+      const key = object.Key as string
+
+      return {
+        id: key,
+        url: await getSignedObjectUrl(key),
+      }
+    }),
+  )
 }

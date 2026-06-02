@@ -1,10 +1,13 @@
 {
   "dependencies": {
     "@aws-sdk/client-s3": "3.808.0",
+    "@aws-sdk/s3-request-presigner": "3.808.0",
     "@iut-intranet/helpers": "*"
   },
   "devDependencies": {
-    "@iut-intranet/configs": "*"
+    "@iut-intranet/configs": "*",
+    "@iut-intranet/db": "*",
+    "tsx": "4.21.0"
   },
   "exports": {
     "./*": {
@@ -23,6 +26,7 @@
     "dev:tsc": "tsc --watch --preserveWatchOutput",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
+    "provider:seed": "tsx ./src/seed.ts",
     "ts:check": "tsc --noEmit"
   },
   "type": "module",

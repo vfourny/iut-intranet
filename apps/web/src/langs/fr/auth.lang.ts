@@ -59,7 +59,7 @@ export const auth = {
       },
       phone: {
         label: 'Téléphone',
-        placeholder: '0612345678',
+        placeholder: '06 12 34 56 78',
       },
     },
     footer: {

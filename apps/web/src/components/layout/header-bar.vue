@@ -36,8 +36,8 @@
       <PrimeButton severity="secondary" text @click="profilMenu.toggle($event)">
         <div class="flex items-center gap-2">
           <PrimeAvatar
-            v-if="currentSession?.user.image"
-            :image="currentSession.user.image"
+            v-if="me?.image"
+            :image="me.image"
             shape="circle"
           />
           <PrimeAvatar v-else icon="pi pi-user" shape="circle" />
@@ -62,6 +62,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useSession, useSignOut } from '@/api/auth.api'
+import { useMe } from '@/api/users.api'
 import { useColorMode } from '@/composables/use-color-mode'
 import { useI18n } from '@/composables/use-i18n'
 import { RouteNames } from '@/router'
@@ -71,6 +72,9 @@ const router = useRouter()
 const { mutateAsync: signOut } = useSignOut()
 const { isDark, toggle } = useColorMode()
 const { currentSession } = useSession()
+// L'avatar vient de `me` (URL signée), pas de la session better-auth qui ne
+// contient que la clé S3 brute — inexploitable avec le bucket privé.
+const { data: me } = useMe()
 
 const items = ref<MenuItem[]>([
   {

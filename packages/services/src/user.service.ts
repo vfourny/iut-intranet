@@ -6,7 +6,7 @@ import type {
   updateOwnProfileInput,
   UpdateUserInput,
 } from '@iut-intranet/helpers/types/user'
-import { uploadUserAvatarObject } from '@iut-intranet/providers/s3'
+import { getSignedObjectUrl, uploadObject } from '@iut-intranet/providers/s3'
 
 export class UserService {
   constructor(
@@ -39,18 +39,22 @@ export class UserService {
    * @throws {Error} If user does not exist
    */
   public async getById(userId: string): Promise<UserModel> {
-    return this.prisma.user.findUniqueOrThrow({
+    const user = await this.prisma.user.findUniqueOrThrow({
       where: {
         id: userId,
       },
     })
+
+    return this.withSignedAvatar(user)
   }
 
   async getByIdWithDepartment(id: string) {
-    return this.prisma.user.findUniqueOrThrow({
+    const user = await this.prisma.user.findUniqueOrThrow({
       include: { department: true },
       where: { id },
     })
+
+    return this.withSignedAvatar(user)
   }
 
   /**
@@ -82,7 +86,10 @@ export class UserService {
       this.prisma.user.count({ where }),
     ])
 
-    return { items, total }
+    return {
+      items: await Promise.all(items.map((item) => this.withSignedAvatar(item))),
+      total,
+    }
   }
 
   /**
@@ -111,31 +118,52 @@ export class UserService {
   }
 
   public async updateOwnUser(user: updateOwnProfileInput, userId: string) {
-    return this.prisma.user.update({
+    // `image` n'est volontairement pas modifiable ici (cf. uploadAvatar).
+    const updated = await this.prisma.user.update({
       data: {
-        image: user.image,
         jobTitle: user.jobTitle,
         phone: user.phone,
       },
       where: { id: userId },
     })
+
+    return this.withSignedAvatar(updated)
   }
 
   /**
-   * Uploads a user avatar to object storage and persists its public URL
+   * Uploads a user avatar to object storage and persists its object key
    * @param {UploadUserAvatarInput} payload - Base64 image and its content type
    * @param {string} userId - Owner of the avatar
-   * @returns {Promise<UserModel>} The updated user
+   * @returns {Promise<UserModel>} The updated user, with a signed avatar URL
    */
   public async uploadAvatar(
     payload: uploadAvatarInput,
     userId: string,
   ): Promise<UserModel> {
-    const imageUrl = await uploadUserAvatarObject({ ...payload, userId })
+    const imageKey = await uploadObject({
+      ...payload,
+      folder: 'avatars',
+      subPath: userId,
+    })
 
-    return this.prisma.user.update({
-      data: { image: imageUrl },
+    const user = await this.prisma.user.update({
+      data: { image: imageKey },
       where: { id: userId },
     })
+
+    return this.withSignedAvatar(user)
+  }
+
+  /**
+   * Replaces a stored avatar key with a temporary signed URL the browser can
+   * load. The bucket is private, so URLs are generated on read, never persisted.
+   */
+  private async withSignedAvatar<T extends { image: string | null }>(
+    user: T,
+  ): Promise<T> {
+    return {
+      ...user,
+      image: user.image ? await getSignedObjectUrl(user.image) : null,
+    }
   }
 }

@@ -59,6 +59,7 @@
       :label="t('auth.signUp.fields.phone.label')"
       name="phone"
       :placeholder="t('auth.signUp.fields.phone.placeholder')"
+      @input="onPhoneInput"
     />
 
     <PrimeFileUpload
@@ -104,6 +105,7 @@
 <script lang="ts" setup>
 import { DepartmentCode } from '@iut-intranet/db/enums'
 import { signUpWithPasswordInputSchema } from '@iut-intranet/helpers/schemas/auth'
+import { formatPhoneNational } from '@iut-intranet/helpers/utils/phone'
 import type { FileUploadSelectEvent } from 'primevue/fileupload'
 import PrimeFileUpload from 'primevue/fileupload'
 import { useForm } from 'vee-validate'
@@ -178,6 +180,13 @@ const [jobTitle] = defineField('jobTitle')
 const [lastName] = defineField('lastName')
 const [password] = defineField('password')
 const [phone] = defineField('phone')
+
+const onPhoneInput = (event: Event) => {
+  // Ne pas reformater lors d'une suppression : AsYouType ré-insérerait les
+  // séparateurs et empêcherait d'effacer un espace.
+  if ((event as InputEvent).inputType?.startsWith('delete')) return
+  phone.value = formatPhoneNational(phone.value ?? '')
+}
 
 const handleSubmit = createSubmitHandler(
   async ({ confirmPassword: _, ...values }) => {

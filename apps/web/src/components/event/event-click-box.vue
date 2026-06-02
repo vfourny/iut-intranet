@@ -32,6 +32,7 @@
 </template>
 
 <script lang="ts" setup>
+import { isAdminRole } from '@iut-intranet/helpers/utils/role'
 import type { TrpcOutput } from '@iut-intranet/trpc'
 import PrimeButton from 'primevue/button'
 import PrimeConfirmDialog from 'primevue/confirmdialog'
@@ -68,7 +69,7 @@ const canEdit = computed(
     event &&
     currentSession.value &&
     (event.organizerId === currentSession.value.user.id ||
-      currentSession.value.user.role === 'ADMIN'),
+      isAdminRole(currentSession.value.user.role)),
 )
 
 function confirmDelete() {

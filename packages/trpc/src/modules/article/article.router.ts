@@ -3,6 +3,7 @@ import { deleteArticleProcedure } from '@/modules/article/procedures/delete-arti
 import { getArticleByIdProcedure } from '@/modules/article/procedures/get-article-by-id.procedure'
 import { listVisibleArticlesForUserProcedure } from '@/modules/article/procedures/list-visible-articles.procedure'
 import { updateArticleProcedure } from '@/modules/article/procedures/update-article.procedure'
+import { uploadArticleCoverProcedure } from '@/modules/article/procedures/upload-cover.procedure'
 import { router } from '@/trpc'
 
 export const articleRouter = router({
@@ -11,4 +12,5 @@ export const articleRouter = router({
   getArticleById: getArticleByIdProcedure,
   listVisibleArticlesForUser: listVisibleArticlesForUserProcedure,
   updateArticle: updateArticleProcedure,
+  uploadCover: uploadArticleCoverProcedure,
 })

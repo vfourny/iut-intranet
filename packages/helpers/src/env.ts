@@ -23,7 +23,7 @@ export const serverEnvSchema = publicEnvSchema.extend({
     .default('development'),
   RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
   S3_ACCESS_KEY_ID: z.string().min(1, 'S3_ACCESS_KEY_ID is required'),
-  S3_AVATARS_BUCKET: z.string().min(1, 'S3_AVATARS_BUCKET is required'),
+  S3_BUCKET: z.string().min(1, 'S3_BUCKET is required'),
   S3_ENDPOINT: z.string().url('S3_ENDPOINT must be a valid URL'),
   S3_REGION: z.string().min(1, 'S3_REGION is required'),
   S3_SECRET_ACCESS_KEY: z.string().min(1, 'S3_SECRET_ACCESS_KEY is required'),

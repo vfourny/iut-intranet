@@ -1,7 +1,9 @@
 import argon2 from 'argon2'
 
 import { prisma } from '@/client'
+import type { Prisma } from '@/generated/client'
 import { DepartmentCode, UserRole } from '@/generated/enums'
+import { avatarKey } from '@/seeds/storage-keys'
 
 const DEFAULT_PASSWORD = 'Password123!'
 
@@ -41,22 +43,28 @@ export const seedUsers = async () => {
     banned: false,
     banReason: null,
     emailVerified: false,
-    image: null,
   }
 
-  const users = [ADMIN, USER, EDITOR].map(({ departmentCode, ...user }) => {
-    const departmentId = departmentIdByCode.get(departmentCode)
-    if (!departmentId) {
-      throw new Error(
-        `Department ${departmentCode} not found — run seedDepartments first`,
-      )
-    }
-    return {
-      ...user,
-      ...defaultUserInput,
-      departmentId,
-    }
-  })
+  const seededUsers = [ADMIN, USER, EDITOR]
+
+  const users: Prisma.UserCreateManyInput[] = seededUsers.map(
+    ({ departmentCode, ...user }) => {
+      const departmentId = departmentIdByCode.get(departmentCode)
+      if (!departmentId) {
+        throw new Error(
+          `Department ${departmentCode} not found — run seedDepartments first`,
+        )
+      }
+      // Clé S3 déterministe dérivée de l'email ; les octets sont poussés
+      // séparément par `provider:seed` (cf. `storage-keys.ts`).
+      return {
+        ...user,
+        ...defaultUserInput,
+        departmentId,
+        image: avatarKey(user.email.split('@')[0]),
+      }
+    },
+  )
 
   const createdUsers = await prisma.user.createManyAndReturn({
     data: users,
@@ -65,18 +73,20 @@ export const seedUsers = async () => {
 
   const passwordHash = await argon2.hash(DEFAULT_PASSWORD)
 
-  const accountsData = createdUsers.map((user) => ({
-    accessToken: null,
-    accessTokenExpiresAt: null,
-    externalAccountId: user.id,
-    idToken: null,
-    password: passwordHash,
-    providerId: 'credential',
-    refreshToken: null,
-    refreshTokenExpiresAt: null,
-    scope: null,
-    userId: user.id,
-  }))
+  const accountsData: Prisma.AccountCreateManyInput[] = createdUsers.map(
+    (user) => ({
+      accessToken: null,
+      accessTokenExpiresAt: null,
+      externalAccountId: user.id,
+      idToken: null,
+      password: passwordHash,
+      providerId: 'credential',
+      refreshToken: null,
+      refreshTokenExpiresAt: null,
+      scope: null,
+      userId: user.id,
+    }),
+  )
 
   await prisma.account.createMany({
     data: accountsData,

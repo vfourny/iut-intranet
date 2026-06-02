@@ -1,11 +1,12 @@
 import { prisma } from '@/client'
+import type { Prisma } from '@/generated/client'
 import { ArticleStatus } from '@/generated/enums'
 import {
   fakeArticleContent,
   fakeArticleExcerpt,
   fakeArticleTitle,
-  fakeCoverUrl,
 } from '@/seeds/faker'
+import { coverKey } from '@/seeds/storage-keys'
 
 interface ArticleSeed {
   createdAtDayOffset: number
@@ -101,20 +102,21 @@ export const seedArticles = async () => {
         ? buildDate(monday, article.publishedAtDay, article.publishedAtHour)
         : null
 
-    await prisma.article.create({
-      data: {
-        authorId: user.id,
-        content: fakeArticleContent(),
-        coverUrl: article.withCover === false ? null : fakeCoverUrl(),
-        createdAt,
-        excerpt: article.withExcerpt === false ? null : fakeArticleExcerpt(),
-        publishedAt,
-        status: article.status,
-        targetDepartments: {
-          connect: { id: assignedDepartment.id },
-        },
-        title: fakeArticleTitle(),
+    const data: Prisma.ArticleUncheckedCreateInput = {
+      authorId: user.id,
+      content: fakeArticleContent(),
+      coverUrl:
+        article.withCover === false ? null : coverKey(`article-${i + 1}`),
+      createdAt,
+      excerpt: article.withExcerpt === false ? null : fakeArticleExcerpt(),
+      publishedAt,
+      status: article.status,
+      targetDepartments: {
+        connect: { id: assignedDepartment.id },
       },
-    })
+      title: fakeArticleTitle(),
+    }
+
+    await prisma.article.create({ data })
   }
 }

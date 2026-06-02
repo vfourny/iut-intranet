@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { MAX_UPLOAD_BYTES } from '@iut-intranet/helpers/schemas/storage'
 import type { FileUploadUploaderEvent } from 'primevue/fileupload'
 import PrimeFileUpload from 'primevue/fileupload'
 import { useI18n } from 'vue-i18n'
@@ -40,7 +41,7 @@ const handleUpload = async (event: FileUploadUploaderEvent) => {
         auto
         :choose-label="t('home.addPicture')"
         custom-upload
-        :max-file-size="2_000_000"
+        :max-file-size="MAX_UPLOAD_BYTES"
         mode="basic"
         @uploader="handleUpload"
       />
