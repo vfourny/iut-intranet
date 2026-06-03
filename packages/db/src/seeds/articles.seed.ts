@@ -6,7 +6,6 @@ import {
   fakeArticleExcerpt,
   fakeArticleTitle,
 } from '@/seeds/faker'
-import { coverKey } from '@/seeds/storage-keys'
 
 interface ArticleSeed {
   createdAtDayOffset: number
@@ -105,8 +104,11 @@ export const seedArticles = async () => {
     const data: Prisma.ArticleUncheckedCreateInput = {
       authorId: user.id,
       content: fakeArticleContent(),
+      // Clé S3 déterministe (préfixe `covers`, pas de randomUUID pour qu'un
+      // re-seed cible le même objet). `db:seed` n'écrit que la clé ; les octets
+      // sont poussés séparément par `provider:seed`.
       coverUrl:
-        article.withCover === false ? null : coverKey(`article-${i + 1}`),
+        article.withCover === false ? null : `covers/article-${i + 1}.jpg`,
       createdAt,
       excerpt: article.withExcerpt === false ? null : fakeArticleExcerpt(),
       publishedAt,

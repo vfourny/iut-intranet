@@ -3,7 +3,6 @@ import argon2 from 'argon2'
 import { prisma } from '@/client'
 import type { Prisma } from '@/generated/client'
 import { DepartmentCode, UserRole } from '@/generated/enums'
-import { avatarKey } from '@/seeds/storage-keys'
 
 const DEFAULT_PASSWORD = 'Password123!'
 
@@ -55,13 +54,15 @@ export const seedUsers = async () => {
           `Department ${departmentCode} not found — run seedDepartments first`,
         )
       }
-      // Clé S3 déterministe dérivée de l'email ; les octets sont poussés
-      // séparément par `provider:seed` (cf. `storage-keys.ts`).
+      // Clé S3 déterministe dérivée de l'email (préfixe `avatars/seed`, pas de
+      // randomUUID pour qu'un re-seed cible le même objet). `db:seed` n'écrit
+      // que la clé ; les octets sont poussés séparément par `provider:seed`.
+      const slug = user.email.split('@')[0]
       return {
         ...user,
         ...defaultUserInput,
         departmentId,
-        image: avatarKey(user.email.split('@')[0]),
+        image: `avatars/seed/${slug}.png`,
       }
     },
   )
