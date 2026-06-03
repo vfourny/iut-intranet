@@ -37,6 +37,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { DepartmentCode } from '@iut-intranet/db/enums'
 import PrimeSelectButton from 'primevue/selectbutton'
 import { computed, ref } from 'vue'
 
@@ -59,6 +60,7 @@ const SEARCH_DEBOUNCE_MS = 300
 const search = ref('')
 const page = ref(1)
 const displayMode = ref(DisplayMode.DATA_TABLE)
+const department = ref<DepartmentCode | undefined>(undefined)
 
 const displayModeOptions = ref<{ icon: string; value: DisplayMode }[]>([
   { icon: 'pi pi-table', value: DisplayMode.DATA_TABLE },
@@ -68,6 +70,7 @@ const displayModeOptions = ref<{ icon: string; value: DisplayMode }[]>([
 const { asyncStatus: paginatedStatus, data: paginatedData } = useUsersPaginated(
   page,
   search,
+  department,
 )
 
 const {
@@ -75,7 +78,7 @@ const {
   data: infiniteData,
   hasNextPage: infiniteHasNextPage,
   loadNextPage: infiniteLoadNextPage,
-} = useUsersInfinite(search)
+} = useUsersInfinite(search, department)
 
 const paginatedUsers = computed(() => paginatedData.value?.items ?? [])
 const paginatedTotal = computed(() => paginatedData.value?.total ?? 0)

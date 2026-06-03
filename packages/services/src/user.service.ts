@@ -1,5 +1,6 @@
 import { type BetterAuthInstance } from '@iut-intranet/auth/types'
-import type { prisma } from '@iut-intranet/db'
+import type { DepartmentCode } from '@iut-intranet/db'
+import { type prisma } from '@iut-intranet/db'
 import type { UserModel } from '@iut-intranet/db/models'
 import type { uploadAvatarInput } from '@iut-intranet/helpers/types/storage'
 import type {
@@ -57,19 +58,23 @@ export class UserService {
    * Retrieves a paginated list of users, optionally filtered by name.
    */
   public async list(input: {
+    department?: DepartmentCode
     page: number
     pageSize: number
     search?: string
   }) {
-    const { page, pageSize, search } = input
-    const where = search
-      ? {
-          OR: [
-            { firstName: { contains: search, mode: 'insensitive' as const } },
-            { lastName: { contains: search, mode: 'insensitive' as const } },
-          ],
-        }
-      : {}
+    const { department, page, pageSize, search } = input
+    const where = {
+      ...(department ? { departmentCode: department } : {}),
+      ...(search
+        ? {
+            OR: [
+              { firstName: { contains: search, mode: 'insensitive' as const } },
+              { lastName: { contains: search, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+    }
 
     const [items, total] = await Promise.all([
       this.prisma.user.findMany({

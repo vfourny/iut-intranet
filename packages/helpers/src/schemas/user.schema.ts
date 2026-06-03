@@ -49,6 +49,7 @@ export const getUserByIdInputSchema = z.object({
 })
 
 export const listUsersInputSchema = paginationSchema.extend({
+  department: z.enum(DepartmentCode).optional(),
   search: searchSchema,
 })
 
