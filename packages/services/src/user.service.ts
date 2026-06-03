@@ -65,7 +65,7 @@ export class UserService {
   }) {
     const { department, page, pageSize, search } = input
     const where = {
-      ...(department ? { departmentCode: department } : {}),
+      ...(department ? { department: { code: department } } : {}),
       ...(search
         ? {
             OR: [

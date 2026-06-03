@@ -42,6 +42,23 @@ const EVENTS: EventSeed[] = [
     titre: 'Soutenances de projets tuteurés INFO',
   },
   {
+    departmentCode: DepartmentCode.INFO,
+    description: 'Visioconférence',
+    endHour: 16,
+    id: 'ia-presentation',
+    invitees: [
+      { email: USER.email, status: Status.ACCEPTED },
+      { email: EDITOR.email, status: Status.PENDING },
+    ],
+    isPublic: true,
+    location: 'Grand amphi',
+    organizerEmail: ADMIN.email,
+    startDayOffset: 0,
+    startHour: 13.5,
+    titre:
+      "Lancement et présentation des outils et formations à l'IA générative de google",
+  },
+  {
     departmentCode: DepartmentCode.GACO,
     description: 'Réunion de rentrée du semestre.',
     endHour: 16,
