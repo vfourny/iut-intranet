@@ -72,12 +72,12 @@ Prérequis : Docker + l'extension **Dev Containers** (VS Code) ou le support **D
 3. À la première création, `npm run db:deploy` est exécuté automatiquement (`postCreateCommand`).
 4. Une fois dans le conteneur : `npm install` puis `npm run dev`.
 
-Ports forwardés : `8000` (API), `5432` (Postgres). La base tourne dans le service `postgres-dev` du compose ; pas besoin de lancer `npm run db:start`.
+Ports forwardés : `8000` (API), `5432` (Postgres). La base tourne dans le service `postgres-dev` du compose ; pas besoin de lancer `npm run env:start`.
 
 ## Lancer le projet (installation locale)
 
 ```bash
-npm run db:start        # démarre Postgres dans Docker
+npm run env:start       # démarre l'environnement local (Postgres + MinIO) dans Docker
 npm run db:generate     # génère le client Prisma
 npm run db:migrate -- init   # applique les migrations (au premier run)
 npm run dev             # lance API + Web en watch
@@ -96,7 +96,7 @@ npm run dev             # lance API + Web en watch
 | `npm run lint` / `npm run lint:fix` | Lint global                                      |
 | `npm run format`                    | Formatte le repo avec Prettier                   |
 | `npm run syncpack:check`            | Vérifie l'uniformité des versions de dépendances |
-| `npm run db:start` / `db:down`      | Démarre / arrête Postgres local                  |
+| `npm run env:start` / `env:stop`    | Démarre / arrête l'environnement local (Postgres + MinIO) |
 | `npm run db:migrate -- <name>`      | Crée et applique une migration                   |
 | `npm run db:reset`                  | Reset complet de la base                         |
 | `npm run db:studio`                 | Ouvre Prisma Studio                              |

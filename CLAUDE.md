@@ -18,7 +18,7 @@ All scripts go through Turbo at the repo root:
 
 Database (all delegate to the `@iut-intranet/db` package via Turbo filters):
 
-- `npm run db:start` / `npm run db:down` — local Postgres 15 in Docker (`docker/local.compose.yml`). Data persists in `.cache/db_data_local`.
+- `npm run env:start` / `npm run env:stop` — local environment (Postgres 15 + MinIO) in Docker (`docker/local.compose.yml`). Data persists in `.cache/db_data_local` and `.cache/minio_data_local`.
 - `npm run db:generate` — `prisma generate` (output goes to `packages/db/src/generated`, not `node_modules`).
 - `npm run db:migrate -- <name>` — `prisma migrate dev --name <name>`. Note the `--` is required because the script is `prisma migrate dev --name`.
 - `npm run db:deploy` / `npm run db:push` / `npm run db:reset` / `npm run db:seed` / `npm run db:studio`.
