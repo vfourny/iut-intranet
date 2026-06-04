@@ -49,6 +49,11 @@ export interface UploadImageObjectPayload {
   contentType: AvatarContentType
 }
 
+export interface GetImageUploadUrlResult {
+  publicUrl: string
+  uploadUrl: string
+}
+
 export const uploadUserAvatarObject = async (
   payload: UploadUserAvatarObjectPayload,
 ): Promise<string> => {
@@ -83,12 +88,6 @@ export const uploadImageObject = async (
   const { base64, contentType } = payload
 
   const body = Buffer.from(base64, 'base64')
-  if (body.byteLength > MAX_AVATAR_BYTES) {
-    throw new AppError(
-      'PAYLOAD_TOO_LARGE',
-      'Avatar exceeds the maximum size of 2MB',
-    )
-  }
 
   const key = `image/${randomUUID()}.${extensionByContentType[contentType]}`
 

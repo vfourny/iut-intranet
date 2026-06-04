@@ -14,7 +14,7 @@ import PrimeButton from 'primevue/button'
 import PrimeDatePicker from 'primevue/datepicker'
 import PrimeInputText from 'primevue/inputtext'
 import PrimeMessage from 'primevue/message'
-import PrimeSelect from 'primevue/select'
+import PrimeMultiSelect from 'primevue/multiselect'
 import PrimeTextarea from 'primevue/textarea'
 import PrimeToggleSwitch from 'primevue/toggleswitch'
 import { useToast } from 'primevue/usetoast'
@@ -28,7 +28,7 @@ import { useI18n } from '@/composables/use-i18n'
 import { RouteNames } from '@/router'
 
 const props = defineProps<{
-  departmentId?: string
+  departmentIds?: string[]
   description?: string
   endAt?: Date
   eventId?: string
@@ -52,14 +52,15 @@ const resolver = zodResolver(
   isUpdateMode.value
     ? updateEventFormulaireInputSchema
     : createEventFormulaireInputSchema.omit({
-        departmentId: true,
+        departmentIds: true,
         organizerId: true,
       }),
 )
 
 const initialValues = computed(() => ({
-  departmentId:
-    props.departmentId ?? currentSession.value?.user?.departmentId ?? '',
+  departmentIds: props.departmentIds ?? [
+    currentSession.value?.user?.departmentId ?? '',
+  ],
   description: props.description ?? '',
   endAt: props.endAt,
   isPublic: props.isPublic ?? false,
@@ -68,8 +69,8 @@ const initialValues = computed(() => ({
   titre: props.titre ?? '',
 }))
 
-const selectedDepartmentId = ref(
-  props.departmentId ?? currentSession.value?.user?.departmentId ?? '',
+const selectedDepartmentIds = ref<string[]>(
+  props.departmentIds ?? [currentSession.value?.user?.departmentId ?? ''],
 )
 
 const startAtValue = ref<Date>(props.startAt ?? new Date())
@@ -87,7 +88,7 @@ async function onSubmit(formEvent: FormSubmitEvent) {
     if (isUpdateMode.value) {
       if (!props.eventId) return
       const payload: updateEventFormulaireInput = {
-        departmentId: selectedDepartmentId.value,
+        departmentIds: selectedDepartmentIds.value,
         description: descriptionValue.value,
         endAt: endAtValue.value,
         id: props.eventId,
@@ -105,7 +106,7 @@ async function onSubmit(formEvent: FormSubmitEvent) {
       })
     } else {
       const payload: createEventFormulaireInput = {
-        departmentId: selectedDepartmentId.value,
+        departmentIds: selectedDepartmentIds.value,
         description: descriptionValue.value,
         endAt: endAtValue.value,
         isPublic: isPublicValue.value,
@@ -133,6 +134,7 @@ async function onSubmit(formEvent: FormSubmitEvent) {
   }
 }
 </script>
+
 <template>
   <div class="flex flex-col gap-4 p-4">
     <PrimeForm
@@ -150,7 +152,6 @@ async function onSubmit(formEvent: FormSubmitEvent) {
             name="titre"
             :placeholder="t('event.placeholder.titre')"
           />
-
           <PrimeMessage
             v-if="$form?.titre?.invalid"
             severity="error"
@@ -182,8 +183,8 @@ async function onSubmit(formEvent: FormSubmitEvent) {
 
         <div class="flex flex-col gap-1">
           <label>{{ t('event.department') }}</label>
-          <PrimeSelect
-            v-model="selectedDepartmentId"
+          <PrimeMultiSelect
+            v-model="selectedDepartmentIds"
             fluid
             :loading="isDepartmentsLoading"
             option-label="code"

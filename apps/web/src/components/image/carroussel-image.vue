@@ -2,7 +2,7 @@
 import 'vue3-carousel/carousel.css'
 
 import type { TrpcOutput } from '@iut-intranet/trpc'
-import { Carousel, Navigation, Pagination, Slide } from 'vue3-carousel'
+import { Carousel, Slide } from 'vue3-carousel'
 
 type ImageList = TrpcOutput['image']['list']
 
@@ -11,7 +11,9 @@ defineProps<{
 }>()
 
 const config = {
+  autoplay: 1500,
   itemsToShow: 2.5,
+  pauseAutoplayOnHover: true,
   wrapAround: true,
 }
 </script>
@@ -21,7 +23,5 @@ const config = {
     <Slide v-for="image in images" :key="image.id">
       <img alt="image" :src="image.url" />
     </Slide>
-    <Navigation />
-    <Pagination />
   </Carousel>
 </template>

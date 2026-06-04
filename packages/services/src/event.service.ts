@@ -1,5 +1,5 @@
 import type { prisma } from '@iut-intranet/db'
-import type { EventModel } from '@iut-intranet/db/models'
+import type { EventModel } from '@iut-intranet/helpers/types/event'
 import type {
   createEventFormulaireInput,
   updateEventFormulaireInput,
@@ -15,7 +15,9 @@ export class EventService {
     }
     return this.prisma.event.create({
       data: {
-        departmentId: event.departmentId,
+        departments: {
+          connect: event.departmentIds.map((id) => ({ id })),
+        },
         description: event.description ?? '',
         endAt: event.endAt,
         isPublic: event.isPublic,
@@ -36,7 +38,7 @@ export class EventService {
   public async getById(eventId: string): Promise<EventModel> {
     return this.prisma.event.findUniqueOrThrow({
       include: {
-        department: true,
+        departments: true,
         invitations: true,
       },
       where: { id: eventId },
@@ -46,7 +48,7 @@ export class EventService {
   public async list() {
     return this.prisma.event.findMany({
       include: {
-        department: true,
+        departments: true,
         organizer: true,
       },
     })
@@ -63,7 +65,7 @@ export class EventService {
     }
     return this.prisma.event.findMany({
       include: {
-        department: true,
+        departments: true,
         organizer: true,
       },
       where: {
@@ -85,8 +87,14 @@ export class EventService {
   }
 
   public async updateEvent(id: string, event: updateEventFormulaireInput) {
+    const { departmentIds, ...data } = event
     return this.prisma.event.update({
-      data: { ...event },
+      data: {
+        ...data,
+        departments: departmentIds
+          ? { set: departmentIds.map((id) => ({ id })) }
+          : undefined,
+      },
       where: { id },
     })
   }

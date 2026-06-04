@@ -7,7 +7,7 @@ import {
 import type { FileUploadUploaderEvent } from 'primevue/fileupload'
 import PrimeFileUpload from 'primevue/fileupload'
 import { useToast } from 'primevue/usetoast'
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useUpdateOwnProfile, useUploadAvatar } from '@/api/users.api'
@@ -49,6 +49,7 @@ const onAvatarUpload = async (event: FileUploadUploaderEvent) => {
       severity: 'success',
       summary: t('profil.avatar.success'),
     })
+    await nextTick()
   } catch {
     toast.add({
       life: 5000,
@@ -61,7 +62,7 @@ const onAvatarUpload = async (event: FileUploadUploaderEvent) => {
 const onSubmit = async () => {
   try {
     await mutate({
-      jobTitle: jobTitle.value || undefined,
+      jobTitle: jobTitle.value,
       phone: (phone.value
         ? formatPhoneToE164(phone.value)
         : undefined) as Exclude<typeof props.user.phone, null>,
@@ -125,7 +126,6 @@ const onInput = () => {
         auto
         choose-label="Changer d'avatar"
         custom-upload
-        :max-file-size="2_000_000"
         mode="basic"
         @uploader="onAvatarUpload"
       />

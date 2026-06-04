@@ -27,6 +27,13 @@
         :options="departmentOptions"
         placeholder="Filtrer par département"
       />
+      <PrimeSelectButton
+        v-model="displayMode"
+        :allow-empty="false"
+        option-label="status"
+        option-value="value"
+        :options="displayModeStatus"
+      />
     </div>
 
     <div
@@ -55,6 +62,7 @@ import { ArticleStatus, UserRole } from '@iut-intranet/db/enums'
 import type { ArticleList } from '@iut-intranet/helpers/types/article'
 import PrimeMultiSelect from 'primevue/multiselect'
 import PrimePaginator from 'primevue/paginator'
+import PrimeSelectButton from 'primevue/selectbutton'
 import { computed, ref, watch } from 'vue'
 
 import { useVisibleArticles } from '@/api/article.api'
@@ -93,9 +101,18 @@ const onSearch = (value: string) => {
   }, SEARCH_DEBOUNCE_MS)
 }
 
+const displayMode = ref<ArticleStatus>(ArticleStatus.PUBLISHED)
+
+const displayModeStatus = [
+  { status: t('article.status.archived'), value: ArticleStatus.ARCHIVED },
+  { status: t('article.status.published'), value: ArticleStatus.PUBLISHED },
+  { status: t('article.status.scheduled'), value: ArticleStatus.SCHEDULED },
+  { status: t('article.status.draft'), value: ArticleStatus.DRAFT },
+]
+
 const { data: rawArticles, isLoading } = useVisibleArticles(
   currentSession.value?.user.id ?? '',
-  ArticleStatus.PUBLISHED,
+  displayMode,
 )
 
 const filteredArticles = computed(

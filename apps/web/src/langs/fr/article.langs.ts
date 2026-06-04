@@ -21,5 +21,11 @@ export const article = {
     success: 'Article sauvegardé',
   },
   saveArticle: "Sauvegarder l'article",
+  status: {
+    archived: 'Archive',
+    draft: 'Brouillon(s)',
+    published: 'Publication(s)',
+    scheduled: 'Article(s) programmé(s)',
+  },
   update: "Modifier l'article",
 }

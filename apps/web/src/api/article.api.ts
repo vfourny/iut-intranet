@@ -18,7 +18,8 @@ import type { QueryKey } from '@/types/api.type'
 export const ARTICLE_KEYS = {
   all: () => ['article', 'all'] as const,
   getById: (articleId: string) => ['article', articleId] as const,
-  visibleForUser: (userId: string) => ['article', 'visible', userId] as const,
+  visibleForUser: (userId: string, status?: ArticleStatus) =>
+    ['article', 'visible', userId, ...(status ? [status] : [])] as const,
 } as const satisfies QueryKey<'article'>
 
 export const useCreateArticle = () => {
@@ -35,14 +36,14 @@ export const useCreateArticle = () => {
 }
 export const useVisibleArticles = (
   userId: string,
-  status: ArticleStatus,
+  status: MaybeRefOrGetter<ArticleStatus>,
 ): UseQueryReturn<ArticleList> => {
   return useQuery({
     enabled: () => !!userId,
-    key: () => ARTICLE_KEYS.visibleForUser(userId),
+    key: () => ARTICLE_KEYS.visibleForUser(userId, toValue(status)),
     query: async (): Promise<ArticleList> => {
       const result = await trpc.articles.listVisibleArticlesForUser.query({
-        status,
+        status: toValue(status),
         userId,
       })
       return z.array(articleSchema).parse(result)

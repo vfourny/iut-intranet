@@ -2,6 +2,7 @@ enum ArticleStatus {
     DRAFT
     PUBLISHED
     SCHEDULED
+    ARCHIVED
 }
 
 model Article {

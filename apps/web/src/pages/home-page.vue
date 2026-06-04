@@ -24,6 +24,7 @@ const handleUpload = async (event: FileUploadUploaderEvent) => {
   await uploadImage({
     base64,
     contentType: file.type as 'image/jpeg' | 'image/png' | 'image/webp',
+    name: '',
   })
   await refetch()
 }
@@ -40,7 +41,6 @@ const handleUpload = async (event: FileUploadUploaderEvent) => {
         auto
         :choose-label="t('home.addPicture')"
         custom-upload
-        :max-file-size="2_000_000"
         mode="basic"
         @uploader="handleUpload"
       />

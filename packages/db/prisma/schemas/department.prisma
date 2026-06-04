@@ -22,8 +22,8 @@ model Department {
   site Site
 
   users User[]
-  events Event[]
   targetedByArticles Article[]
+  events Event[] @relation("EventDepartments")
 
   @@map("department")
 }

@@ -28,7 +28,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { EventClickArg } from '@fullcalendar/core/index.js'
+import type { EventClickArg, EventDropArg } from '@fullcalendar/core/index.js'
+import frLocale from '@fullcalendar/core/locales/fr'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import { type DateClickArg } from '@fullcalendar/interaction'
 import interactionPlugin from '@fullcalendar/interaction'
@@ -41,9 +42,10 @@ import PrimePopover from 'primevue/popover'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { useUpdateEvent } from '@/api/event.api'
 import EventClickBox from '@/components/event/event-click-box.vue'
 import { useI18n } from '@/composables/use-i18n'
-import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
+import { SPECIALTY_BY_DEPARTMENT, SPECIALTY_COLORS } from '@/lib/department'
 import { RouteNames } from '@/router'
 
 type VisibleEvent = TrpcOutput['event']['listVisibleEventsForUser'][number]
@@ -53,15 +55,13 @@ interface CalendarObjectProps {
 }
 
 const { events } = defineProps<CalendarObjectProps>()
+const { mutate: updateEvent } = useUpdateEvent()
 
 const router = useRouter()
 const { t } = useI18n()
 
 function getDepartmentColor(code: DepartmentCode) {
-  const specialty = SPECIALTY_BY_DEPARTMENT[code]
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(`--color-dept-${specialty}-500`)
-    .trim()
+  return SPECIALTY_COLORS[SPECIALTY_BY_DEPARTMENT[code]]
 }
 
 const isMobile = window.innerWidth < 768
@@ -101,8 +101,15 @@ const calendar = computed(() => ({
     selectedEvent.value = info.event.extendedProps.source as VisibleEvent
     clickBox.value?.show(info.jsEvent, info.el)
   },
+  eventDrop: (info: EventDropArg) => {
+    updateEvent({
+      endAt: info.event.end ?? undefined,
+      id: info.event.id,
+      startAt: info.event.start ?? undefined,
+    })
+  },
   events: events.map((event) => ({
-    backgroundColor: getDepartmentColor(event.department.code),
+    backgroundColor: getDepartmentColor(event.departments[0]?.code),
     end: event.endAt,
     extendedProps: { source: event },
     id: event.id,
@@ -123,6 +130,7 @@ const calendar = computed(() => ({
       },
   height: 'auto',
   initialView: isMobile ? 'timeGridDay' : 'timeGridWeek',
+  locale: frLocale,
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
   scrollTime: '08:00:00',
   selectable: true,

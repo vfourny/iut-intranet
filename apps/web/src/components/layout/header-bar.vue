@@ -21,18 +21,6 @@
     </PrimeMenubar>
 
     <div class="flex items-center gap-2">
-      <PrimeButton
-        :aria-label="
-          isDark ? t('layout.colorMode.toLight') : t('layout.colorMode.toDark')
-        "
-        :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
-        rounded
-        severity="secondary"
-        size="small"
-        text
-        @click="toggle"
-      />
-
       <PrimeButton severity="secondary" text @click="profilMenu.toggle($event)">
         <div class="flex items-center gap-2">
           <PrimeAvatar
@@ -62,14 +50,12 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useSession, useSignOut } from '@/api/auth.api'
-import { useColorMode } from '@/composables/use-color-mode'
 import { useI18n } from '@/composables/use-i18n'
 import { RouteNames } from '@/router'
 
 const { t } = useI18n()
 const router = useRouter()
 const { mutateAsync: signOut } = useSignOut()
-const { isDark, toggle } = useColorMode()
 const { currentSession } = useSession()
 
 const items = ref<MenuItem[]>([
