@@ -9,6 +9,13 @@ import type {
   updateEventFormulaireInputSchema,
 } from '@/schemas/event.schema'
 
+export type EventModel = Prisma.EventGetPayload<{
+  include: {
+    departments: true
+    invitations: true
+  }
+}>
+
 export type getEventByIdInput = z.infer<typeof getEventByIdInputSchema>
 
 export type listVisibleEventsForUserInput = z.infer<
@@ -16,7 +23,7 @@ export type listVisibleEventsForUserInput = z.infer<
 >
 
 export type EventWithDepartment = Prisma.EventGetPayload<{
-  include: { department: true }
+  include: { departments: true }
 }>
 
 export type createEventFormulaireInput = z.infer<

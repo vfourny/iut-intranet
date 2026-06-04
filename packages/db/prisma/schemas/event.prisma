@@ -12,11 +12,10 @@ model Event {
     endAt        DateTime
     location     String
     organizerId  String   @map("user_id")
-    departmentId String   @map("department_id")
     isPublic     Boolean
 
     organizer   User              @relation(fields: [organizerId], references: [id])
-    department  Department        @relation(fields: [departmentId], references: [id])
+    departments Department[]      @relation("EventDepartments")
     invitations EventInvitation[]
 }
 

@@ -9,7 +9,7 @@ export const listVisibleEventsForUserInputSchema = z.object({
 })
 
 export const createEventFormulaireInputSchema = z.object({
-  departmentId: z.cuid(),
+  departmentIds: z.array(z.cuid()).min(1),
   description: z.string().max(2000).optional(),
   endAt: z.coerce.date(),
   isPublic: z.boolean().default(false),

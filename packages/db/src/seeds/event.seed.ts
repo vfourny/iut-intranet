@@ -8,7 +8,7 @@ interface EventInviteeSeed {
 }
 
 interface EventSeed {
-  departmentCode: DepartmentCode
+  departmentCodes: DepartmentCode[]
   description: string
   endDayOffset?: number
   endHour: number
@@ -26,7 +26,7 @@ interface EventSeed {
 
 const EVENTS: EventSeed[] = [
   {
-    departmentCode: DepartmentCode.INFO,
+    departmentCodes: [DepartmentCode.INFO],
     description: 'Soutenances finales devant le jury pédagogique.',
     endHour: 11,
     id: 'evt-soutenances-info',
@@ -42,7 +42,7 @@ const EVENTS: EventSeed[] = [
     titre: 'Soutenances de projets tuteurés INFO',
   },
   {
-    departmentCode: DepartmentCode.INFO,
+    departmentCodes: [DepartmentCode.INFO],
     description: 'Visioconférence',
     endHour: 16,
     id: 'ia-presentation',
@@ -59,23 +59,32 @@ const EVENTS: EventSeed[] = [
       "Lancement et présentation des outils et formations à l'IA générative de google",
   },
   {
-    departmentCode: DepartmentCode.GACO,
-    description: 'Réunion de rentrée du semestre.',
-    endHour: 16,
-    id: 'evt-rentree-gaco',
+    departmentCodes: [
+      DepartmentCode.GACO,
+      DepartmentCode.GEA,
+      DepartmentCode.TC,
+      DepartmentCode.INFO,
+      DepartmentCode.GEII,
+      DepartmentCode.GIM,
+      DepartmentCode.GB,
+      DepartmentCode.GTE,
+    ],
+    description: '',
+    endHour: 14.3,
+    id: 'journée-cohesion',
     invitees: [
       { email: EDITOR.email, status: Status.ACCEPTED },
       { email: ADMIN.email, status: Status.PENDING },
     ],
     isPublic: true,
-    location: 'Salle 204',
+    location: 'Bowling de Saint-Omer',
     organizerEmail: USER.email,
     startDayOffset: 0,
-    startHour: 14,
-    titre: 'Réunion de rentrée GACO',
+    startHour: 9.5,
+    titre: "Journée de Cohésion d'équipe",
   },
   {
-    departmentCode: DepartmentCode.TC,
+    departmentCodes: [DepartmentCode.TC],
     description: "Visite annuelle des locaux d'une entreprise partenaire.",
     endHour: 17,
     id: 'evt-visite-tc',
@@ -88,7 +97,7 @@ const EVENTS: EventSeed[] = [
     titre: "Visite d'entreprise TC",
   },
   {
-    departmentCode: DepartmentCode.INFO,
+    departmentCodes: [DepartmentCode.INFO],
     description: 'Conseil pédagogique trimestriel (huis clos).',
     endHour: 12,
     id: 'evt-conseil-pedago',
@@ -104,20 +113,7 @@ const EVENTS: EventSeed[] = [
     titre: 'Conseil pédagogique INFO',
   },
   {
-    departmentCode: DepartmentCode.INFO,
-    description: 'Journée portes ouvertes — accueil des futurs étudiants.',
-    endHour: 17,
-    id: 'evt-jpo',
-    invitees: [],
-    isPublic: true,
-    location: 'Tout le campus',
-    organizerEmail: ADMIN.email,
-    startDayOffset: 3,
-    startHour: 9,
-    titre: 'Journée Portes Ouvertes',
-  },
-  {
-    departmentCode: DepartmentCode.GACO,
+    departmentCodes: [DepartmentCode.GACO],
     description: 'Salon étudiant sur deux jours — stand GACO.',
     endDayOffset: 5,
     endHour: 18,
@@ -131,7 +127,7 @@ const EVENTS: EventSeed[] = [
     titre: 'Salon étudiant — stand GACO',
   },
   {
-    departmentCode: DepartmentCode.TC,
+    departmentCodes: [DepartmentCode.TC],
     description: 'Compétition régionale de techniques de vente.',
     endHour: 11,
     endMinute: 30,
@@ -145,7 +141,7 @@ const EVENTS: EventSeed[] = [
     titre: 'Challenge de la vente TC',
   },
   {
-    departmentCode: DepartmentCode.GACO,
+    departmentCodes: [DepartmentCode.GACO],
     description: 'Soutenances de stage de fin de cursus.',
     endHour: 17,
     id: 'evt-soutenances-gaco',
@@ -161,7 +157,7 @@ const EVENTS: EventSeed[] = [
     titre: 'Soutenances de stage GACO',
   },
   {
-    departmentCode: DepartmentCode.INFO,
+    departmentCodes: [DepartmentCode.INFO],
     description: 'Point hebdomadaire équipe de direction.',
     endHour: 11,
     id: 'evt-reunion-direction',
@@ -175,51 +171,6 @@ const EVENTS: EventSeed[] = [
     startDayOffset: 9,
     startHour: 10,
     titre: 'Réunion de direction',
-  },
-  {
-    departmentCode: DepartmentCode.INFO,
-    description: 'Comité de suivi qualité — chevauche la réunion direction.',
-    endHour: 12,
-    id: 'evt-comite-qualite',
-    invitees: [{ email: USER.email, status: Status.PENDING }],
-    isPublic: true,
-    location: 'Salle 101',
-    organizerEmail: ADMIN.email,
-    startDayOffset: 9,
-    startHour: 10,
-    titre: 'Comité qualité INFO',
-  },
-  {
-    departmentCode: DepartmentCode.TC,
-    description: 'Restitution intermédiaire des projets tuteurés.',
-    endHour: 15,
-    id: 'evt-projet-tutore',
-    invitees: [
-      { email: ADMIN.email, status: Status.ACCEPTED },
-      { email: USER.email, status: Status.ACCEPTED },
-    ],
-    isPublic: true,
-    location: 'Salle 303',
-    organizerEmail: EDITOR.email,
-    startDayOffset: 10,
-    startHour: 13,
-    titre: 'Restitution projets tuteurés TC',
-  },
-  {
-    departmentCode: DepartmentCode.INFO,
-    description: 'Soirée de fin d’année — tous départements bienvenus.',
-    endHour: 23,
-    id: 'evt-fete-fin-annee',
-    invitees: [
-      { email: USER.email, status: Status.ACCEPTED },
-      { email: EDITOR.email, status: Status.ACCEPTED },
-    ],
-    isPublic: true,
-    location: 'Foyer étudiant',
-    organizerEmail: ADMIN.email,
-    startDayOffset: 11,
-    startHour: 18,
-    titre: 'Fête de fin d’année',
   },
 ]
 
@@ -256,20 +207,17 @@ export const seedEvents = async () => {
   const monday = getMondayThisWeek()
 
   const eventsData = EVENTS.map((event) => {
-    const departmentId = departmentIdByCode.get(event.departmentCode)
-    if (!departmentId) {
-      throw new Error(
-        `Department ${event.departmentCode} not found — run seedDepartments first`,
-      )
-    }
+    const departmentIds = event.departmentCodes.map((code) => {
+      const id = departmentIdByCode.get(code)
+      if (!id) throw new Error(`Department ${code} not found`)
+      return id
+    })
+
     const organizerId = userIdByEmail.get(event.organizerEmail)
-    if (!organizerId) {
-      throw new Error(
-        `User ${event.organizerEmail} not found — run seedUsers first`,
-      )
-    }
+    if (!organizerId) throw new Error(`User ${event.organizerEmail} not found`)
+
     return {
-      departmentId,
+      departmentIds,
       description: event.description,
       endAt: buildDate(
         monday,
@@ -291,10 +239,20 @@ export const seedEvents = async () => {
     }
   })
 
-  await prisma.event.createMany({
-    data: eventsData,
-    skipDuplicates: true,
-  })
+  await Promise.all(
+    eventsData.map(({ departmentIds, ...data }) =>
+      prisma.event.upsert({
+        create: {
+          ...data,
+          departments: {
+            connect: departmentIds.map((id) => ({ id })),
+          },
+        },
+        update: {},
+        where: { id: data.id },
+      }),
+    ),
+  )
 
   const invitationsData = EVENTS.flatMap((event) =>
     event.invitees.map((invitee) => {
