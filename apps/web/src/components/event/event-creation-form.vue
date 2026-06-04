@@ -136,8 +136,8 @@ import type {
   CreateEventInput,
   UpdateEventInput,
 } from '@iut-intranet/helpers/schemas/event'
+import { eventIdSchema } from '@iut-intranet/helpers/schemas/brand'
 import {
-  eventIdSchema,
   eventWriteSchema,
   updateEventInputSchema,
 } from '@iut-intranet/helpers/schemas/event'

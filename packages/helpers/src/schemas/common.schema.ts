@@ -35,21 +35,16 @@ const DEFAULT_PAGE_SIZE = 10
 const MAX_PAGE_SIZE = 100
 
 /**
- * Fabrique de schéma de pagination : `page`/`pageSize` partagés, seule la taille
- * de page par défaut varie d'un module à l'autre (cf. news). Source unique
- * pour la borne `MAX_PAGE_SIZE`, qu'aucun module ne redéfinit.
+ * Schéma de pagination partagé : `page`/`pageSize` avec une taille de page par
  */
-export const buildPaginationSchema = (defaultPageSize = DEFAULT_PAGE_SIZE) =>
-  z.object({
-    page: z.number().int().min(1).default(1),
-    pageSize: z
-      .number()
-      .int()
-      .min(1)
-      .max(MAX_PAGE_SIZE)
-      .default(defaultPageSize),
-  })
-
-export const paginationSchema = buildPaginationSchema()
+export const paginationSchema = z.object({
+  page: z.number().int().min(1).default(1),
+  pageSize: z
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_PAGE_SIZE)
+    .default(DEFAULT_PAGE_SIZE),
+})
 
 export const searchSchema = z.string().trim().optional()

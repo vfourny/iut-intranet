@@ -1,10 +1,9 @@
 import type { Prisma, prisma } from '@iut-intranet/db'
 import type { UserRole } from '@iut-intranet/db/enums'
 import { AppError } from '@iut-intranet/helpers/errors'
-import type { UserId } from '@iut-intranet/helpers/schemas/brand'
+import type { EventId, UserId } from '@iut-intranet/helpers/schemas/brand'
 import type {
   CreateEventInput,
-  EventId,
   EventWithDepartment,
   ListVisibleEventsInput,
   UpdateEventInput,

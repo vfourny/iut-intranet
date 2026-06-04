@@ -12,17 +12,14 @@ import {
 } from '@/schemas/common.schema'
 import { uploadObjectInputSchema } from '@/schemas/storage.schema'
 
-const MAX_JOB_TITLE_LENGTH = 100
-
-// Réutilisé par `auth.schema` (sign up) : reste exporté.
-export const jobTitleSchema = z.string().trim().min(1).max(MAX_JOB_TITLE_LENGTH)
+export const jobTitleSchema = z.string().trim().min(1)
 
 // ── Entité ────────────────────────────────────────────────────────────────────
 
 const userSchema = z.object({
   email: emailSchema,
   firstName: firstNameSchema,
-  jobTitle: jobTitleSchema.optional(),
+  jobTitle: z.string().trim().min(1).optional(),
   lastName: lastNameSchema,
   phone: phoneValueSchema.optional(),
   role: z.enum(UserRole),
@@ -42,14 +39,6 @@ export const updateMeInputSchema = userSchema
   .partial()
   .strict()
 export type UpdateMeInput = z.infer<typeof updateMeInputSchema>
-
-/**
- * Colonnes éditables acceptées par `UserService.updateUser` : l'union de tous
- * les champs que n'importe quel appelant peut poser. Chaque procédure restreint
- * le sous-ensemble réel via son propre schéma d'input ; le service se contente
- * de persister ce qu'on lui donne.
- */
-export type UpdateUserData = Omit<UpdateUserInput, 'userId'> & UpdateMeInput
 
 // ── Upload (avatar) ───────────────────────────────────────────────────────────
 

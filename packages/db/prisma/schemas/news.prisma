@@ -7,7 +7,7 @@ enum NewsStatus {
 model News {
   id          String     @id @default(cuid())
   title       String
-  content     Json
+  content     String
   excerpt     String?
   coverUrl    String?
   authorId    String     @map("author_id")

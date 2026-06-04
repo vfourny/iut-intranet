@@ -4,7 +4,8 @@ import type { UserId } from '@iut-intranet/helpers/schemas/brand'
 import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
 import type {
   ListUsersInputSchema,
-  UpdateUserData,
+  UpdateMeInput,
+  UpdateUserInput,
 } from '@iut-intranet/helpers/schemas/user'
 import {
   getSignedObjectUrl,
@@ -68,7 +69,10 @@ export class UserService {
    * never set here: avatars go through `uploadAvatar` (S3 key stored, signed on
    * read).
    */
-  public async updateUser(payload: UpdateUserData, userId: UserId) {
+  public async updateUser(
+    payload: Omit<UpdateUserInput, 'userId'> | UpdateMeInput,
+    userId: UserId,
+  ) {
     const updated = await this.prisma.user.update({
       data: payload,
       where: { id: userId },

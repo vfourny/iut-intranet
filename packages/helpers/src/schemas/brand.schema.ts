@@ -1,21 +1,19 @@
 import { z } from 'zod'
 
 /**
- * Identifiants brandés des entités **transverses** : référencés depuis plusieurs
- * domaines (FK) ou sans fichier de domaine propre.
- *
- * - `UserId` : importé comme valeur par l'auth/la middleware et référencé par
- *   les services news/event/user → vocabulaire partagé, pas la propriété du
- *   domaine user.
- *
- * Les ids mono-domaine vivent au contraire dans leur propre schéma
- * (`newsIdSchema` → `news.schema`, `eventIdSchema` → `event.schema`,
- * `departmentIdSchema` → `department.schema`).
- *
- * La validation `cuid` « gagne » le brand : impossible de confondre deux ids ou
- * de passer une string nue, sans aucun cast `as`. Côté frontières, on fait
- * `xIdSchema.parse(value)` pour transformer une string en id brandé.
+ * Identifiants brandés de toutes les entités, regroupés ici pour être faciles à
+ * suivre (un seul fichier source de vérité plutôt qu'un id éparpillé par
+ * domaine).
  */
 
 export const userIdSchema = z.cuid().brand<'UserId'>()
 export type UserId = z.infer<typeof userIdSchema>
+
+export const departmentIdSchema = z.cuid().brand<'DepartmentId'>()
+export type DepartmentId = z.infer<typeof departmentIdSchema>
+
+export const newsIdSchema = z.cuid().brand<'NewsId'>()
+export type NewsId = z.infer<typeof newsIdSchema>
+
+export const eventIdSchema = z.cuid().brand<'EventId'>()
+export type EventId = z.infer<typeof eventIdSchema>

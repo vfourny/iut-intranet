@@ -1,7 +1,5 @@
 import { fakerFR as faker } from '@faker-js/faker'
 
-import type { Prisma } from '@/generated/client'
-
 /**
  * Seed fixé : les textes décoratifs générés (titres, descriptions, contenus)
  * sont identiques à chaque `db:reset`, tant que l'ordre des appels ne change pas.
@@ -123,5 +121,5 @@ export const fakeNewsTitle = (): string =>
 
 export const fakeNewsExcerpt = (): string => frSentence()
 
-export const fakeNewsContent = (): Prisma.InputJsonValue =>
+export const fakeNewsContent = (): string =>
   Array.from({ length: faker.number.int({ max: 3, min: 1 }) }, () => `<p>${frSentence()}</p>`).join('')

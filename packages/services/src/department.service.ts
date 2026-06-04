@@ -1,7 +1,7 @@
 import type { prisma } from '@iut-intranet/db'
 import type { DepartmentCode } from '@iut-intranet/db/enums'
 import type { DepartmentModel } from '@iut-intranet/db/models'
-import type { DepartmentId } from '@iut-intranet/helpers/schemas/department'
+import type { DepartmentId } from '@iut-intranet/helpers/schemas/brand'
 
 export class DepartmentService {
   constructor(private prisma: prisma) {}

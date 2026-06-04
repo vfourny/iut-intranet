@@ -13,27 +13,18 @@ import { trpc } from '@/lib/trpc'
 import type { QueryKey } from '@/types/api.type'
 
 // Forme « news » du front, dérivée de la sortie tRPC plutôt que d'un schéma de
-// sortie dédié. Deux champs sont raffinés : `content`, que Prisma stocke en JSON
-// (typé `JsonValue`, union récursive) mais que l'éditeur PrimeVue sérialise
-// toujours en HTML (`string`) ; et `publishedAt`, recoercé en `Date`.
-// On réécrit ces clés via un type mappé conditionnel plutôt qu'un `Omit & {…}` :
-// la branche `content` renvoie `string` sans jamais évaluer la `JsonValue`
-// récursive d'origine, ce qui évite une instanciation explosive (TS2589).
+// sortie dédié. Seul `publishedAt` est raffiné : sans transformer tRPC, les
+// dates transitent en ISO string, on les recoerce en `Date`. `content` est une
+// string HTML (sérialisée par l'éditeur PrimeVue) typée comme telle de bout en
+// bout, plus aucun raffinage nécessaire.
 type RawNews = TrpcOutput['news']['getById']
-export type News = {
-  [K in keyof RawNews]: K extends 'content'
-    ? string
-    : K extends 'publishedAt'
-      ? Date | null
-      : RawNews[K]
+export type News = Omit<RawNews, 'publishedAt'> & {
+  publishedAt: Date | null
 }
 export type NewsList = News[]
 
-// Sans transformer tRPC, les dates transitent en ISO string : on recoerce
-// `publishedAt` en `Date` pour honorer le type renvoyé par le serveur.
 const coerceNews = (news: RawNews): News => ({
   ...news,
-  content: news.content as unknown as string,
   publishedAt: news.publishedAt ? new Date(news.publishedAt) : null,
 })
 

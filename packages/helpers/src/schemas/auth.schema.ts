@@ -14,10 +14,7 @@ import { PASSWORD_REGEX } from '@/utils/regex.util'
 
 export const MIN_PASSWORD_LENGTH = 8
 
-const passwordSchema = z
-  .string()
-  .min(MIN_PASSWORD_LENGTH)
-  .regex(PASSWORD_REGEX)
+const passwordSchema = z.string().min(MIN_PASSWORD_LENGTH).regex(PASSWORD_REGEX)
 
 // ── Sign up ───────────────────────────────────────────────────────────────────
 

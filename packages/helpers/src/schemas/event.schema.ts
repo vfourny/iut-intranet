@@ -2,15 +2,10 @@ import type { Prisma } from '@iut-intranet/db'
 import { DepartmentCode } from '@iut-intranet/db/enums'
 import { z } from 'zod'
 
+import { eventIdSchema } from '@/schemas/brand.schema'
+
 const MAX_TITLE_LENGTH = 200
 const MAX_DESCRIPTION_LENGTH = 2000
-
-// ── Identifiant ───────────────────────────────────────────────────────────────
-// Id mono-domaine (référencé uniquement ici) : brandé sur place plutôt que dans
-// `brand.schema`, qui ne garde que les ids transverses (cf. sa doc).
-
-export const eventIdSchema = z.cuid().brand<'EventId'>()
-export type EventId = z.infer<typeof eventIdSchema>
 
 // ── Lecture ───────────────────────────────────────────────────────────────────
 
@@ -62,8 +57,6 @@ const endAtIsAfterStartAtParams = {
   path: ['endAt'],
 }
 
-// `.strict()` avant `.refine()` : `.refine()` produit un `ZodEffects` qui n'expose
-// plus `.strict()`.
 export const createEventInputSchema = eventWriteSchema
   .strict()
   .refine(endAtIsAfterStartAt, endAtIsAfterStartAtParams)

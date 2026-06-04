@@ -3,10 +3,9 @@ import type { Prisma } from '@iut-intranet/db'
 import { NewsStatus } from '@iut-intranet/db'
 import type { NewsModel } from '@iut-intranet/db/models'
 import { AppError } from '@iut-intranet/helpers/errors'
-import type { UserId } from '@iut-intranet/helpers/schemas/brand'
+import type { NewsId, UserId } from '@iut-intranet/helpers/schemas/brand'
 import type {
   CreateNewsInput,
-  NewsId,
   UpdateNewsInput,
 } from '@iut-intranet/helpers/schemas/news'
 import type { ListVisibleNewsInput } from '@iut-intranet/helpers/schemas/news'
@@ -50,10 +49,14 @@ export class NewsService {
   constructor(private prisma: prisma) {}
 
   /**
-   * Creates a news as a DRAFT owned by `userId`, wiring its target departments
-   * from their codes. Returns it with a signed cover URL.
+   * Creates a news owned by `userId` with the requested status/publication date
+   * (defaulting to a DRAFT), wiring its target departments from their codes.
+   * Validates status↔date coherence like update. Returns it with a signed cover
+   * URL.
    */
   public async create(payload: CreateNewsInput, userId: UserId) {
+    validateStatus(payload.status, payload.publishedAt)
+
     const departments = await this.prisma.department.findMany({
       select: { id: true },
       where: {
@@ -66,9 +69,10 @@ export class NewsService {
     const news = await this.prisma.news.create({
       data: {
         authorId: userId,
-        content: payload.content as Prisma.InputJsonValue,
+        content: payload.content,
         coverUrl,
-        status: NewsStatus.DRAFT,
+        publishedAt: payload.publishedAt,
+        status: payload.status,
         targetDepartments: {
           connect: departments.map((d) => ({ id: d.id })),
         },
@@ -203,7 +207,7 @@ export class NewsService {
 
     const updated = await this.prisma.news.update({
       data: {
-        content: payload.content as Prisma.InputJsonValue,
+        content: payload.content,
         coverUrl,
         publishedAt: payload.publishedAt,
         status: status,

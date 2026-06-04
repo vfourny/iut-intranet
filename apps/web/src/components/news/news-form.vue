@@ -46,29 +46,27 @@
       />
     </div>
 
-    <template v-if="isUpdate">
-      <div class="flex flex-col gap-1">
-        <label for="status">{{ t('news.form.status') }}</label>
-        <PrimeSelect
-          id="status"
-          v-model="form.status"
-          :options="['DRAFT', 'PUBLISHED', 'SCHEDULED']"
-          :placeholder="t('news.form.status')"
-        />
-      </div>
+    <div class="flex flex-col gap-1">
+      <label for="status">{{ t('news.form.status') }}</label>
+      <PrimeSelect
+        id="status"
+        v-model="form.status"
+        :options="['DRAFT', 'PUBLISHED', 'SCHEDULED']"
+        :placeholder="t('news.form.status')"
+      />
+    </div>
 
-      <div class="flex flex-col gap-1">
-        <label for="publishedAt">{{ t('news.form.publishedAt') }}</label>
-        <PrimeDatePicker
-          id="publishedAt"
-          v-model="form.publishedAt"
-          date-format="dd/mm/yy"
-          :disabled="isPublishedAtDisabled"
-          show-button-bar
-          show-time
-        />
-      </div>
-    </template>
+    <div class="flex flex-col gap-1">
+      <label for="publishedAt">{{ t('news.form.publishedAt') }}</label>
+      <PrimeDatePicker
+        id="publishedAt"
+        v-model="form.publishedAt"
+        date-format="dd/mm/yy"
+        :disabled="isPublishedAtDisabled"
+        show-button-bar
+        show-time
+      />
+    </div>
 
     <div class="flex justify-end gap-2">
       <PrimeButton
@@ -90,7 +88,7 @@
 
 <script lang="ts" setup>
 import { DepartmentCode,NewsStatus } from '@iut-intranet/db/enums'
-import { newsIdSchema } from '@iut-intranet/helpers/schemas/news'
+import { newsIdSchema } from '@iut-intranet/helpers/schemas/brand'
 import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
 import { MAX_UPLOAD_BYTES } from '@iut-intranet/helpers/schemas/storage'
 import PrimeDatePicker from 'primevue/datepicker'
@@ -178,10 +176,11 @@ const onCoverUpload = async (event: FileUploadUploaderEvent) => {
   }
 }
 
-const isPublishedAtDisabled = computed(() => {
-  if (!isUpdate.value) return true
-  return form.value.status === 'DRAFT' || form.value.status === 'PUBLISHED'
-})
+// La date n'est saisissable que pour une news programmée : un brouillon n'en a
+// pas et une publication immédiate la fige sur « maintenant » à l'envoi.
+const isPublishedAtDisabled = computed(
+  () => form.value.status === 'DRAFT' || form.value.status === 'PUBLISHED',
+)
 
 const onSubmit = async () => {
   if (!me.value?.id) return
@@ -208,6 +207,8 @@ const onSubmit = async () => {
         title: form.value.title,
       })
     } else {
+      // Au create, le service force le statut DRAFT et ignore toute date de
+      // publication : on ne porte donc que les champs du contrat `create`.
       await createNews({
         content: form.value.content,
         cover: coverFile.value,

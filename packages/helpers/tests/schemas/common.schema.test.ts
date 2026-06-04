@@ -1,5 +1,4 @@
 import {
-  buildPaginationSchema,
   emailSchema,
   firstNameSchema,
   lastNameSchema,
@@ -53,15 +52,6 @@ describe('paginationSchema', () => {
 
   it('should reject a pageSize above the maximum', () => {
     expect(paginationSchema.safeParse({ pageSize: 1000 }).success).toBe(false)
-  })
-})
-
-describe('buildPaginationSchema', () => {
-  it('should honour a custom default page size', () => {
-    expect(buildPaginationSchema(25).parse({})).toEqual({
-      page: 1,
-      pageSize: 25,
-    })
   })
 })
 
