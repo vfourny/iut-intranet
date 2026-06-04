@@ -4,6 +4,7 @@ import { customSession } from 'better-auth/plugins'
 
 export const customSessionPluginConfig = customSession(async ({ session }) => {
   const user = await prisma.user.findUniqueOrThrow({
+    include: { department: true },
     where: { id: session.userId },
   })
 

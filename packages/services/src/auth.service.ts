@@ -1,10 +1,9 @@
 import type { AuthSession, BetterAuthInstance } from '@iut-intranet/auth/types'
 import type {
-  ForgotPasswordInput,
-  ResetPasswordInput,
   SignInWithPasswordInput,
   SignUpWithPasswordInput,
-} from '@iut-intranet/helpers/types/auth'
+} from '@iut-intranet/helpers/schemas/auth'
+import { userIdSchema } from '@iut-intranet/helpers/schemas/brand'
 
 import type { DepartmentService } from '@/department.service'
 import type { UserService } from '@/user.service'
@@ -22,24 +21,8 @@ export class AuthService {
   ) {}
 
   /**
-   * Initiates password reset flow by sending a reset email
-   * @param {ForgotPasswordInput} input - Email address for password reset
-   * @returns {Promise<boolean>} Status of password reset request
-   * @remarks Does not throw if email is not found (security best practice)
-   */
-  public async forgotPassword(input: ForgotPasswordInput): Promise<boolean> {
-    const { status } = await this.betterAuth.api.requestPasswordReset({
-      body: {
-        email: input.email,
-      },
-    })
-    return status
-  }
-
-  /**
-   * Retrieves the current session
-   * @param {Headers} [headers] - HTTP headers for the request context
-   * @returns {Promise<AuthSession | null>} Session object or null if not authenticated
+   * Returns the current session resolved from the request headers, or null when
+   * the caller isn't authenticated.
    */
   public async getSession(headers: Headers): Promise<AuthSession | null> {
     return this.betterAuth.api.getSession({
@@ -48,41 +31,23 @@ export class AuthService {
   }
 
   /**
-   * Resets password using a reset token
-   * @param {ResetPasswordInput} input - New password and reset token
-   * @returns {Promise<boolean>} True when password is successfully reset
-   * @remarks Invalidates all previous sessions
-   */
-  public async resetPassword(input: ResetPasswordInput): Promise<boolean> {
-    const { status } = await this.betterAuth.api.resetPassword({
-      body: {
-        newPassword: input.password,
-        token: input.token,
-      },
-    })
-
-    return status
-  }
-
-  /**
-   * Authenticates a user with email and password
-   * @param {SignInWithPasswordInput} input - User credentials (email, password)
-   * @param {Headers} [headers] - HTTP headers for the request context
-   * @returns {Promise<AuthResponse>} Headers and authenticated user object
-   * @remarks Automatically restores their last used organization as active
+   * Authenticates a user with email/password. Returns the response headers
+   * (carrying the session cookie) and the authenticated user.
    */
   public async signInWithPassword(
-    input: SignInWithPasswordInput,
+    payload: SignInWithPasswordInput,
     headers: Headers,
   ): Promise<AuthResponse> {
     const { headers: headersResponse, response: signInResponse } =
       await this.betterAuth.api.signInEmail({
-        body: input,
+        body: payload,
         headers,
         returnHeaders: true,
       })
 
-    const user = await this.userService.getById(signInResponse.user.id)
+    const user = await this.userService.getById(
+      userIdSchema.parse(signInResponse.user.id),
+    )
 
     return {
       body: {
@@ -93,9 +58,8 @@ export class AuthService {
   }
 
   /**
-   * Signs out the current user
-   * @param {Headers} [headers] - HTTP headers for the request context
-   * @returns {Promise<{ headersResponse: Headers; success: boolean }>} Headers and sign out status
+   * Signs the current user out. Returns the response headers (clearing the
+   * session cookie) and whether the operation succeeded.
    */
   public async signOut(
     headers: Headers,
@@ -110,17 +74,16 @@ export class AuthService {
   }
 
   /**
-   * Registers a new user with email and password
-   * @param {SignUpWithPasswordInput} input - User registration data (email, password, firstName, lastName)
-   * @param {Headers} [headers] - HTTP headers for the request context
-   * @returns {Promise<AuthResponse>} Headers and created user object
-   * @remarks Automatically authenticates and activates their last used organization
+   * Registers a user with email/password under the given department and
+   * immediately signs them in. The department code is resolved to its id and
+   * `lastName` maps to better-auth's `name`. Returns the response headers
+   * (carrying the session cookie) and the created user.
    */
   public async signUpWithPassword(
-    input: SignUpWithPasswordInput,
+    payload: SignUpWithPasswordInput,
     headers: Headers,
   ): Promise<AuthResponse> {
-    const { departmentCode, lastName, ...rest } = input
+    const { departmentCode, lastName, ...rest } = payload
 
     const { id: departmentId } =
       await this.departmentService.getByCode(departmentCode)
@@ -132,7 +95,9 @@ export class AuthService {
         returnHeaders: true,
       })
 
-    const user = await this.userService.getById(signUpResponse.user.id)
+    const user = await this.userService.getById(
+      userIdSchema.parse(signUpResponse.user.id),
+    )
 
     return {
       body: {

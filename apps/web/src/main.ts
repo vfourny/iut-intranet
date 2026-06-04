@@ -15,13 +15,12 @@ import Menubar from 'primevue/menubar'
 import Message from 'primevue/message'
 import Password from 'primevue/password'
 import Select from 'primevue/select'
-import Toast from 'primevue/toast'
 import ToastService from 'primevue/toastservice'
 import { createApp } from 'vue'
 
 import App from '@/app.vue'
 import { IutPreset } from '@/lib/primevue-theme'
-import { i18n } from '@/plugins/i18n'
+import { i18n } from '@/plugins/i18n.plugin'
 import { router } from '@/router'
 
 const app = createApp(App)
@@ -38,7 +37,9 @@ app.use(PrimeVue, {
         name: 'primevue',
         order: 'theme, base, primevue, utilities',
       },
-      darkModeSelector: '.dark',
+      // App light-only : on coupe le dark de PrimeVue (sinon `system` suit
+      // `prefers-color-scheme` et rend toutes les surfaces en noir).
+      darkModeSelector: false,
     },
     preset: IutPreset,
   },
@@ -54,11 +55,9 @@ app.component('PrimeMenubar', Menubar)
 app.component('PrimeMessage', Message)
 app.component('PrimePassword', Password)
 app.component('PrimeSelect', Select)
-app.component('Toast', Toast)
 
 app.use(i18n)
 app.use(router)
 app.use(ConfirmationService)
-app.use(ToastService)
 
 app.mount('#app')

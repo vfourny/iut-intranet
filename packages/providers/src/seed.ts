@@ -2,14 +2,14 @@ import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { prisma } from '@iut-intranet/db'
 
 import { S3_BUCKET_NAME, s3Client } from '@/s3.client'
-import { CAROUSEL_IMAGE_PREFIX } from '@/s3.provider'
+import { StorageFolders } from '@/s3.provider'
 
 /**
  * `provider:seed` — alimente le bucket MinIO avec les images correspondant aux
  * clés déjà écrites en base par `db:seed` (avatars `user.image`, couvertures
- * `article.coverUrl`), plus le jeu d'images du carrousel (qui, lui, n'a aucune
- * ligne en base et est piloté uniquement par le contenu S3 via
- * `listImageObjects`).
+ * `news.coverUrl`), plus le jeu d'images à la une (qui, lui, n'a aucune
+ * ligne en base et est piloté uniquement par le contenu S3, listé via
+ * `listObjects`).
  *
  * Deux commandes distinctes et ordonnées : `db:seed` écrit les clés, puis
  * `provider:seed` pousse les octets — la base peut donc être seedée sans MinIO.
@@ -20,7 +20,7 @@ import { CAROUSEL_IMAGE_PREFIX } from '@/s3.provider'
  * (offline) le seed dégrade proprement (warn) sans faire échouer la commande.
  */
 
-const CAROUSEL_SEEDS = ['campus', 'amphi', 'bibliotheque', 'remise-diplomes']
+const HIGHLIGHT_SEEDS = ['campus', 'amphi', 'bibliotheque', 'remise-diplomes']
 
 interface RemoteAsset {
   body: Buffer
@@ -81,16 +81,16 @@ const seedAvatars = async (): Promise<void> => {
   )
 }
 
-/** Couvertures d'articles, sous la clé stockée en `coverUrl`. */
-const seedArticleCovers = async (): Promise<void> => {
-  const articles = await prisma.article.findMany({
+/** Couvertures d'news, sous la clé stockée en `coverUrl`. */
+const seedNewsCovers = async (): Promise<void> => {
+  const news = await prisma.news.findMany({
     select: { coverUrl: true },
     where: { coverUrl: { not: null } },
   })
 
   await Promise.all(
-    articles.map((article) => {
-      const key = article.coverUrl as string
+    news.map((news) => {
+      const key = news.coverUrl as string
       // Seed picsum déterministe dérivé du nom de fichier de la clé.
       const slug =
         key
@@ -102,12 +102,12 @@ const seedArticleCovers = async (): Promise<void> => {
   )
 }
 
-/** Carrousel : jeu d'images fixe, aucune écriture en base. */
-const seedCarousel = async (): Promise<void> => {
+/** Images à la une : jeu d'images fixe, aucune écriture en base. */
+const seedHighlights = async (): Promise<void> => {
   await Promise.all(
-    CAROUSEL_SEEDS.map((seed, index) =>
+    HIGHLIGHT_SEEDS.map((seed, index) =>
       seedObject(
-        `${CAROUSEL_IMAGE_PREFIX}seed-${index + 1}.jpg`,
+        `${StorageFolders.highlights}/seed-${index + 1}.jpg`,
         `https://picsum.photos/seed/${seed}/1200/630`,
       ),
     ),
@@ -115,7 +115,7 @@ const seedCarousel = async (): Promise<void> => {
 }
 
 async function main() {
-  await Promise.all([seedAvatars(), seedArticleCovers(), seedCarousel()])
+  await Promise.all([seedAvatars(), seedNewsCovers(), seedHighlights()])
 }
 
 main()

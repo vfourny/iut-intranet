@@ -1,33 +1,93 @@
+import type { Prisma } from '@iut-intranet/db'
+import { DepartmentCode } from '@iut-intranet/db/enums'
 import { z } from 'zod'
 
-export const getEventByIdInputSchema = z.object({
-  eventId: z.cuid(),
-})
+const MAX_TITLE_LENGTH = 200
+const MAX_DESCRIPTION_LENGTH = 2000
 
-export const listVisibleEventsForUserInputSchema = z.object({
-  userId: z.cuid(),
-})
+// ── Identifiant ───────────────────────────────────────────────────────────────
+// Id mono-domaine (référencé uniquement ici) : brandé sur place plutôt que dans
+// `brand.schema`, qui ne garde que les ids transverses (cf. sa doc).
 
-export const createEventFormulaireInputSchema = z.object({
-  departmentId: z.cuid(),
-  description: z.string().max(2000).optional(),
+export const eventIdSchema = z.cuid().brand<'EventId'>()
+export type EventId = z.infer<typeof eventIdSchema>
+
+// ── Lecture ───────────────────────────────────────────────────────────────────
+
+export const getEventByIdInputSchema = z
+  .object({
+    eventId: eventIdSchema,
+  })
+  .strict()
+export type GetEventByIdInput = z.infer<typeof getEventByIdInputSchema>
+
+// Fenêtre visible du calendrier (FullCalendar `datesSet`). Optionnelle : sans
+// bornes, on renvoie tous les events visibles (utile au premier rendu).
+export const listVisibleEventsInputSchema = z
+  .object({
+    from: z.coerce.date().optional(),
+    to: z.coerce.date().optional(),
+  })
+  .strict()
+export type ListVisibleEventsInput = z.infer<
+  typeof listVisibleEventsInputSchema
+>
+
+// ── Écriture ──────────────────────────────────────────────────────────────────
+
+// Champs d'écriture partagés par create/update. Gardé comme objet « nu » pour
+// rester composable (`.omit`/`.partial`/`.extend`) : l'invariant d'ordre des
+// dates est appliqué via `.refine` sur chaque schéma final, car `.refine`
+// produit un `ZodEffects` qui n'est plus composable.
+export const eventWriteSchema = z.object({
+  // L'organisateur est dérivé de la session (ctx.user.id), jamais de l'input.
+  // Le département est ciblé par son code métier ; le service résout le code
+  // vers l'id en base (le code est `@unique`), comme pour les news.
+  departmentCode: z.enum(DepartmentCode),
+  description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
   endAt: z.coerce.date(),
   isPublic: z.boolean().default(false),
   location: z.string().min(1),
-  organizerId: z.cuid(),
   startAt: z.coerce.date(),
-  titre: z.string().max(200).min(1),
+  title: z.string().max(MAX_TITLE_LENGTH).min(1),
 })
 
-export const updateEventFormulaireInputSchema = createEventFormulaireInputSchema
+// Invariant validable depuis le seul payload (aucun état externe) : il vit donc
+// dans le schéma, pas dans le service. Tolère les bornes manquantes (update
+// partiel) : on ne vérifie l'ordre que lorsque les deux dates sont présentes.
+const endAtIsAfterStartAt = (data: { startAt?: Date; endAt?: Date }) =>
+  !data.endAt || !data.startAt || data.endAt > data.startAt
+const endAtIsAfterStartAtParams = {
+  message: 'La date de fin doit être après la date de début',
+  path: ['endAt'],
+}
+
+// `.strict()` avant `.refine()` : `.refine()` produit un `ZodEffects` qui n'expose
+// plus `.strict()`.
+export const createEventInputSchema = eventWriteSchema
+  .strict()
+  .refine(endAtIsAfterStartAt, endAtIsAfterStartAtParams)
+export type CreateEventInput = z.infer<typeof createEventInputSchema>
+
+export const updateEventInputSchema = eventWriteSchema
   .partial()
-  .omit({ organizerId: true })
-  .extend({ id: z.cuid() })
-  .refine((data) => !data.endAt || !data.startAt || data.endAt > data.startAt, {
-    message: 'La date de fin doit être après la date de début',
-    path: ['endAt'],
-  })
+  .extend({ id: eventIdSchema })
+  .strict()
+  .refine(endAtIsAfterStartAt, endAtIsAfterStartAtParams)
+export type UpdateEventInput = z.infer<typeof updateEventInputSchema>
 
-export const deleteEventInputSchema = z.object({
-  id: z.cuid(),
-})
+export const deleteEventInputSchema = z
+  .object({
+    eventId: eventIdSchema,
+  })
+  .strict()
+export type DeleteEventInput = z.infer<typeof deleteEventInputSchema>
+
+// ── Types issus de la base (Prisma) ───────────────────────────────────────────
+// Exception : non dérivé d'un schéma zod, mais d'un payload Prisma. Reste ici
+// par cohésion (tout ce qui concerne l'event au même endroit) faute d'un fichier
+// de types DB dédié.
+
+export type EventWithDepartment = Prisma.EventGetPayload<{
+  include: { department: true }
+}>

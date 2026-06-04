@@ -1,7 +1,7 @@
 <template>
   <PrimePopover ref="popover">
     <div class="min-w-52 max-w-80">
-      <h3 class="font-semibold text-gray-800 mb-2">{{ event?.titre }}</h3>
+      <h3 class="font-semibold text-gray-800 mb-2">{{ event?.title }}</h3>
       <p class="text-sm text-gray-600">{{ event?.location }}</p>
       <p class="text-sm text-gray-600">
         {{ formatTime(event?.startAt) }} – {{ formatTime(event?.endAt) }}
@@ -47,7 +47,7 @@ import { useDeleteEvent } from '@/api/event.api'
 import { useI18n } from '@/composables/use-i18n'
 import { RouteNames } from '@/router'
 
-type VisibleEvent = TrpcOutput['event']['listVisibleEventsForUser'][number]
+type VisibleEvent = TrpcOutput['event']['listVisible'][number]
 
 const { event } = defineProps<{ event: null | VisibleEvent }>()
 
@@ -78,7 +78,7 @@ function confirmDelete() {
       if (!event) return
       popover.value?.hide()
       try {
-        await deleteEvent({ id: event.id })
+        await deleteEvent({ eventId: event.id })
         toast.add({
           detail: t('event.toast.deleted'),
           life: 3000,

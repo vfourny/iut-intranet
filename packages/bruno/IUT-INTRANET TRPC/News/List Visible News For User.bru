@@ -1,0 +1,21 @@
+meta {
+  name: List Visible News For User
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{SERVER_URL}}/{{TRPC}}/news.listVisibleForUser?input={"status":"PUBLISHED","page":1,"pageSize":12}
+  body: none
+  auth: inherit
+}
+
+vars:pre-request {
+  SERVER_URL: http://localhost:8000
+  TRPC: api/trpc
+}
+
+settings {
+  encodeUrl: false
+  timeout: 0
+}

@@ -28,7 +28,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { EventClickArg } from '@fullcalendar/core/index.js'
+import type {
+  DatesSetArg,
+  EventClickArg,
+} from '@fullcalendar/core/index.js'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import { type DateClickArg } from '@fullcalendar/interaction'
 import interactionPlugin from '@fullcalendar/interaction'
@@ -46,13 +49,19 @@ import { useI18n } from '@/composables/use-i18n'
 import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
 import { RouteNames } from '@/router'
 
-type VisibleEvent = TrpcOutput['event']['listVisibleEventsForUser'][number]
+type VisibleEvent = TrpcOutput['event']['listVisible'][number]
 
 interface CalendarObjectProps {
-  events: TrpcOutput['event']['listVisibleEventsForUser']
+  events: TrpcOutput['event']['listVisible']
 }
 
 const { events } = defineProps<CalendarObjectProps>()
+
+// Émis à chaque changement de fenêtre visible (navigation, changement de vue) :
+// le parent recharge alors uniquement les events de l'intervalle affiché.
+const emit = defineEmits<{
+  rangeChange: [{ from: Date; to: Date }]
+}>()
 
 const router = useRouter()
 const { t } = useI18n()
@@ -96,6 +105,9 @@ const calendar = computed(() => ({
     clickedDate.value = info.date
     datePopover.value?.show(info.jsEvent, info.jsEvent.target as HTMLElement)
   },
+  datesSet: (arg: DatesSetArg) => {
+    emit('rangeChange', { from: arg.start, to: arg.end })
+  },
   editable: true,
   eventClick: (info: EventClickArg) => {
     selectedEvent.value = info.event.extendedProps.source as VisibleEvent
@@ -107,7 +119,7 @@ const calendar = computed(() => ({
     extendedProps: { source: event },
     id: event.id,
     start: event.startAt,
-    title: event.titre,
+    title: event.title,
   })),
   expandRows: true,
   headerToolbar: isMobile

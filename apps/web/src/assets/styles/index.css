@@ -1,7 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400..700;1,14..32,400..600&display=swap');
 @import 'tailwindcss';
 @plugin 'tailwindcss-primeui';
-
-@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   /* Coupe les palettes par défaut de Tailwind (slate, blue, red, gray…) :
@@ -13,8 +12,10 @@
   --color-white: #ffffff;
   --color-black: #000000;
 
-  --font-sans: Arial, 'Helvetica Neue', Helvetica, sans-serif;
-  --font-narrow: 'Arial Narrow', Arial, 'Helvetica Neue', Helvetica, sans-serif;
+  --font-sans:
+    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-narrow: 'Inter', system-ui, -apple-system, Helvetica, Arial, sans-serif;
 
   /* ============================================================
    * Palettes de marque — charte IUT Littoral Côte d'Opale
@@ -193,9 +194,7 @@
 }
 
 /* ============================================================
- * Tokens sémantiques — exposés à Tailwind via `@theme inline`
- * (les `var(--…)` ne sont pas inlinés au build → un toggle `.dark`
- *  suffit pour basculer toutes les classes utilitaires).
+ * Tokens sémantiques — exposés à Tailwind via `@theme inline`.
  *
  * Utilisation : bg-background, text-foreground, border-border,
  *               bg-primary, text-danger, bg-card, etc.
@@ -220,7 +219,8 @@
 }
 
 :root {
-  --bg: #ffffff;
+  /* Fond légèrement teinté (pas blanc pur) pour que les cartes blanches ressortent. */
+  --bg: var(--color-iut-grey-50);
   --fg: var(--color-iut-grey-900);
   --muted: var(--color-iut-grey-100);
   --muted-fg: var(--color-iut-grey-600);
@@ -238,28 +238,16 @@
   --info: var(--color-info-500);
 }
 
-.dark {
-  --bg: var(--color-iut-grey-950);
-  --fg: var(--color-iut-grey-50);
-  --muted: var(--color-iut-grey-800);
-  --muted-fg: var(--color-iut-grey-400);
-  --card: var(--color-iut-grey-900);
-  --card-fg: var(--color-iut-grey-50);
-  --border: var(--color-iut-grey-700);
-  --input: var(--color-iut-grey-700);
-  --ring: var(--color-iut-blue-400);
-  --primary: var(--color-iut-blue-400);
-  --primary-fg: var(--color-iut-grey-950);
-  --danger: var(--color-danger-400);
-  --danger-fg: var(--color-iut-grey-950);
-  --success: var(--color-success-400);
-  --warning: var(--color-warning-400);
-  --info: var(--color-info-400);
-}
-
 html,
 body {
   font-family: var(--font-sans);
   background-color: var(--color-background);
   color: var(--color-foreground);
+  /* Rendu typographique soigné : lissage + chiffres tabulaires + features Inter. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings:
+    'cv11', 'ss01';
+  letter-spacing: -0.011em;
+  text-rendering: optimizeLegibility;
 }

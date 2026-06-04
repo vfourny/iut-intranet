@@ -5,13 +5,18 @@ meta {
 }
 
 get {
-  url: {{SERVER_URL}}/{{TRPC}}/event.listVisibleEventsForUser?input={"userId":"{{activeUserId}}"}
+  url: {{SERVER_URL}}/{{TRPC}}/event.listVisibleForUser?input={}
   body: none
   auth: inherit
 }
 
 params:query {
-  input: {"userId":"{{activeUserId}}"}
+  input: {}
+}
+
+vars:pre-request {
+  TRPC: trpc
+  SERVER_URL: http://localhost:8000
 }
 
 settings {

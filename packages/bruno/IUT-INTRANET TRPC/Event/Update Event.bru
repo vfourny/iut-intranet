@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{SERVER_URL}}/{{TRPC}}/event.updateEvent
+  url: {{SERVER_URL}}/{{TRPC}}/event.update
   body: json
   auth: inherit
 }
@@ -13,18 +13,17 @@ post {
 body:json {
   {
     "id": "cmp3qak28000e20oiu9n6opqc",
-    "departmentId": "cmp3qajkz000620oiorlrkjcj",
+    "departmentCode": "INFO",
     "description": "Description mise à jour..",
     "endAt": "2026-05-20T10:00:00.000Z",
     "isPublic": false,
     "location": "Salle B",
     "startAt": "2026-05-20T08:00:00.000Z",
-    "titre": "Événement mis à jour"
+    "title": "Événement mis à jour"
   }
 }
 
 vars:pre-request {
-  activeDepartmentId: cmp3qajkz000620oiorlrkjcj
   activeEventId: cmp3qak28000e20oiu9n6opqc
   TRPC: trpc
   SERVER_URL: http://localhost:8000

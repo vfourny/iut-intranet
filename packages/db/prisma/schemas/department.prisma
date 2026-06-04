@@ -21,9 +21,9 @@ model Department {
   code DepartmentCode @unique
   site Site
 
-  users User[]
-  events Event[]
-  targetedByArticles Article[]
+  users          User[]
+  events         Event[]
+  targetedByNews News[]
 
   @@map("department")
 }

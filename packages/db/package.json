@@ -35,7 +35,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev --name",
     "db:push": "prisma db push",
-    "db:reset": "prisma migrate reset --force",
+    "db:reset": "prisma migrate reset --force && prisma db seed",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "dev": "run-p dev:tsc dev:alias",

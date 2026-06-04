@@ -1,57 +1,28 @@
-import { type BetterAuthInstance } from '@iut-intranet/auth/types'
 import type { prisma } from '@iut-intranet/db'
 import type { UserModel } from '@iut-intranet/db/models'
-import type { uploadAvatarInput } from '@iut-intranet/helpers/types/storage'
+import type { UserId } from '@iut-intranet/helpers/schemas/brand'
+import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
 import type {
-  updateOwnProfileInput,
-  UpdateUserInput,
-} from '@iut-intranet/helpers/types/user'
-import { getSignedObjectUrl, uploadObject } from '@iut-intranet/providers/s3'
+  ListUsersInputSchema,
+  UpdateUserData,
+} from '@iut-intranet/helpers/schemas/user'
+import {
+  getSignedObjectUrl,
+  updateObject,
+  uploadObject,
+} from '@iut-intranet/providers/s3'
 
 export class UserService {
-  constructor(
-    private betterAuth: BetterAuthInstance,
-    private prisma: prisma,
-  ) {}
+  constructor(private prisma: prisma) {}
 
   /**
-   * Deletes a user
-   * @param {string} userId - User unique identifier
-   * @param {Headers} [headers] - HTTP headers for the request context
-   * @returns {Promise<boolean>} Deletion result from better-auth
-   * @remarks Removes all associated data (sessions, organization memberships, profile)
+   * Fetches a user by id with their department and a signed avatar URL. Throws
+   * if the user doesn't exist.
    */
-  public async delete(userId: string, headers: Headers): Promise<boolean> {
-    const { success } = await this.betterAuth.api.removeUser({
-      body: {
-        userId,
-      },
-      headers,
-    })
-
-    return success
-  }
-
-  /**
-   * Retrieves a user by ID
-   * @param {string} userId - User unique identifier
-   * @returns {Promise<UserModel>} User object
-   * @throws {Error} If user does not exist
-   */
-  public async getById(userId: string): Promise<UserModel> {
-    const user = await this.prisma.user.findUniqueOrThrow({
-      where: {
-        id: userId,
-      },
-    })
-
-    return this.withSignedAvatar(user)
-  }
-
-  async getByIdWithDepartment(id: string) {
+  public async getById(userId: UserId) {
     const user = await this.prisma.user.findUniqueOrThrow({
       include: { department: true },
-      where: { id },
+      where: { id: userId },
     })
 
     return this.withSignedAvatar(user)
@@ -60,12 +31,8 @@ export class UserService {
   /**
    * Retrieves a paginated list of users, optionally filtered by name.
    */
-  public async list(input: {
-    page: number
-    pageSize: number
-    search?: string
-  }) {
-    const { page, pageSize, search } = input
+  public async list(payload: ListUsersInputSchema) {
+    const { page, pageSize, search } = payload
     const where = search
       ? {
           OR: [
@@ -87,43 +54,23 @@ export class UserService {
     ])
 
     return {
-      items: await Promise.all(items.map((item) => this.withSignedAvatar(item))),
+      items: await Promise.all(
+        items.map((item) => this.withSignedAvatar(item)),
+      ),
       total,
     }
   }
 
   /**
-   * Updates an existing user
-   * @param {UpdateUserInput} input - User update data (id required, other fields optional)
-   * @param {Headers} [headers] - HTTP headers for the request context
-   * @returns {Promise<UserModel>} Updated user object with all fields
+   * Updates editable columns of a user. The caller (procedure) decides who the
+   * target `userId` is and which fields are allowed through its input schema —
+   * the service just persists the validated subset it receives. `image` is
+   * never set here: avatars go through `uploadAvatar` (S3 key stored, signed on
+   * read).
    */
-  public async update(
-    input: UpdateUserInput,
-    headers: Headers,
-  ): Promise<UserModel> {
-    const { lastName, userId, ...restingUserPayload } = input
-    const updatedUser = await this.betterAuth.api.adminUpdateUser({
-      body: {
-        data: {
-          ...(lastName && { name: lastName }),
-          ...restingUserPayload,
-        },
-        userId,
-      },
-      headers,
-    })
-
-    return this.getById(updatedUser.id)
-  }
-
-  public async updateOwnUser(user: updateOwnProfileInput, userId: string) {
-    // `image` n'est volontairement pas modifiable ici (cf. uploadAvatar).
+  public async updateUser(payload: UpdateUserData, userId: UserId) {
     const updated = await this.prisma.user.update({
-      data: {
-        jobTitle: user.jobTitle,
-        phone: user.phone,
-      },
+      data: payload,
       where: { id: userId },
     })
 
@@ -131,20 +78,23 @@ export class UserService {
   }
 
   /**
-   * Uploads a user avatar to object storage and persists its object key
-   * @param {UploadUserAvatarInput} payload - Base64 image and its content type
-   * @param {string} userId - Owner of the avatar
-   * @returns {Promise<UserModel>} The updated user, with a signed avatar URL
+   * Uploads a user avatar to object storage, persists its object key, and
+   * returns the user with a signed avatar URL. Keys we already own are
+   * overwritten in place; an external/social-login URL (or first upload) gets a
+   * fresh key so storage doesn't accumulate orphans.
    */
   public async uploadAvatar(
-    payload: uploadAvatarInput,
-    userId: string,
+    payload: UploadFileInput,
+    userId: UserId,
   ): Promise<UserModel> {
-    const imageKey = await uploadObject({
-      ...payload,
-      folder: 'avatars',
-      subPath: userId,
+    const { image: previousKey } = await this.prisma.user.findUniqueOrThrow({
+      select: { image: true },
+      where: { id: userId },
     })
+
+    const imageKey = previousKey
+      ? await updateObject({ ...payload, key: previousKey })
+      : await uploadObject({ ...payload, folder: 'users', subFolder: userId })
 
     const user = await this.prisma.user.update({
       data: { image: imageKey },
@@ -158,7 +108,7 @@ export class UserService {
    * Replaces a stored avatar key with a temporary signed URL the browser can
    * load. The bucket is private, so URLs are generated on read, never persisted.
    */
-  private async withSignedAvatar<T extends { image: string | null }>(
+  private async withSignedAvatar<T extends { image: UserModel['image'] }>(
     user: T,
   ): Promise<T> {
     return {

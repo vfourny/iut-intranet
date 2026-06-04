@@ -1,6 +1,7 @@
 <template>
   <AuthFormCard
     :error="signInStatus === 'error' ? t('auth.signIn.error') : undefined"
+    :loading="asyncStatus === 'loading'"
     :submit-label="t('auth.signIn.submit')"
     :subtitle="t('auth.signIn.header.subtitle')"
     :title="t('auth.signIn.header.title')"
@@ -49,21 +50,22 @@
 </template>
 
 <script lang="ts" setup>
+import type { SignInWithPasswordInput } from '@iut-intranet/helpers/schemas/auth'
 import { signInWithPasswordInputSchema } from '@iut-intranet/helpers/schemas/auth'
-import type { SignInWithPasswordInput } from '@iut-intranet/helpers/types/auth'
 import { useForm } from 'vee-validate'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { useSignIn } from '@/api/auth.api'
 import AuthFormCard from '@/components/auth/auth-form-card.vue'
 import InputField from '@/components/ui/input-field.vue'
 import PasswordField from '@/components/ui/password-field.vue'
 import { useI18n } from '@/composables/use-i18n'
-import { RouteNames } from '@/router'
+import { resolveRedirect, RouteNames } from '@/router'
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
-const { mutateAsync: signIn, status: signInStatus } = useSignIn()
+const { asyncStatus, mutateAsync: signIn, status: signInStatus } = useSignIn()
 
 const {
   defineField,
@@ -79,6 +81,8 @@ const [rememberMe] = defineField('rememberMe')
 
 const handleSubmit = createSubmitHandler(async (values) => {
   await signIn(values)
-  await router.push({ name: RouteNames.home })
+  await router.replace(
+    resolveRedirect(route.query.redirect) ?? { name: RouteNames.home },
+  )
 })
 </script>

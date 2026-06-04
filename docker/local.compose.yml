@@ -6,7 +6,6 @@ services:
       file: ./postgres.base.yml
       service: postgres
     container_name: iut-intranet-postgres-local
-    restart: 'no'
     ports:
       - '5432:5432'
     volumes:
@@ -17,7 +16,6 @@ services:
       file: ./minio.base.yml
       service: minio
     container_name: iut-intranet-minio-local
-    restart: 'no'
     ports:
       - '9000:9000'
       - '9001:9001'
@@ -29,5 +27,3 @@ services:
       file: ./minio.base.yml
       service: minio-init
     container_name: iut-intranet-minio-init-local
-    depends_on:
-      - minio

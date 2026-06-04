@@ -1,35 +1,37 @@
 import { randomUUID } from 'node:crypto'
 
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { AppError } from '@iut-intranet/helpers/errors'
+import { ContentType } from '@iut-intranet/helpers/schemas/storage'
 import { MAX_UPLOAD_BYTES } from '@iut-intranet/helpers/schemas/storage'
 
 import { S3_BUCKET_NAME, s3Client } from '@/s3.client'
 
 const SIGNED_URL_TTL_SECONDS = 24 * 60 * 60
 
-const extensionByContentType = {
-  'image/jpeg': 'jpg',
-  'image/png': 'png',
-  'image/webp': 'webp',
+const ExtensionByContentType = {
+  [ContentType.IMAGE_JPEG]: 'jpg',
+  [ContentType.IMAGE_PNG]: 'png',
+  [ContentType.IMAGE_WEBP]: 'webp',
+} as const satisfies Record<ContentType, string>
+
+export const StorageFolders = {
+  highlights: 'highlights',
+  news: 'news',
+  users: 'users',
 } as const
 
-type AvatarContentType = keyof typeof extensionByContentType
+type StorageFolder = keyof typeof StorageFolders
 
-const STORAGE_FOLDERS = {
-  avatars: 'avatars/',
-  carousel: 'image/',
-  cover: 'covers/',
-} as const
-
-type StorageFolder = keyof typeof STORAGE_FOLDERS
-
-export const CAROUSEL_IMAGE_PREFIX = STORAGE_FOLDERS.carousel
+/** Folders whose objects are partitioned by a {@link subFolder} segment in their key. */
+const ScopedFolder = ['users'] as const satisfies StorageFolder[]
+type ScopedFolder = (typeof ScopedFolder)[number]
 
 /**
  * Generates a temporary presigned URL granting read access to a private object.
@@ -45,39 +47,16 @@ export const getSignedObjectUrl = (key: string): Promise<string> =>
     },
   )
 
-interface UploadObjectBase {
-  base64: string
-  contentType: AvatarContentType
-}
-
-/** Folders whose objects are partitioned by a {@link subPath} segment in their key. */
-const SCOPED_FOLDERS = ['avatars'] as const satisfies StorageFolder[]
-type ScopedFolder = (typeof SCOPED_FOLDERS)[number]
-
-export type UploadObjectPayload = UploadObjectBase &
-  (
-    | {
-        folder: ScopedFolder
-        /** Segment inserted between the folder and the generated uuid (e.g. a userId). */
-        subPath: string
-      }
-    | {
-        folder: Exclude<StorageFolder, ScopedFolder>
-        subPath?: string
-      }
-  )
-
 /**
- * Uploads an object to private storage under the given folder.
- * @returns The object key (e.g. `avatars/<userId>/<uuid>.png`), to be persisted
- * and later turned into a usable URL via {@link getSignedObjectUrl} (or listed
- * and signed via {@link listImageObjects} for the carousel folder).
+ * Decodes a base64 payload, enforces the upload size limit, and writes it to the
+ * given key (overwriting any existing object). Shared by {@link uploadObject}
+ * (fresh key) and {@link updateObject} (existing key).
  */
-export const uploadObject = async (
-  payload: UploadObjectPayload,
-): Promise<string> => {
-  const { base64, contentType, folder, subPath } = payload
-
+const putObject = async (
+  key: string,
+  base64: string,
+  contentType: ContentType,
+): Promise<void> => {
   const body = Buffer.from(base64, 'base64')
   if (body.byteLength > MAX_UPLOAD_BYTES) {
     throw new AppError(
@@ -85,10 +64,6 @@ export const uploadObject = async (
       'File exceeds the maximum upload size',
     )
   }
-
-  const base = STORAGE_FOLDERS[folder]
-  const prefix = subPath ? `${base}${subPath}/` : base
-  const key = `${prefix}${randomUUID()}.${extensionByContentType[contentType]}`
 
   await s3Client.send(
     new PutObjectCommand({
@@ -98,38 +73,99 @@ export const uploadObject = async (
       Key: key,
     }),
   )
+}
+
+/** The raw content shared by every write to storage. */
+interface ObjectBase {
+  base64: string
+  contentType: ContentType
+}
+
+export type UploadObjectPayload = ObjectBase & {
+  fileName?: string
+} & (
+    | {
+        folder: ScopedFolder
+        subFolder: string
+      }
+    | {
+        folder: Exclude<StorageFolder, ScopedFolder>
+        subFolder?: string
+      }
+  )
+
+/**
+ * Uploads an object to private storage under the given folder.
+ * @returns The object key (e.g. `avatars/<userId>/<uuid>.png`), to be persisted
+ * and later turned into a usable URL via {@link getSignedObjectUrl} (or listed
+ * via {@link listObjects} then signed, e.g. for the highlight folder).
+ */
+export const uploadObject = async (
+  payload: UploadObjectPayload,
+): Promise<string> => {
+  const { base64, contentType, fileName, folder, subFolder } = payload
+
+  const base = StorageFolders[folder]
+  const prefix = subFolder ? `${base}/${subFolder}` : base
+  const name = fileName ?? randomUUID()
+  const key = `${prefix}/${name}.${ExtensionByContentType[contentType]}`
+
+  await putObject(key, base64, contentType)
 
   return key
 }
 
-export interface CarouselImageObject {
-  id: string
-  url: string
+export interface UpdateObjectPayload extends ObjectBase {
+  key: string
 }
 
-export const listImageObjects = async (): Promise<CarouselImageObject[]> => {
+/**
+ * Overwrites an existing object in place, keeping the same key. The new
+ * `contentType` is stored as object metadata even if it differs from the one the
+ * key's extension was derived from (the extension is cosmetic — the bucket is
+ * private and objects are served by their `ContentType` header, not their name).
+ * @returns The unchanged object key, for symmetry with {@link uploadObject}.
+ */
+export const updateObject = async (
+  payload: UpdateObjectPayload,
+): Promise<string> => {
+  const { base64, contentType, key } = payload
+
+  await putObject(key, base64, contentType)
+
+  return key
+}
+
+export interface StorageObject {
+  key: string
+  lastModified?: Date
+}
+
+/**
+ * Lists the objects stored under a folder prefix (e.g. `StorageFolders.highlights`).
+ * Returns raw keys, not URLs: the caller signs them on read via
+ * {@link getSignedObjectUrl}. The folder placeholder object (key equal to the
+ * prefix itself) is filtered out.
+ */
+export const listObjects = async (prefix: string): Promise<StorageObject[]> => {
   const { Contents } = await s3Client.send(
     new ListObjectsV2Command({
       Bucket: S3_BUCKET_NAME,
-      Prefix: CAROUSEL_IMAGE_PREFIX,
+      Prefix: `${prefix}/`,
     }),
   )
 
-  const objects = (Contents ?? [])
-    .filter((object) => object.Key && object.Key !== CAROUSEL_IMAGE_PREFIX)
-    .sort(
-      (a, b) =>
-        (b.LastModified?.getTime() ?? 0) - (a.LastModified?.getTime() ?? 0),
-    )
+  return (Contents ?? [])
+    .filter((object) => object.Key && object.Key !== prefix)
+    .map((object) => ({
+      key: object.Key as string,
+      lastModified: object.LastModified,
+    }))
+}
 
-  return Promise.all(
-    objects.map(async (object) => {
-      const key = object.Key as string
-
-      return {
-        id: key,
-        url: await getSignedObjectUrl(key),
-      }
-    }),
+/** Permanently removes an object from storage (no-op if the key doesn't exist). */
+export const deleteObject = async (key: string): Promise<void> => {
+  await s3Client.send(
+    new DeleteObjectCommand({ Bucket: S3_BUCKET_NAME, Key: key }),
   )
 }

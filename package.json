@@ -20,11 +20,17 @@
     "db:generate": "turbo db:generate --filter=@iut-intranet/db",
     "db:migrate": "dotenvx run -- turbo db:migrate --filter=@iut-intranet/db",
     "db:deploy": "turbo db:deploy --filter=@iut-intranet/db",
+    "db:seed": "turbo db:seed --filter=@iut-intranet/db",
     "provider:seed": "dotenvx run -- turbo provider:seed --filter=@iut-intranet/providers",
     "db:reset": "dotenvx run -- turbo db:reset --filter=@iut-intranet/db",
     "env:reset": "npm run db:reset && npm run provider:seed",
     "db:push": "dotenvx run -- turbo db:push --filter=@iut-intranet/db",
     "db:studio": "dotenvx run -- turbo db:studio --filter=@iut-intranet/db",
+    "test": "docker compose -f docker/test.compose.yml up --build -V --abort-on-container-exit --exit-code-from test-runner",
+    "test:watch": "TEST_COMMAND=test:watch:exec docker compose -f docker/test.compose.yml up --build -V",
+    "test:ci": "run-s build db:deploy db:seed test:exec",
+    "test:exec": "vitest run",
+    "test:watch:exec": "vitest watch --ui",
     "clean": "turbo clean && rimraf node_modules .turbo .cache",
     "prepare": "husky",
     "syncpack:check": "syncpack lint --dependency-types dev,overrides,prod"
@@ -36,8 +42,11 @@
   "devDependencies": {
     "@commitlint/cli": "20.5.0",
     "@dotenvx/dotenvx": "1.59.1",
+    "@faker-js/faker": "10.4.0",
     "@iut-intranet/configs": "*",
     "@types/node": "22.19.15",
+    "@vitest/coverage-v8": "4.1.4",
+    "@vitest/ui": "4.1.4",
     "cpy-cli": "7.0.0",
     "eslint": "9.39.4",
     "husky": "9.1.7",
@@ -51,7 +60,8 @@
     "turbo": "2.8.21",
     "typescript": "5.9.3",
     "typescript-eslint": "8.57.2",
-    "vite": "7.3.1"
+    "vite": "7.3.1",
+    "vitest": "4.1.4"
   },
   "commitlint": {
     "extends": [
@@ -76,12 +86,6 @@
   },
   "prettier": "@iut-intranet/configs/prettier",
   "dependencies": {
-    "@editorjs/editorjs": "2.31.6",
-    "@editorjs/header": "2.8.9",
-    "@editorjs/image": "2.10.3",
-    "@editorjs/list": "2.0.9",
-    "@editorjs/paragraph": "2.11.7",
-    "@editorjs/quote": "2.7.6",
     "vue3-carousel": "0.17.0",
     "@primevue/forms": "4.5.5"
   }

@@ -39,7 +39,7 @@ const EVENT_THEMES = [
   'de département',
 ] as const
 
-const ARTICLE_PREFIXES = [
+const NEWS_PREFIXES = [
   'Bilan',
   'Point',
   'Retour',
@@ -49,7 +49,7 @@ const ARTICLE_PREFIXES = [
   'Information',
 ] as const
 
-const ARTICLE_TOPICS = [
+const NEWS_TOPICS = [
   'sur la vie étudiante',
   "sur l'insertion professionnelle",
   'sur les projets tuteurés',
@@ -118,14 +118,10 @@ export const fakeEventDescription = (): string => frSentence()
 
 export const fakeEventLocation = (): string => pick(EVENT_LOCATIONS)
 
-export const fakeArticleTitle = (): string =>
-  `${pick(ARTICLE_PREFIXES)} ${pick(ARTICLE_TOPICS)}`
+export const fakeNewsTitle = (): string =>
+  `${pick(NEWS_PREFIXES)} ${pick(NEWS_TOPICS)}`
 
-export const fakeArticleExcerpt = (): string => frSentence()
+export const fakeNewsExcerpt = (): string => frSentence()
 
-export const fakeArticleContent = (): Prisma.InputJsonValue => ({
-  blocks: Array.from({ length: faker.number.int({ max: 3, min: 1 }) }, () => ({
-    data: { text: frSentence() },
-    type: 'paragraph',
-  })),
-})
+export const fakeNewsContent = (): Prisma.InputJsonValue =>
+  Array.from({ length: faker.number.int({ max: 3, min: 1 }) }, () => `<p>${frSentence()}</p>`).join('')

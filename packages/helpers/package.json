@@ -24,11 +24,6 @@
       "types": "./dist/schemas/*.schema.d.ts",
       "default": "./dist/schemas/*.schema.js"
     },
-    "./types/*": {
-      "source": "./src/types/*.types.ts",
-      "types": "./dist/types/*.types.d.ts",
-      "default": "./dist/types/*.types.js"
-    },
     "./utils/*": {
       "source": "./src/utils/*.util.ts",
       "types": "./dist/utils/*.util.d.ts",
@@ -45,7 +40,7 @@
     "dev:tsc": "tsc --watch --preserveWatchOutput",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "ts:check": "tsc --noEmit"
+    "ts:check": "tsc --noEmit && tsc --noEmit --project tsconfig.test.json"
   },
   "type": "module",
   "version": "0.0.1"

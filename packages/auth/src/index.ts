@@ -30,6 +30,12 @@ export const betterAuthInstance = betterAuth({
       dont_remember: { name: AuthCookieName.dontRemember },
       session_token: { name: AuthCookieName.sessionToken },
     },
+    database: {
+      // Délègue la génération d'id à Prisma (`@default(cuid())`) au lieu de
+      // l'id maison non-cuid de better-auth, pour rester compatible avec
+      // `userIdSchema` (z.cuid().brand). Voir packages/helpers/.../brand.schema.ts.
+      generateId: false,
+    },
   },
   baseURL: PUBLIC_API_URL,
   database: prismaAdapter(prisma, { provider: 'postgresql' }),

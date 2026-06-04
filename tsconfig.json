@@ -1,5 +1,6 @@
 {
   "extends": "@vfourny/node-toolkit/tsconfig/base",
+  "include": ["vitest.config.ts", "packages/*/vitest.config.ts"],
   "compilerOptions": {
     "noEmit": true
   }

@@ -3,8 +3,9 @@ import { z } from 'zod'
 import { formatPhoneForStorage, isValidPhone } from '@/utils/phone.util'
 import { NAME_PATTERN_REGEX } from '@/utils/regex.util'
 
+// ── Identité ────────────────────────────────────────────────────────────────
+
 const MAX_NAME_LENGTH = 70
-const MAX_JOB_TITLE_LENGTH = 100
 
 export const firstNameSchema = z
   .string()
@@ -28,19 +29,27 @@ export const phoneValueSchema = z
   .refine(isValidPhone)
   .transform(formatPhoneForStorage)
 
-export const jobTitleSchema = z.string().trim().min(1).max(MAX_JOB_TITLE_LENGTH)
+// ── Listing (pagination & recherche) ──────────────────────────────────────────
 
 const DEFAULT_PAGE_SIZE = 10
 const MAX_PAGE_SIZE = 100
 
-export const paginationSchema = z.object({
-  page: z.number().int().min(1).default(1),
-  pageSize: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_PAGE_SIZE)
-    .default(DEFAULT_PAGE_SIZE),
-})
+/**
+ * Fabrique de schéma de pagination : `page`/`pageSize` partagés, seule la taille
+ * de page par défaut varie d'un module à l'autre (cf. news). Source unique
+ * pour la borne `MAX_PAGE_SIZE`, qu'aucun module ne redéfinit.
+ */
+export const buildPaginationSchema = (defaultPageSize = DEFAULT_PAGE_SIZE) =>
+  z.object({
+    page: z.number().int().min(1).default(1),
+    pageSize: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_PAGE_SIZE)
+      .default(defaultPageSize),
+  })
+
+export const paginationSchema = buildPaginationSchema()
 
 export const searchSchema = z.string().trim().optional()

@@ -5,21 +5,20 @@ meta {
 }
 
 post {
-  url: {{SERVER_URL}}/{{TRPC}}/event.createEvent
+  url: {{SERVER_URL}}/{{TRPC}}/event.create
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "departmentId": "cmp3qajkz000620oiorlrkjcj",
+    "departmentCode": "INFO",
     "description": "test bruno",
     "endAt": "2026-05-20T10:00:00.000Z",
     "isPublic": false,
     "location": "Salle A",
-    "organizerId": "{{activeUserId}}",
     "startAt": "2026-05-20T08:00:00.000Z",
-    "titre": "Nouvel événement"
+    "title": "Nouvel événement"
   }
 }
 

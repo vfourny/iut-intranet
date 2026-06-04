@@ -1,14 +1,14 @@
 <template>
   <EventFormulaire
     v-if="ready"
-    :department-id="event?.departmentId"
+    :department-code="event?.department?.code"
     :description="event?.description"
     :end-at="endAt"
     :event-id="eventId"
     :is-public="event?.isPublic"
     :location="event?.location"
     :start-at="startAt"
-    :titre="event?.titre"
+    :title="event?.title"
   />
 </template>
 

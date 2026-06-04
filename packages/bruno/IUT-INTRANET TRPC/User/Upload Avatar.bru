@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{SERVER_URL}}/{{TRPC}}/user.uploadAvatar
+  url: {{SERVER_URL}}/{{TRPC}}/user.uploadMyAvatar
   body: json
   auth: inherit
 }
@@ -13,7 +13,7 @@ post {
 body:json {
   {
     "base64": "{{avatarBase64}}",
-    "contentType": "image/jpeg"
+    "contentType": "image/png"
   }
 }
 

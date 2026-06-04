@@ -1,18 +1,18 @@
 import { betterAuthInstance } from '@iut-intranet/auth'
 import { prisma } from '@iut-intranet/db'
 
-import { ArticleService } from '@/article.service'
 import { AuthService } from '@/auth.service'
 import { DepartmentService } from '@/department.service'
 import { EventService } from '@/event.service'
-import { ImageService } from '@/image.service'
+import { HighlightService } from '@/highlight.service'
+import { NewsService } from '@/news.service'
 import { UserService } from '@/user.service'
 
-const userService = new UserService(betterAuthInstance, prisma)
+const userService = new UserService(prisma)
 const departmentService = new DepartmentService(prisma)
 const eventService = new EventService(prisma)
-const articleService = new ArticleService(prisma)
-const imageService = new ImageService()
+const newsService = new NewsService(prisma)
+const highlightService = new HighlightService()
 const authService = new AuthService(
   betterAuthInstance,
   userService,
@@ -20,18 +20,18 @@ const authService = new AuthService(
 )
 
 export {
-  articleService,
   authService,
   departmentService,
   eventService,
-  imageService,
+  highlightService,
+  newsService,
   userService,
 }
 export type {
-  ArticleService,
   AuthService,
   DepartmentService,
   EventService,
-  ImageService,
+  HighlightService,
+  NewsService,
   UserService,
 }

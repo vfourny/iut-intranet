@@ -2,9 +2,11 @@
   <component :is="activeLayout">
     <RouterView />
   </component>
+  <Toast />
 </template>
 
 <script lang="ts" setup>
+import Toast from 'primevue/toast'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 

@@ -1,0 +1,33 @@
+meta {
+  name: Update News
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{SERVER_URL}}/{{TRPC}}/news.update
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "newsId": "{{NEWS_ID}}",
+    "title": "Ma news modifiée",
+    "content": { "blocks": [] },
+    "status": "PUBLISHED",
+    "publishedAt": "2026-01-01T10:00:00.000Z",
+    "targetDepartmentIds": []
+  }
+}
+
+vars:pre-request {
+  SERVER_URL: http://localhost:8000
+  TRPC: api/trpc
+  NEWS_ID: cmpdsz5wd00004soituz0d7pk
+}
+
+settings {
+  encodeUrl: false
+  timeout: 0
+}

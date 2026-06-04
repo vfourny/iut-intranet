@@ -1,8 +1,5 @@
-import type { uploadAvatarInput } from '@iut-intranet/helpers/types/storage'
-import type {
-  getMeWithDepartmentInput,
-  updateOwnProfileInput,
-} from '@iut-intranet/helpers/types/user'
+import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
+import type { UpdateMeInput } from '@iut-intranet/helpers/schemas/user'
 import {
   useInfiniteQuery,
   useMutation,
@@ -24,16 +21,15 @@ export const USER_KEYS = {
     ['user', 'list', 'infinite', { pageSize, search }] as const,
 } as const satisfies QueryKey<'user'>
 
+export type MeWithDepartment = Awaited<ReturnType<typeof trpc.user.getMe.query>>
+
 export const useMe = () => {
   const { currentSession } = useSession()
 
   return useQuery({
     enabled: () => !!currentSession.value?.user.id,
     key: () => ['user', 'me', currentSession.value?.user.id ?? null] as const,
-    query: async () => {
-      const data = await trpc.user.getMeWithDepartment.query()
-      return data as getMeWithDepartmentInput
-    },
+    query: () => trpc.user.getMe.query(),
     staleTime: 1000 * 60 * 5,
   })
 }
@@ -81,13 +77,13 @@ export const useUsersInfinite = (
   })
 }
 
-export const useUpdateOwnProfile = () => {
+export const useUpdateMe = () => {
   const queryCache = useQueryCache()
   const { currentSession } = useSession()
 
   return useMutation({
-    mutation: (input: Omit<updateOwnProfileInput, 'userId'>) =>
-      trpc.user.updateOwnUser.mutate(input),
+    mutation: (input: Omit<UpdateMeInput, 'userId'>) =>
+      trpc.user.updateMe.mutate(input),
     onSuccess: () => {
       queryCache.invalidateQueries({ key: ['user', 'list'] })
       queryCache.invalidateQueries({
@@ -97,13 +93,13 @@ export const useUpdateOwnProfile = () => {
   })
 }
 
-export const useUploadAvatar = () => {
+export const useUploadMyAvatar = () => {
   const queryCache = useQueryCache()
   const { currentSession } = useSession()
 
   return useMutation({
-    mutation: (input: uploadAvatarInput) =>
-      trpc.user.uploadAvatar.mutate(input),
+    mutation: (input: UploadFileInput) =>
+      trpc.user.uploadMyAvatar.mutate(input),
     onSuccess: () => {
       queryCache.invalidateQueries({ key: ['user', 'list'] })
       queryCache.invalidateQueries({

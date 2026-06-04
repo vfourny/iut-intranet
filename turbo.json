@@ -60,6 +60,22 @@
       "cache": true,
       "dependsOn": ["db:generate", "^db:generate", "^build"]
     },
+    "//#test": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": [
+        "packages/*/src/**",
+        "packages/*/tests/**",
+        "packages/*/vitest.config.*",
+        "vitest.config.*"
+      ],
+      "outputs": ["coverage/**"]
+    },
+    "//#test:watch": {
+      "cache": false,
+      "dependsOn": ["^build"],
+      "persistent": true
+    },
     "clean": {
       "cache": false
     }

@@ -1,19 +1,20 @@
-import z from 'zod'
+import { z } from 'zod'
 
-/**
- * Taille max d'un upload image (avatar, couverture d'article, carrousel).
- * Source unique partagée par le back (garde-fou S3) et le front (FileUpload),
- * pour qu'ils ne puissent pas diverger.
- */
 export const MAX_UPLOAD_BYTES = 2 * 1024 * 1024
 
-export const avatarContentTypeSchema = z.enum([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-])
+export const ContentType = {
+  IMAGE_JPEG: 'image/jpeg',
+  IMAGE_PNG: 'image/png',
+  IMAGE_WEBP: 'image/webp',
+} as const
+export type ContentType = (typeof ContentType)[keyof typeof ContentType]
 
-export const uploadAvatarInputSchema = z.object({
-  base64: z.string().min(1),
-  contentType: avatarContentTypeSchema,
-})
+// ── Input d'upload ────────────────────────────────────────────────────────────
+
+export const uploadObjectInputSchema = z
+  .object({
+    base64: z.string().min(1),
+    contentType: z.enum(ContentType),
+  })
+  .strict()
+export type UploadFileInput = z.infer<typeof uploadObjectInputSchema>

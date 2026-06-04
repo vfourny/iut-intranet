@@ -1,11 +1,12 @@
 <template>
   <header
-    class="flex items-center justify-between border-b border-border bg-card px-6 py-3"
+    class="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-card/80 px-6 py-2.5 backdrop-blur-md"
   >
     <div class="flex items-center gap-2">
-      <RouterLink :to="{ name: RouteNames.home }">
+      <RouterLink class="flex items-center" :to="{ name: RouteNames.home }">
         <img
-          class="h-22 w-44 object-contain"
+          alt="IUT"
+          class="h-10 w-auto object-contain"
           src="../../assets/img/logo_iut.png"
         />
       </RouterLink>
@@ -21,18 +22,6 @@
     </PrimeMenubar>
 
     <div class="flex items-center gap-2">
-      <PrimeButton
-        :aria-label="
-          isDark ? t('layout.colorMode.toLight') : t('layout.colorMode.toDark')
-        "
-        :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
-        rounded
-        severity="secondary"
-        size="small"
-        text
-        @click="toggle"
-      />
-
       <PrimeButton severity="secondary" text @click="profilMenu.toggle($event)">
         <div class="flex items-center gap-2">
           <PrimeAvatar
@@ -63,14 +52,12 @@ import { useRouter } from 'vue-router'
 
 import { useSession, useSignOut } from '@/api/auth.api'
 import { useMe } from '@/api/users.api'
-import { useColorMode } from '@/composables/use-color-mode'
 import { useI18n } from '@/composables/use-i18n'
 import { RouteNames } from '@/router'
 
 const { t } = useI18n()
 const router = useRouter()
 const { mutateAsync: signOut } = useSignOut()
-const { isDark, toggle } = useColorMode()
 const { currentSession } = useSession()
 // L'avatar vient de `me` (URL signée), pas de la session better-auth qui ne
 // contient que la clé S3 brute — inexploitable avec le bucket privé.
@@ -83,7 +70,7 @@ const items = ref<MenuItem[]>([
     label: t('layout.default.nav.home'),
   },
   {
-    command: () => router.push({ name: RouteNames.directory }),
+    command: () => router.push({ name: RouteNames.users }),
     icon: 'pi pi-users',
     label: t('layout.default.nav.directory'),
   },
@@ -93,7 +80,7 @@ const items = ref<MenuItem[]>([
     label: t('layout.default.nav.calendar'),
   },
   {
-    command: () => router.push({ name: RouteNames.article.news }),
+    command: () => router.push({ name: RouteNames.news.news }),
     icon: 'pi pi-file',
     label: t('layout.default.nav.news'),
   },

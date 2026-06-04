@@ -1,6 +1,6 @@
 import { prisma } from '@/client'
 import type { Prisma } from '@/generated/client'
-import { DepartmentCode, Status } from '@/generated/enums'
+import { DepartmentCode, EventInvitationStatus } from '@/generated/enums'
 import {
   fakeEventDescription,
   fakeEventLocation,
@@ -10,7 +10,7 @@ import { ADMIN, EDITOR, USER } from '@/seeds/user.seed'
 
 interface EventInviteeSeed {
   email: string
-  status: Status
+  status: EventInvitationStatus
 }
 
 interface EventSeed {
@@ -33,8 +33,8 @@ const EVENTS: EventSeed[] = [
     endHour: 11,
     id: 'evt-soutenances-info',
     invitees: [
-      { email: USER.email, status: Status.ACCEPTED },
-      { email: EDITOR.email, status: Status.PENDING },
+      { email: USER.email, status: EventInvitationStatus.ACCEPTED },
+      { email: EDITOR.email, status: EventInvitationStatus.PENDING },
     ],
     isPublic: true,
     organizerEmail: ADMIN.email,
@@ -46,8 +46,8 @@ const EVENTS: EventSeed[] = [
     endHour: 16,
     id: 'evt-rentree-gaco',
     invitees: [
-      { email: EDITOR.email, status: Status.ACCEPTED },
-      { email: ADMIN.email, status: Status.PENDING },
+      { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
+      { email: ADMIN.email, status: EventInvitationStatus.PENDING },
     ],
     isPublic: true,
     organizerEmail: USER.email,
@@ -58,7 +58,7 @@ const EVENTS: EventSeed[] = [
     departmentCode: DepartmentCode.TC,
     endHour: 17,
     id: 'evt-visite-tc',
-    invitees: [{ email: ADMIN.email, status: Status.DECLINED }],
+    invitees: [{ email: ADMIN.email, status: EventInvitationStatus.DECLINED }],
     isPublic: true,
     organizerEmail: EDITOR.email,
     startDayOffset: 1,
@@ -69,8 +69,8 @@ const EVENTS: EventSeed[] = [
     endHour: 12,
     id: 'evt-conseil-pedago',
     invitees: [
-      { email: USER.email, status: Status.ACCEPTED },
-      { email: EDITOR.email, status: Status.ACCEPTED },
+      { email: USER.email, status: EventInvitationStatus.ACCEPTED },
+      { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
     ],
     isPublic: false,
     organizerEmail: ADMIN.email,
@@ -92,7 +92,7 @@ const EVENTS: EventSeed[] = [
     endDayOffset: 5,
     endHour: 18,
     id: 'evt-salon-gaco',
-    invitees: [{ email: EDITOR.email, status: Status.PENDING }],
+    invitees: [{ email: EDITOR.email, status: EventInvitationStatus.PENDING }],
     isPublic: true,
     organizerEmail: USER.email,
     startDayOffset: 4,
@@ -103,7 +103,7 @@ const EVENTS: EventSeed[] = [
     endHour: 11,
     endMinute: 30,
     id: 'evt-challenge-vente',
-    invitees: [{ email: ADMIN.email, status: Status.ACCEPTED }],
+    invitees: [{ email: ADMIN.email, status: EventInvitationStatus.ACCEPTED }],
     isPublic: true,
     organizerEmail: EDITOR.email,
     startDayOffset: 7,
@@ -114,8 +114,8 @@ const EVENTS: EventSeed[] = [
     endHour: 17,
     id: 'evt-soutenances-gaco',
     invitees: [
-      { email: ADMIN.email, status: Status.DECLINED },
-      { email: EDITOR.email, status: Status.ACCEPTED },
+      { email: ADMIN.email, status: EventInvitationStatus.DECLINED },
+      { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
     ],
     isPublic: true,
     organizerEmail: USER.email,
@@ -127,8 +127,8 @@ const EVENTS: EventSeed[] = [
     endHour: 11,
     id: 'evt-reunion-direction',
     invitees: [
-      { email: USER.email, status: Status.ACCEPTED },
-      { email: EDITOR.email, status: Status.PENDING },
+      { email: USER.email, status: EventInvitationStatus.ACCEPTED },
+      { email: EDITOR.email, status: EventInvitationStatus.PENDING },
     ],
     isPublic: false,
     organizerEmail: ADMIN.email,
@@ -140,7 +140,7 @@ const EVENTS: EventSeed[] = [
     departmentCode: DepartmentCode.INFO,
     endHour: 12,
     id: 'evt-comite-qualite',
-    invitees: [{ email: USER.email, status: Status.PENDING }],
+    invitees: [{ email: USER.email, status: EventInvitationStatus.PENDING }],
     isPublic: true,
     organizerEmail: ADMIN.email,
     startDayOffset: 9,
@@ -151,8 +151,8 @@ const EVENTS: EventSeed[] = [
     endHour: 15,
     id: 'evt-projet-tutore',
     invitees: [
-      { email: ADMIN.email, status: Status.ACCEPTED },
-      { email: USER.email, status: Status.ACCEPTED },
+      { email: ADMIN.email, status: EventInvitationStatus.ACCEPTED },
+      { email: USER.email, status: EventInvitationStatus.ACCEPTED },
     ],
     isPublic: true,
     organizerEmail: EDITOR.email,
@@ -164,8 +164,8 @@ const EVENTS: EventSeed[] = [
     endHour: 23,
     id: 'evt-fete-fin-annee',
     invitees: [
-      { email: USER.email, status: Status.ACCEPTED },
-      { email: EDITOR.email, status: Status.ACCEPTED },
+      { email: USER.email, status: EventInvitationStatus.ACCEPTED },
+      { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
     ],
     isPublic: true,
     organizerEmail: ADMIN.email,
@@ -238,7 +238,7 @@ export const seedEvents = async () => {
         event.startHour,
         event.startMinute ?? 0,
       ),
-      titre: fakeEventTitle(),
+      title: fakeEventTitle(),
     }
   })
 

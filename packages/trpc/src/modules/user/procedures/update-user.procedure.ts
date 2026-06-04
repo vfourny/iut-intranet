@@ -4,6 +4,7 @@ import { adminProcedure } from '@/procedures'
 
 export const updateUserProcedure = adminProcedure
   .input(updateUserInputSchema)
-  .mutation(async ({ ctx, input }) => {
-    return ctx.services.user.update(input, ctx.headers)
+  .mutation(({ ctx, input }) => {
+    const { userId, ...payload } = input
+    return ctx.services.user.updateUser(payload, userId)
   })

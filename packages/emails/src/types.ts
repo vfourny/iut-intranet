@@ -1,14 +1,5 @@
 import type { SupportedLocale } from '@/locales'
 
-export interface OrganizationInvitationEmailPayload {
-  expiresIn: number
-  invitationUrl: string
-  invitee: { firstName: string; lastName: string }
-  inviter: { firstName: string; lastName: string; email: string }
-  organizationName: string
-  role?: string
-}
-
 export interface ResetPasswordEmailPayload {
   expiresIn: number
   resetPasswordUrl: string
