@@ -17,7 +17,7 @@
     "format:check": "turbo build --filter=@iut-intranet/configs && prettier --check .",
     "env:start": "docker compose -f docker/local.compose.yml up -d",
     "env:stop": "docker compose -f docker/local.compose.yml down",
-    "env:reset": "dotenvx run -- turbo db:reset provider:seed --filter=@iut-intranet/db --filter=@iut-intranet/providers",
+    "env:reset": "dotenvx run -- turbo db:reset --filter=@iut-intranet/db && dotenvx run -- turbo provider:seed --filter=@iut-intranet/providers",
     "db:generate": "turbo db:generate --filter=@iut-intranet/db",
     "db:migrate": "dotenvx run -- turbo db:migrate --filter=@iut-intranet/db",
     "db:deploy": "turbo db:deploy --filter=@iut-intranet/db",

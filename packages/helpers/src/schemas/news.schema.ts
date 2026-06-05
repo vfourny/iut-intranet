@@ -32,14 +32,13 @@ const scheduledHasPublishedAt = (data: {
   status?: NewsStatus
   publishedAt?: Date | null
 }) => data.status !== NewsStatus.SCHEDULED || !!data.publishedAt
-const scheduledHasPublishedAtParams = {
-  message: 'Une news programmée doit avoir une date de publication',
-  path: ['publishedAt'],
-}
 
 export const createNewsInputSchema = newsWriteSchema
   .strict()
-  .refine(scheduledHasPublishedAt, scheduledHasPublishedAtParams)
+  .refine(scheduledHasPublishedAt, {
+    message: 'Une news programmée doit avoir une date de publication',
+    path: ['publishedAt'],
+  })
   .transform(normalizePublishedAt)
 export type CreateNewsInput = z.infer<typeof createNewsInputSchema>
 
@@ -49,7 +48,10 @@ export const updateNewsInputSchema = newsWriteSchema
     newsId: newsIdSchema,
   })
   .strict()
-  .refine(scheduledHasPublishedAt, scheduledHasPublishedAtParams)
+  .refine(scheduledHasPublishedAt, {
+    message: 'Une news programmée doit avoir une date de publication',
+    path: ['publishedAt'],
+  })
   .transform(normalizePublishedAt)
 export type UpdateNewsInput = z.infer<typeof updateNewsInputSchema>
 

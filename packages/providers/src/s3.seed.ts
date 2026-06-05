@@ -5,7 +5,6 @@ import { updateObject, uploadObject } from '@/s3.provider'
 
 const KNOWN_CONTENT_TYPES = new Set<string>(Object.values(ContentType))
 
-/** Le header `content-type` distant est libre : on le contraint à l'enum du provider. */
 const toContentType = (header: string | null): ContentType =>
   header && KNOWN_CONTENT_TYPES.has(header)
     ? (header as ContentType)
@@ -16,31 +15,20 @@ interface RemoteAsset {
   contentType: ContentType
 }
 
-const fetchAsset = async (url: string): Promise<RemoteAsset | null> => {
-  try {
-    const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`)
-    }
-    return {
-      base64: Buffer.from(await response.arrayBuffer()).toString('base64'),
-      contentType: toContentType(response.headers.get('content-type')),
-    }
-  } catch (error) {
-    console.warn(
-      `Seed asset fetch failed (${url}):`,
-      error instanceof Error ? error.message : error,
-    )
-    return null
+const fetchAsset = async (url: string): Promise<RemoteAsset> => {
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Seed asset fetch failed (${url}): HTTP ${response.status}`)
+  }
+  return {
+    base64: Buffer.from(await response.arrayBuffer()).toString('base64'),
+    contentType: toContentType(response.headers.get('content-type')),
   }
 }
 
 /** Écrit les octets sur une clé déjà présente en base (avatar, couverture). */
 const seedExistingKey = async (key: string, url: string): Promise<void> => {
   const asset = await fetchAsset(url)
-  if (!asset) {
-    return
-  }
 
   await updateObject({
     base64: asset.base64,
@@ -49,7 +37,7 @@ const seedExistingKey = async (key: string, url: string): Promise<void> => {
   })
 }
 
-/** Avatars : un visuel déterministe par user, sous la clé stockée en `image`. */
+/** Avatars : une vraie photo de portrait déterministe par user, sous la clé stockée en `image`. */
 const seedAvatars = async (): Promise<void> => {
   const users = await prisma.user.findMany({
     select: { firstName: true, image: true, lastName: true },
@@ -60,15 +48,15 @@ const seedAvatars = async (): Promise<void> => {
     users.map((user) =>
       seedExistingKey(
         user.image as string,
-        `https://api.dicebear.com/9.x/initials/png?seed=${encodeURIComponent(
+        // pravatar : portrait réel, déterministe via `u` (le nom du user).
+        `https://i.pravatar.cc/256?u=${encodeURIComponent(
           `${user.firstName} ${user.lastName}`,
-        )}&size=256`,
+        )}`,
       ),
     ),
   )
 }
 
-/** Couvertures d'news, sous la clé stockée en `coverUrl`. */
 const seedNewsCovers = async (): Promise<void> => {
   const news = await prisma.news.findMany({
     select: { coverUrl: true },
@@ -78,7 +66,6 @@ const seedNewsCovers = async (): Promise<void> => {
   await Promise.all(
     news.map((news) => {
       const key = news.coverUrl as string
-      // Seed picsum déterministe dérivé du nom de fichier de la clé.
       const slug =
         key
           .split('/')
@@ -101,9 +88,6 @@ const seedHighlights = async (): Promise<void> => {
       const asset = await fetchAsset(
         `https://picsum.photos/seed/${seed}/1200/630`,
       )
-      if (!asset) {
-        return
-      }
 
       await uploadObject({
         base64: asset.base64,
