@@ -1,42 +1,56 @@
 import { DepartmentCode, NewsStatus } from '@iut-intranet/db/enums'
 import { z } from 'zod'
 
-import { buildPaginationSchema, searchSchema } from '@/schemas/common.schema'
+import { newsIdSchema } from '@/schemas/brand.schema'
+import { paginationSchema, searchSchema } from '@/schemas/common.schema'
 import { uploadObjectInputSchema } from '@/schemas/storage.schema'
-
-const DEFAULT_NEWS_PAGE_SIZE = 12
-
-// ── Identifiant ───────────────────────────────────────────────────────────────
-// Id mono-domaine (référencé uniquement ici) : brandé sur place plutôt que dans
-// `brand.schema`, qui ne garde que les ids transverses (cf. sa doc).
-
-export const newsIdSchema = z.cuid().brand<'NewsId'>()
-export type NewsId = z.infer<typeof newsIdSchema>
 
 // ── Inputs (écriture) ─────────────────────────────────────────────────────────
 
-// `.strict()` se propage à `updateNewsInputSchema` via `.partial().extend()`.
-export const createNewsInputSchema = z
-  .object({
-    // Contenu riche sérialisé en HTML par l'éditeur PrimeVue (Quill) côté front.
-    content: z.string(),
-    // La couverture est envoyée d'un bloc avec la news : le fichier est uploadé
-    // côté procédure, pas pré-uploadé via une mutation dédiée.
-    cover: uploadObjectInputSchema.optional(),
-    targetDepartmentCodes: z.array(z.string()).default([]),
-    title: z.string(),
-  })
+const newsWriteSchema = z.object({
+  content: z.string().trim().min(1, 'Une news doit avoir un contenu'),
+  cover: uploadObjectInputSchema.optional(),
+  publishedAt: z.coerce.date().nullable().optional(),
+  status: z.enum(NewsStatus).default(NewsStatus.DRAFT),
+  targetDepartmentCodes: z.array(z.string()).default([]),
+  title: z.string().trim().min(1, 'Une news doit avoir un titre'),
+})
+
+const normalizePublishedAt = <
+  T extends { status?: NewsStatus; publishedAt?: Date | null },
+>(
+  data: T,
+) => ({
+  ...data,
+  publishedAt:
+    data.status === NewsStatus.DRAFT || data.status === NewsStatus.PUBLISHED
+      ? null
+      : data.publishedAt,
+})
+
+const scheduledHasPublishedAt = (data: {
+  status?: NewsStatus
+  publishedAt?: Date | null
+}) => data.status !== NewsStatus.SCHEDULED || !!data.publishedAt
+const scheduledHasPublishedAtParams = {
+  message: 'Une news programmée doit avoir une date de publication',
+  path: ['publishedAt'],
+}
+
+export const createNewsInputSchema = newsWriteSchema
   .strict()
+  .refine(scheduledHasPublishedAt, scheduledHasPublishedAtParams)
+  .transform(normalizePublishedAt)
 export type CreateNewsInput = z.infer<typeof createNewsInputSchema>
 
-export const updateNewsInputSchema = createNewsInputSchema.partial().extend({
-  // `undefined` laisse la couverture inchangée, `null` la supprime, un fichier
-  // la remplace.
-  cover: uploadObjectInputSchema.nullable().optional(),
-  newsId: newsIdSchema,
-  publishedAt: z.coerce.date().nullable(),
-  status: z.enum(NewsStatus),
-})
+export const updateNewsInputSchema = newsWriteSchema
+  .partial()
+  .extend({
+    newsId: newsIdSchema,
+  })
+  .strict()
+  .refine(scheduledHasPublishedAt, scheduledHasPublishedAtParams)
+  .transform(normalizePublishedAt)
 export type UpdateNewsInput = z.infer<typeof updateNewsInputSchema>
 
 // ── Inputs (lecture) ──────────────────────────────────────────────────────────
@@ -48,11 +62,7 @@ export const getNewsByIdInputSchema = z
   .strict()
 export type GetNewsByIdInput = z.infer<typeof getNewsByIdInputSchema>
 
-// L'utilisateur cible est dérivé de la session côté procédure ; l'input ne porte
-// que les critères de liste (statut, recherche, filtres, pagination).
-export const listVisibleNewsInputSchema = buildPaginationSchema(
-  DEFAULT_NEWS_PAGE_SIZE,
-)
+export const listVisibleNewsInputSchema = paginationSchema
   .extend({
     departmentCodes: z.array(z.enum(DepartmentCode)).default([]),
     search: searchSchema,

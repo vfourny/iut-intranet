@@ -13,19 +13,15 @@ import { isEditorRole } from '@iut-intranet/helpers/utils/role'
 import { getSignedObjectUrl, uploadObject } from '@iut-intranet/providers/s3'
 
 /**
- * Validates the coherence between a news status and its publication date,
- * throwing BAD_REQUEST on a contradiction (e.g. a scheduled news without a
- * future date). Shared by create/update so both enforce the same rules.
+ * Validates the *temporal* coherence between a news status and its publication
+ * date, throwing BAD_REQUEST on a contradiction. Only the clock-dependent rules
+ * live here: the *structural* ones (a draft has no date, a scheduled news has a
+ * date) are enforced upfront by the input schema. Shared by create/update — the
+ * latter passes the merged status (payload ?? stored), which the schema cannot
+ * know.
  */
 function validateStatus(status: NewsStatus, publishedAt?: Date | null) {
   const now = new Date()
-
-  if (status === NewsStatus.DRAFT && publishedAt) {
-    throw new AppError(
-      'BAD_REQUEST',
-      'A draft news cannot have a publication date',
-    )
-  }
 
   if (
     status === NewsStatus.SCHEDULED &&
@@ -55,7 +51,13 @@ export class NewsService {
    * URL.
    */
   public async create(payload: CreateNewsInput, userId: UserId) {
-    validateStatus(payload.status, payload.publishedAt)
+    const now = new Date()
+    // Date de publication pilotée par le service pour un PUBLISHED (= l'instant de
+    // publication) ; le schéma a déjà mis le `publishedAt` du payload à `null` pour
+    // ce statut. Draft → null, scheduled → date fournie (validée future plus bas).
+    const publishedAt =
+      payload.status === NewsStatus.PUBLISHED ? now : payload.publishedAt
+    validateStatus(payload.status, publishedAt)
 
     const departments = await this.prisma.department.findMany({
       select: { id: true },
@@ -71,7 +73,7 @@ export class NewsService {
         authorId: userId,
         content: payload.content,
         coverUrl,
-        publishedAt: payload.publishedAt,
+        publishedAt,
         status: payload.status,
         targetDepartments: {
           connect: departments.map((d) => ({ id: d.id })),
@@ -134,12 +136,7 @@ export class NewsService {
       status,
       ...(isAuthorScoped ? { authorId: userId } : {}),
       ...(search
-        ? {
-            OR: [
-              { title: { contains: search, mode: 'insensitive' } },
-              { excerpt: { contains: search, mode: 'insensitive' } },
-            ],
-          }
+        ? { title: { contains: search, mode: 'insensitive' } }
         : {}),
       ...(departmentCodes.length
         ? {
@@ -179,8 +176,16 @@ export class NewsService {
    */
   public async update(payload: UpdateNewsInput, userId: UserId) {
     const news = await this.getById(payload.newsId, userId)
+    const now = new Date()
     const status = payload.status ?? news.status
-    validateStatus(status, payload.publishedAt)
+    // Date pilotée par le service pour un PUBLISHED : `now` à la première
+    // publication, date d'origine conservée ensuite (un simple édit ne la
+    // réinitialise pas). Le schéma a déjà mis le `publishedAt` du payload à `null`.
+    const publishedAt =
+      status === NewsStatus.PUBLISHED
+        ? (news.publishedAt ?? now)
+        : payload.publishedAt
+    validateStatus(status, publishedAt)
 
     const departments = await this.prisma.department.findMany({
       select: { id: true },
@@ -196,20 +201,18 @@ export class NewsService {
       where: { id: payload.newsId },
     })
 
-    // `undefined` laisse la couverture inchangée (Prisma ignore le champ) ;
-    // `null` la supprime ; un fichier l'uploade et la remplace.
-    const coverUrl =
-      payload.cover === null
-        ? null
-        : payload.cover
-          ? await uploadObject({ ...payload.cover, folder: 'news' })
-          : undefined
+    // `undefined` laisse la couverture inchangée (Prisma ignore le champ) ; un
+    // fichier l'uploade et la remplace. Pas de suppression : une fois posée, on
+    // garde l'ancienne couverture tant qu'aucune nouvelle ne la remplace.
+    const coverUrl = payload.cover
+      ? await uploadObject({ ...payload.cover, folder: 'news' })
+      : undefined
 
     const updated = await this.prisma.news.update({
       data: {
         content: payload.content,
         coverUrl,
-        publishedAt: payload.publishedAt,
+        publishedAt,
         status: status,
         targetDepartments: {
           connect: departments.map((department) => ({ id: department.id })),
