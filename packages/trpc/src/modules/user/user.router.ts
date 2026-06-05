@@ -1,3 +1,4 @@
+import { createUserFromAdmin } from '@/modules/user/procedures/create-user-from-admin'
 import { deleteUserProcedure } from '@/modules/user/procedures/delete-user.procedure'
 import { getMeProcedure } from '@/modules/user/procedures/get-me.procedure'
 import { getMeWithDepartmentProcedure } from '@/modules/user/procedures/get-me-with-department'
@@ -9,6 +10,7 @@ import { uploadAvatarProcedure } from '@/modules/user/procedures/upload-avatar.p
 import { router } from '@/trpc'
 
 export const userRouter = router({
+  create: createUserFromAdmin,
   delete: deleteUserProcedure,
   getById: getUserByIdProcedure,
   getMe: getMeProcedure,

@@ -18,7 +18,14 @@ export const lastNameSchema = z
   .max(MAX_NAME_LENGTH)
   .regex(NAME_PATTERN_REGEX)
 
-export const emailSchema = z.string().trim().toLowerCase().email()
+export const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email()
+  .endsWith('@univ-littoral.fr', {
+    message: "L'adresse doit être un e-mail officiel @univ-littoral.fr",
+  })
 
 export const phoneSchema = z.string().trim().regex(PHONE_FR_REGEX)
 

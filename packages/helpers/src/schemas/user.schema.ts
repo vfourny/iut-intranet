@@ -5,6 +5,7 @@ import { z } from 'zod'
 import {
   emailSchema,
   firstNameSchema,
+  jobTitleSchema,
   lastNameSchema,
   paginationSchema,
   searchSchema,
@@ -83,4 +84,14 @@ export const getMeWithDepartmentSchema = z.object({
   phone: phoneValueSchema.nullable(),
   role: z.enum(UserRole),
   updatedAt: z.string(),
+})
+
+export const createUserSchema = z.object({
+  departmentCode: z.enum(DepartmentCode),
+  email: emailSchema,
+  firstName: firstNameSchema,
+  jobTitle: jobTitleSchema.optional(),
+  lastName: lastNameSchema,
+  phone: z.string().optional(),
+  role: z.enum(UserRole).default(UserRole.USER),
 })

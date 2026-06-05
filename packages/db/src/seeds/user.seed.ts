@@ -7,7 +7,7 @@ const DEFAULT_PASSWORD = 'Password123!'
 
 export const ADMIN = {
   departmentCode: DepartmentCode.INFO,
-  email: 'admin@iut-intranet.com',
+  email: 'admin@univ-littoral.fr',
   firstName: 'John',
   jobTitle: 'Chef de département',
   lastName: 'ADMIN',
@@ -16,7 +16,7 @@ export const ADMIN = {
 
 export const USER = {
   departmentCode: DepartmentCode.GACO,
-  email: 'user@iut-intranet.com',
+  email: 'user@univ-littoral.fr',
   firstName: 'John',
   jobTitle: 'Enseignant',
   lastName: 'USER',
@@ -25,7 +25,7 @@ export const USER = {
 
 export const EDITOR = {
   departmentCode: DepartmentCode.TC,
-  email: 'editor@iut-intranet.com',
+  email: 'editor@univ-littoral.fr',
   firstName: 'Jane',
   jobTitle: 'Responsable pédagogique',
   lastName: 'EDITOR',

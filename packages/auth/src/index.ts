@@ -30,6 +30,7 @@ export const betterAuthInstance = betterAuth({
       dont_remember: { name: AuthCookieName.dontRemember },
       session_token: { name: AuthCookieName.sessionToken },
     },
+    disableCSRFCheck: true,
   },
   baseURL: PUBLIC_API_URL,
   database: prismaAdapter(prisma, { provider: 'postgresql' }),

@@ -2,18 +2,54 @@ import { type BetterAuthInstance } from '@iut-intranet/auth/types'
 import type { DepartmentCode } from '@iut-intranet/db'
 import { type prisma } from '@iut-intranet/db'
 import type { UserModel } from '@iut-intranet/db/models'
+import { AppError } from '@iut-intranet/helpers/errors'
 import type { uploadAvatarInput } from '@iut-intranet/helpers/types/storage'
 import type {
+  createUserFromAdminInput,
   updateOwnProfileInput,
   UpdateUserInput,
 } from '@iut-intranet/helpers/types/user'
+import { isAdminRole } from '@iut-intranet/helpers/utils/role'
 import { uploadUserAvatarObject } from '@iut-intranet/providers/s3'
+import { generate } from 'generate-password-ts'
 
 export class UserService {
   constructor(
     private betterAuth: BetterAuthInstance,
     private prisma: prisma,
   ) {}
+
+  public async create(adminId: string, user: createUserFromAdminInput) {
+    const admin = await this.getById(adminId)
+    if (!isAdminRole(admin.role)) {
+      throw new AppError('UNAUTHORIZED', 'Not authorized to create user')
+    }
+
+    const password = generate({
+      length: 8,
+      numbers: true,
+      symbols: true,
+      uppercase: true,
+    })
+
+    const department = await this.prisma.department.findUniqueOrThrow({
+      where: { code: user.departmentCode },
+    })
+    return await this.betterAuth.api.createUser({
+      body: {
+        data: {
+          departmentId: department.id,
+          firstName: user.firstName,
+          jobTitle: user.jobTitle,
+          phone: user.phone,
+        },
+        email: user.email,
+        name: user.lastName,
+        password: password,
+        role: user.role,
+      },
+    })
+  }
 
   /**
    * Deletes a user
