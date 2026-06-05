@@ -8,8 +8,8 @@ import {
 
 export class HighlightService {
   /**
-   * Lists highlight images from object storage, most recently modified first,
-   * each paired with a temporary signed URL the browser can load.
+   * Lists highlight images from object storage, most recently modified first.
+   * @returns {Promise<{ key: string; url: string }[]>} Each highlight's object key paired with a temporary signed URL the browser can load
    */
   public async list(): Promise<
     {
@@ -32,7 +32,11 @@ export class HighlightService {
     )
   }
 
-  /** Uploads an image to the home highlight folder and returns its object key. */
+  /**
+   * Uploads an image to the home highlight folder.
+   * @param {UploadHighlightInput} payload - The highlight image to upload
+   * @returns {Promise<string>} The stored object key
+   */
   public async upload(payload: UploadHighlightInput): Promise<string> {
     return uploadObject({ ...payload, folder: StorageFolders.highlights })
   }

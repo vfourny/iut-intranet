@@ -17,8 +17,10 @@ export class UserService {
   constructor(private prisma: prisma) {}
 
   /**
-   * Fetches a user by id with their department and a signed avatar URL. Throws
-   * if the user doesn't exist.
+   * Fetches a user by id with their department.
+   * @param {UserId} userId - Id of the user to fetch
+   * @returns {Promise<UserModel>} The user with their department and a signed avatar URL
+   * @throws Throws if the user doesn't exist
    */
   public async getById(userId: UserId) {
     const user = await this.prisma.user.findUniqueOrThrow({
@@ -31,6 +33,8 @@ export class UserService {
 
   /**
    * Retrieves a paginated list of users, optionally filtered by name.
+   * @param {ListUsersInputSchema} payload - Pagination and an optional name search term
+   * @returns {Promise<{ items: UserModel[]; total: number }>} The users (each with a signed avatar URL) and the total matching count
    */
   public async list(payload: ListUsersInputSchema) {
     const { page, pageSize, search } = payload
@@ -63,11 +67,11 @@ export class UserService {
   }
 
   /**
-   * Updates editable columns of a user. The caller (procedure) decides who the
-   * target `userId` is and which fields are allowed through its input schema —
-   * the service just persists the validated subset it receives. `image` is
-   * never set here: avatars go through `uploadAvatar` (S3 key stored, signed on
-   * read).
+   * Updates editable columns of a user.
+   * @param {Omit<UpdateUserInput, 'userId'> | UpdateMeInput} payload - The validated subset of fields to persist
+   * @param {UserId} userId - Id of the user to update
+   * @returns {Promise<UserModel>} The updated user with a signed avatar URL
+   * @remarks The caller (procedure) decides who the target `userId` is and which fields are allowed through its input schema — the service just persists the validated subset it receives. `image` is never set here: avatars go through `uploadAvatar` (S3 key stored, signed on read).
    */
   public async updateUser(
     payload: Omit<UpdateUserInput, 'userId'> | UpdateMeInput,
@@ -82,10 +86,11 @@ export class UserService {
   }
 
   /**
-   * Uploads a user avatar to object storage, persists its object key, and
-   * returns the user with a signed avatar URL. Keys we already own are
-   * overwritten in place; an external/social-login URL (or first upload) gets a
-   * fresh key so storage doesn't accumulate orphans.
+   * Uploads a user avatar to object storage and persists its object key.
+   * @param {UploadFileInput} payload - The avatar file to upload
+   * @param {UserId} userId - Id of the user whose avatar is set
+   * @returns {Promise<UserModel>} The user with a signed avatar URL
+   * @remarks Keys we already own are overwritten in place; an external/social-login URL (or first upload) gets a fresh key so storage doesn't accumulate orphans.
    */
   public async uploadAvatar(
     payload: UploadFileInput,
@@ -109,8 +114,10 @@ export class UserService {
   }
 
   /**
-   * Replaces a stored avatar key with a temporary signed URL the browser can
-   * load. The bucket is private, so URLs are generated on read, never persisted.
+   * Replaces a stored avatar key with a temporary signed URL the browser can load.
+   * @param {T} user - A user-shaped object carrying an `image` object key
+   * @returns {Promise<T>} The same object with `image` swapped for a signed URL (or null)
+   * @remarks The bucket is private, so URLs are generated on read, never persisted.
    */
   private async withSignedAvatar<T extends { image: UserModel['image'] }>(
     user: T,

@@ -13,12 +13,12 @@ import { isEditorRole } from '@iut-intranet/helpers/utils/role'
 import { getSignedObjectUrl, uploadObject } from '@iut-intranet/providers/s3'
 
 /**
- * Validates the *temporal* coherence between a news status and its publication
- * date, throwing BAD_REQUEST on a contradiction. Only the clock-dependent rules
- * live here: the *structural* ones (a draft has no date, a scheduled news has a
- * date) are enforced upfront by the input schema. Shared by create/update — the
- * latter passes the merged status (payload ?? stored), which the schema cannot
- * know.
+ * Validates the temporal coherence between a news status and its publication date.
+ * @param {NewsStatus} status - The status the news is moving to
+ * @param {Date | null} [publishedAt] - The publication date, when one is set
+ * @returns {void}
+ * @throws {AppError} BAD_REQUEST when a SCHEDULED news lacks a future date, or a PUBLISHED news carries a future one
+ * @remarks Only the clock-dependent rules live here; the structural ones (a draft has no date, a scheduled news has a date) are enforced upfront by the input schema. Shared by create/update — the latter passes the merged status (payload ?? stored), which the schema cannot know.
  */
 function validateStatus(status: NewsStatus, publishedAt?: Date | null) {
   const now = new Date()
@@ -45,10 +45,11 @@ export class NewsService {
   constructor(private prisma: prisma) {}
 
   /**
-   * Creates a news owned by `userId` with the requested status/publication date
-   * (defaulting to a DRAFT), wiring its target departments from their codes.
-   * Validates status↔date coherence like update. Returns it with a signed cover
-   * URL.
+   * Creates a news owned by the given user with the requested status and publication date.
+   * @param {CreateNewsInput} payload - News content, status, target department codes and optional cover
+   * @param {UserId} userId - Id of the authoring user, set as owner
+   * @returns {Promise<NewsModel>} The created news with its author, target departments and a signed cover URL
+   * @remarks Defaults to a DRAFT, wires target departments from their codes, and validates status↔date coherence like update.
    */
   public async create(payload: CreateNewsInput, userId: UserId) {
     const now = new Date()
@@ -93,9 +94,12 @@ export class NewsService {
   }
 
   /**
-   * Fetches a news by id with its author and target departments, plus a signed
-   * cover URL. Editor-gated: non-editors get NOT_FOUND rather than FORBIDDEN so
-   * the resource's existence isn't leaked. Throws NOT_FOUND if it doesn't exist.
+   * Fetches a news by id with its author and target departments.
+   * @param {NewsId} newsId - Id of the news to fetch
+   * @param {UserId} userId - Id of the caller, used for the editor gate
+   * @returns {Promise<NewsModel>} The news with its author, target departments and a signed cover URL
+   * @throws {AppError} NOT_FOUND if the caller isn't an editor or the news doesn't exist
+   * @remarks Editor-gated: non-editors get NOT_FOUND rather than FORBIDDEN so the resource's existence isn't leaked.
    */
   public async getById(newsId: NewsId, userId: UserId) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } })
@@ -115,11 +119,11 @@ export class NewsService {
 
   /**
    * Lists news visible to a user, paginated and filtered server-side.
-   *
-   * Visibility: PUBLISHED news are visible to everyone; DRAFT/SCHEDULED are
-   * restricted to their author. The status is part of the WHERE clause so the
-   * pagination count stays correct, and search/department filters are applied
-   * in SQL rather than in memory.
+   * @param {ListVisibleNewsInput} payload - Status filter, search term, department codes and pagination
+   * @param {UserId} userId - Id of the caller, scoping DRAFT/SCHEDULED to their author
+   * @returns {Promise<{ items: NewsModel[]; total: number }>} The visible news (each with a signed cover URL) and the total matching count
+   * @throws {AppError} NOT_FOUND if the user doesn't exist
+   * @remarks PUBLISHED news are visible to everyone; DRAFT/SCHEDULED are restricted to their author. The status is part of the WHERE clause so the pagination count stays correct, and search/department filters are applied in SQL rather than in memory.
    */
   public async listVisible(payload: ListVisibleNewsInput, userId: UserId) {
     const { departmentCodes, page, pageSize, search, status } = payload
@@ -170,9 +174,12 @@ export class NewsService {
   }
 
   /**
-   * Updates an editor-owned news after validating its status/publication-date
-   * coherence. Target departments are reset then reconnected from the payload
-   * codes (a full replace, not a merge). Returns it with a signed cover URL.
+   * Updates an editor-owned news after validating its status/publication-date coherence.
+   * @param {UpdateNewsInput} payload - Fields to update, including the news id and target department codes
+   * @param {UserId} userId - Id of the caller, used for the editor/ownership gate
+   * @returns {Promise<NewsModel>} The updated news with its author, target departments and a signed cover URL
+   * @throws {AppError} NOT_FOUND (via getById) if the caller isn't an editor or the news doesn't exist
+   * @remarks Target departments are reset then reconnected from the payload codes (a full replace, not a merge).
    */
   public async update(payload: UpdateNewsInput, userId: UserId) {
     const news = await this.getById(payload.newsId, userId)
@@ -229,9 +236,10 @@ export class NewsService {
   }
 
   /**
-   * Replaces a stored cover object key with a temporary signed URL the browser
-   * can load. The bucket is private, so URLs are generated on read, never
-   * persisted (mirrors the avatar flow in {@link UserService}).
+   * Replaces a stored cover object key with a temporary signed URL the browser can load.
+   * @param {T} news - A news-shaped object carrying a `coverUrl` object key
+   * @returns {Promise<T>} The same object with `coverUrl` swapped for a signed URL (or null)
+   * @remarks The bucket is private, so URLs are generated on read, never persisted (mirrors the avatar flow in {@link UserService}).
    */
   private async withSignedCover<T extends { coverUrl: NewsModel['coverUrl'] }>(
     news: T,

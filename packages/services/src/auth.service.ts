@@ -21,8 +21,9 @@ export class AuthService {
   ) {}
 
   /**
-   * Returns the current session resolved from the request headers, or null when
-   * the caller isn't authenticated.
+   * Resolves the current session from the request headers.
+   * @param {Headers} headers - Incoming request headers carrying the session cookie
+   * @returns {Promise<AuthSession | null>} The session, or null when the caller isn't authenticated
    */
   public async getSession(headers: Headers): Promise<AuthSession | null> {
     return this.betterAuth.api.getSession({
@@ -31,8 +32,10 @@ export class AuthService {
   }
 
   /**
-   * Authenticates a user with email/password. Returns the response headers
-   * (carrying the session cookie) and the authenticated user.
+   * Authenticates a user with email and password.
+   * @param {SignInWithPasswordInput} payload - Email and password credentials
+   * @param {Headers} headers - Incoming request headers
+   * @returns {Promise<AuthResponse>} The response headers (carrying the session cookie) and the authenticated user
    */
   public async signInWithPassword(
     payload: SignInWithPasswordInput,
@@ -58,8 +61,9 @@ export class AuthService {
   }
 
   /**
-   * Signs the current user out. Returns the response headers (clearing the
-   * session cookie) and whether the operation succeeded.
+   * Signs the current user out.
+   * @param {Headers} headers - Incoming request headers carrying the session cookie
+   * @returns {Promise<{ headersResponse: Headers; success: boolean }>} The response headers (clearing the session cookie) and whether the operation succeeded
    */
   public async signOut(
     headers: Headers,
@@ -74,10 +78,11 @@ export class AuthService {
   }
 
   /**
-   * Registers a user with email/password under the given department and
-   * immediately signs them in. The department code is resolved to its id and
-   * `lastName` maps to better-auth's `name`. Returns the response headers
-   * (carrying the session cookie) and the created user.
+   * Registers a user with email/password under the given department and immediately signs them in.
+   * @param {SignUpWithPasswordInput} payload - Credentials, department code and profile fields
+   * @param {Headers} headers - Incoming request headers
+   * @returns {Promise<AuthResponse>} The response headers (carrying the session cookie) and the created user
+   * @remarks The department code is resolved to its id and `lastName` maps to better-auth's `name`.
    */
   public async signUpWithPassword(
     payload: SignUpWithPasswordInput,

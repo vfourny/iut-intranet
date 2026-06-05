@@ -7,8 +7,10 @@ export class DepartmentService {
   constructor(private prisma: prisma) {}
 
   /**
-   * Fetches a department by its business code (e.g. INFO, GACO). Throws if none
-   * matches.
+   * Fetches a department by its business code (e.g. INFO, GACO).
+   * @param {DepartmentCode} code - The department business code
+   * @returns {Promise<DepartmentModel>} The matching department
+   * @throws Throws if none matches
    */
   public async getByCode(code: DepartmentCode): Promise<DepartmentModel> {
     return this.prisma.department.findUniqueOrThrow({
@@ -17,7 +19,10 @@ export class DepartmentService {
   }
 
   /**
-   * Fetches a department by id. Throws if none matches.
+   * Fetches a department by id.
+   * @param {DepartmentId} departmentId - Id of the department to fetch
+   * @returns {Promise<DepartmentModel>} The matching department
+   * @throws Throws if none matches
    */
   public async getById(departmentId: DepartmentId): Promise<DepartmentModel> {
     return this.prisma.department.findUniqueOrThrow({

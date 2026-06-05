@@ -24,9 +24,11 @@ export class EventService {
   constructor(private prisma: prisma) {}
 
   /**
-   * Creates an event organized by `userId`, connected to the given department.
-   * The endAt > startAt invariant is enforced by the input schema at the tRPC
-   * boundary, so it isn't re-checked here.
+   * Creates an event organized by the given user, connected to a department.
+   * @param {CreateEventInput} payload - Event details and target department code
+   * @param {UserId} userId - Id of the organizing user
+   * @returns {Promise<EventModel>} The created event
+   * @remarks The endAt > startAt invariant is enforced by the input schema at the tRPC boundary, so it isn't re-checked here.
    */
   public async createEvent(payload: CreateEventInput, userId: UserId) {
     return this.prisma.event.create({
@@ -44,8 +46,11 @@ export class EventService {
   }
 
   /**
-   * Deletes an event the manager may manage (its organizer or an admin). Throws
-   * FORBIDDEN otherwise.
+   * Deletes an event the manager may manage (its organizer or an admin).
+   * @param {EventId} eventId - Id of the event to delete
+   * @param {EventManager} manager - The acting user's id and role
+   * @returns {Promise<EventModel>} The deleted event
+   * @throws {AppError} FORBIDDEN if the manager may not manage the event
    */
   public async deleteEvent(eventId: EventId, manager: EventManager) {
     await this.assertManageable(eventId, manager)
@@ -55,8 +60,10 @@ export class EventService {
   }
 
   /**
-   * Fetches an event by id with its department and invitations. Throws
-   * NOT_FOUND if it doesn't exist.
+   * Fetches an event by id with its department and invitations.
+   * @param {EventId} eventId - Id of the event to fetch
+   * @returns {Promise<EventWithDepartment>} The event with its department and invitations
+   * @throws Throws NOT_FOUND if it doesn't exist
    */
   public async getById(eventId: EventId): Promise<EventWithDepartment> {
     return this.prisma.event.findUniqueOrThrow({
@@ -69,9 +76,11 @@ export class EventService {
   }
 
   /**
-   * Lists events overlapping the requested calendar window and visible to the
-   * manager: an admin sees all, others see public events plus those they are
-   * invited to or organize. Ordered by start date.
+   * Lists events overlapping the requested calendar window and visible to the manager.
+   * @param {ListVisibleEventsInput} payload - Calendar window bounds (from/to); unbounded means no window filter
+   * @param {EventManager} manager - The acting user's id and role
+   * @returns {Promise<EventModel[]>} The visible events with their department and organizer, ordered by start date
+   * @remarks An admin sees all; others see public events plus those they are invited to or organize.
    */
   public async listVisible(
     payload: ListVisibleEventsInput,
@@ -107,8 +116,11 @@ export class EventService {
   }
 
   /**
-   * Updates an event the manager may manage (its organizer or an admin),
-   * optionally moving it to another department. Throws FORBIDDEN otherwise.
+   * Updates an event the manager may manage (its organizer or an admin), optionally moving it to another department.
+   * @param {UpdateEventInput} payload - Fields to update, including the event id and an optional department code
+   * @param {EventManager} manager - The acting user's id and role
+   * @returns {Promise<EventModel>} The updated event
+   * @throws {AppError} FORBIDDEN if the manager may not manage the event
    */
   public async updateEvent(payload: UpdateEventInput, manager: EventManager) {
     const { departmentCode, id, ...data } = payload
@@ -125,8 +137,11 @@ export class EventService {
   }
 
   /**
-   * Ensures the user may manage (update/delete) the event: only its organizer
-   * or an admin can. Throws FORBIDDEN otherwise (mapped to a tRPC error).
+   * Ensures the user may manage (update/delete) the event: only its organizer or an admin can.
+   * @param {EventId} eventId - Id of the event to check
+   * @param {EventManager} manager - The acting user's id and role
+   * @returns {Promise<EventWithDepartment>} The event, when it is manageable by the caller
+   * @throws {AppError} FORBIDDEN otherwise (mapped to a tRPC error)
    */
   private async assertManageable(eventId: EventId, manager: EventManager) {
     const event = await this.getById(eventId)
