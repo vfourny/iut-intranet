@@ -8,7 +8,7 @@ const DEFAULT_PASSWORD = 'Password123!'
 
 export const ADMIN = {
   departmentCode: DepartmentCode.INFO,
-  email: 'john.admin@univ-littoral.fr',
+  email: 'admin@univ-littoral.fr',
   firstName: 'John',
   jobTitle: 'Chef de département',
   lastName: 'ADMIN',
@@ -17,7 +17,7 @@ export const ADMIN = {
 
 export const USER = {
   departmentCode: DepartmentCode.GACO,
-  email: 'john.user@univ-littoral.fr',
+  email: 'user@univ-littoral.fr',
   firstName: 'John',
   jobTitle: 'Enseignant',
   lastName: 'USER',
@@ -26,7 +26,7 @@ export const USER = {
 
 export const EDITOR = {
   departmentCode: DepartmentCode.TC,
-  email: 'jane.editor@univ-littoral.fr',
+  email: 'editor@univ-littoral.fr',
   firstName: 'Jane',
   jobTitle: 'Responsable pédagogique',
   lastName: 'EDITOR',

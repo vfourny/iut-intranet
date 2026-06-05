@@ -5,7 +5,6 @@ import { userIdSchema } from '@/schemas/brand.schema'
 import {
   emailSchema,
   firstNameSchema,
-  jobTitleSchema,
   lastNameSchema,
   paginationSchema,
   phoneValueSchema,
@@ -20,7 +19,7 @@ export const jobTitleSchema = z.string().trim().min(1)
 export const userSchema = z.object({
   email: emailSchema,
   firstName: firstNameSchema,
-  jobTitle: z.string().trim().min(1).optional(),
+  jobTitle: jobTitleSchema.optional(),
   lastName: lastNameSchema,
   phone: phoneValueSchema.optional(),
   role: z.enum(UserRole),

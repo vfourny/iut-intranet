@@ -141,16 +141,3 @@ export const useUploadMyAvatar = () => {
     },
   })
 }
-
-export const useCreateUser = () => {
-  const queryCache = useQueryCache()
-  return useMutation({
-    mutation: (input: createUserFromAdminInput) =>
-      trpc.user.create.mutate(input),
-    onSuccess: () => {
-      queryCache.invalidateQueries({
-        key: ['user', 'list'],
-      })
-    },
-  })
-}
