@@ -96,7 +96,7 @@ export type UploadObjectPayload = ObjectBase & {
 
 /**
  * Uploads an object to private storage under the given folder.
- * @returns The object key (e.g. `avatars/<userId>/<uuid>.png`), to be persisted
+ * @returns The object key (e.g. `users/<userId>/avatar.png`), to be persisted
  * and later turned into a usable URL via {@link getSignedObjectUrl} (or listed
  * via {@link listObjects} then signed, e.g. for the highlight folder).
  */

@@ -10,7 +10,11 @@ import type {
 } from '@iut-intranet/helpers/schemas/news'
 import type { ListVisibleNewsInput } from '@iut-intranet/helpers/schemas/news'
 import { isEditorRole } from '@iut-intranet/helpers/utils/role'
-import { getSignedObjectUrl, uploadObject } from '@iut-intranet/providers/s3'
+import {
+  getSignedObjectUrl,
+  StorageFolders,
+  uploadObject,
+} from '@iut-intranet/providers/s3'
 
 /**
  * Validates the temporal coherence between a news status and its publication date.
@@ -23,10 +27,7 @@ import { getSignedObjectUrl, uploadObject } from '@iut-intranet/providers/s3'
 function validateStatus(status: NewsStatus, publishedAt?: Date | null) {
   const now = new Date()
 
-  if (
-    status === NewsStatus.SCHEDULED &&
-    (!publishedAt || publishedAt <= now)
-  ) {
+  if (status === NewsStatus.SCHEDULED && (!publishedAt || publishedAt <= now)) {
     throw new AppError(
       'BAD_REQUEST',
       'A scheduled news must have a future publication date',
@@ -66,14 +67,15 @@ export class NewsService {
         code: { in: payload.targetDepartmentCodes as DepartmentCode[] },
       },
     })
-    const coverUrl = payload.cover
-      ? await uploadObject({ ...payload.cover, folder: 'news' })
-      : undefined
-    const news = await this.prisma.news.create({
+    const include = {
+      author: { select: { firstName: true, lastName: true } },
+      targetDepartments: { select: { code: true } },
+    } satisfies Prisma.NewsInclude
+
+    const created = await this.prisma.news.create({
       data: {
         authorId: userId,
         content: payload.content,
-        coverUrl,
         publishedAt,
         status: payload.status,
         targetDepartments: {
@@ -81,15 +83,29 @@ export class NewsService {
         },
         title: payload.title,
       },
-      include: {
-        author: {
-          select: { firstName: true, lastName: true },
-        },
-        targetDepartments: {
-          select: { code: true },
-        },
-      },
+      include,
     })
+
+    // Cover uploadée après la création : la clé est partitionnée par `news.id`
+    // (`news/<id>/cover.png`), qui n'existe pas avant l'insert. En cas d'échec
+    // d'upload la news reste sans cover (`coverUrl` nullable), jamais d'orphelin.
+    const coverUrl = payload.cover
+      ? await uploadObject({
+          ...payload.cover,
+          fileName: 'cover',
+          folder: StorageFolders.news,
+          subFolder: created.id,
+        })
+      : undefined
+
+    const news = coverUrl
+      ? await this.prisma.news.update({
+          data: { coverUrl },
+          include,
+          where: { id: created.id },
+        })
+      : created
+
     return this.withSignedCover(news)
   }
 
@@ -139,9 +155,7 @@ export class NewsService {
     const where: Prisma.NewsWhereInput = {
       status,
       ...(isAuthorScoped ? { authorId: userId } : {}),
-      ...(search
-        ? { title: { contains: search, mode: 'insensitive' } }
-        : {}),
+      ...(search ? { title: { contains: search, mode: 'insensitive' } } : {}),
       ...(departmentCodes.length
         ? {
             targetDepartments: {
@@ -166,9 +180,7 @@ export class NewsService {
     ])
 
     return {
-      items: await Promise.all(
-        news.map((news) => this.withSignedCover(news)),
-      ),
+      items: await Promise.all(news.map((news) => this.withSignedCover(news))),
       total,
     }
   }
@@ -212,7 +224,12 @@ export class NewsService {
     // fichier l'uploade et la remplace. Pas de suppression : une fois posée, on
     // garde l'ancienne couverture tant qu'aucune nouvelle ne la remplace.
     const coverUrl = payload.cover
-      ? await uploadObject({ ...payload.cover, folder: 'news' })
+      ? await uploadObject({
+          ...payload.cover,
+          fileName: 'cover',
+          folder: StorageFolders.news,
+          subFolder: news.id,
+        })
       : undefined
 
     const updated = await this.prisma.news.update({
@@ -246,9 +263,7 @@ export class NewsService {
   ): Promise<T> {
     return {
       ...news,
-      coverUrl: news.coverUrl
-        ? await getSignedObjectUrl(news.coverUrl)
-        : null,
+      coverUrl: news.coverUrl ? await getSignedObjectUrl(news.coverUrl) : null,
     }
   }
 }

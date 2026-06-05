@@ -48,7 +48,6 @@ const seedAvatars = async (): Promise<void> => {
     users.map((user) =>
       seedExistingKey(
         user.image as string,
-        // pravatar : portrait réel, déterministe via `u` (le nom du user).
         `https://i.pravatar.cc/256?u=${encodeURIComponent(
           `${user.firstName} ${user.lastName}`,
         )}`,
@@ -66,12 +65,12 @@ const seedNewsCovers = async (): Promise<void> => {
   await Promise.all(
     news.map((news) => {
       const key = news.coverUrl as string
-      const slug =
-        key
-          .split('/')
-          .pop()
-          ?.replace(/\.[^.]+$/, '') ?? key
-      return seedExistingKey(key, `https://picsum.photos/seed/${slug}/1200/630`)
+      // La clé est `news/<newsId>/cover.png` : le nom de fichier est constant,
+      // donc on dérive le seed picsum du segment `newsId` (unique, déterministe)
+      // pour garder une couverture distincte par news.
+      const segments = key.split('/')
+      const seed = segments[segments.length - 2] ?? key
+      return seedExistingKey(key, `https://picsum.photos/seed/${seed}/1200/630`)
     }),
   )
 }

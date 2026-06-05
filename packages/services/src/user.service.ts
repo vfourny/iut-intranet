@@ -7,11 +7,7 @@ import type {
   UpdateMeInput,
   UpdateUserInput,
 } from '@iut-intranet/helpers/schemas/user'
-import {
-  getSignedObjectUrl,
-  updateObject,
-  uploadObject,
-} from '@iut-intranet/providers/s3'
+import { getSignedObjectUrl, uploadObject } from '@iut-intranet/providers/s3'
 
 export class UserService {
   constructor(private prisma: prisma) {}
@@ -90,20 +86,18 @@ export class UserService {
    * @param {UploadFileInput} payload - The avatar file to upload
    * @param {UserId} userId - Id of the user whose avatar is set
    * @returns {Promise<UserModel>} The user with a signed avatar URL
-   * @remarks Keys we already own are overwritten in place; an external/social-login URL (or first upload) gets a fresh key so storage doesn't accumulate orphans.
+   * @remarks A user owns exactly one avatar under a deterministic key (`users/<userId>/avatar.png`), so every upload overwrites it in place — no orphan keys to track, no social-login URL to special-case.
    */
   public async uploadAvatar(
     payload: UploadFileInput,
     userId: UserId,
   ): Promise<UserModel> {
-    const { image: previousKey } = await this.prisma.user.findUniqueOrThrow({
-      select: { image: true },
-      where: { id: userId },
+    const imageKey = await uploadObject({
+      ...payload,
+      fileName: 'avatar',
+      folder: 'users',
+      subFolder: userId,
     })
-
-    const imageKey = previousKey
-      ? await updateObject({ ...payload, key: previousKey })
-      : await uploadObject({ ...payload, folder: 'users', subFolder: userId })
 
     const user = await this.prisma.user.update({
       data: { image: imageKey },

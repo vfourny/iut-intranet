@@ -54,15 +54,10 @@ export const seedUsers = async () => {
           `Department ${departmentCode} not found — run seedDepartments first`,
         )
       }
-      // Clé S3 déterministe dérivée de l'email (préfixe `avatars/seed`, pas de
-      // randomUUID pour qu'un re-seed cible le même objet). `db:seed` n'écrit
-      // que la clé ; les octets sont poussés séparément par `provider:seed`.
-      const slug = user.email.split('@')[0]
       return {
         ...user,
         ...defaultUserInput,
         departmentId,
-        image: `avatars/seed/${slug}.png`,
       }
     },
   )
@@ -71,6 +66,19 @@ export const seedUsers = async () => {
     data: users,
     skipDuplicates: true,
   })
+
+  // Clé S3 déterministe alignée sur le runtime (`uploadAvatar`) :
+  // `users/<userId>/avatar.png`. Posée après coup car l'id (cuid) est généré par
+  // Prisma à l'insert. `db:seed` n'écrit que la clé ; les octets sont poussés
+  // séparément par `provider:seed`. Un re-seed cible le même objet (id stable).
+  await Promise.all(
+    createdUsers.map((user) =>
+      prisma.user.update({
+        data: { image: `users/${user.id}/avatar.png` },
+        where: { id: user.id },
+      }),
+    ),
+  )
 
   const passwordHash = await argon2.hash(DEFAULT_PASSWORD)
 

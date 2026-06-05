@@ -95,10 +95,6 @@ export const seedNews = async () => {
     const data: Prisma.NewsUncheckedCreateInput = {
       authorId: user.id,
       content: fakeNewsContent(),
-      // Clé S3 déterministe (préfixe `covers`, pas de randomUUID pour qu'un
-      // re-seed cible le même objet). `db:seed` n'écrit que la clé ; les octets
-      // sont poussés séparément par `provider:seed`.
-      coverUrl: news.withCover === false ? null : `covers/news-${i + 1}.jpg`,
       createdAt,
       publishedAt,
       status: news.status,
@@ -108,6 +104,17 @@ export const seedNews = async () => {
       title: fakeNewsTitle(),
     }
 
-    await prisma.news.create({ data })
+    const created = await prisma.news.create({ data })
+
+    // Clé S3 déterministe alignée sur le runtime (`NewsService.create`) :
+    // `news/<newsId>/cover.png`. Posée après coup car l'id (cuid) est généré par
+    // Prisma à l'insert. `db:seed` n'écrit que la clé ; les octets sont poussés
+    // séparément par `provider:seed`. Un re-seed cible le même objet (id stable).
+    if (news.withCover !== false) {
+      await prisma.news.update({
+        data: { coverUrl: `news/${created.id}/cover.png` },
+        where: { id: created.id },
+      })
+    }
   }
 }

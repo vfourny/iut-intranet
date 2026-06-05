@@ -96,6 +96,7 @@ describe('UserService', () => {
 
       expect(mockUploadObject).toHaveBeenCalledWith({
         ...payload,
+        fileName: 'avatar',
         folder: 'users',
         subFolder: user.id,
       })
