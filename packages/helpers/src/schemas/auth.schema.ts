@@ -1,13 +1,8 @@
 import { DepartmentCode } from '@iut-intranet/db/enums'
 import { z } from 'zod'
 
-import {
-  emailSchema,
-  firstNameSchema,
-  lastNameSchema,
-  phoneValueSchema,
-} from '@/schemas/common.schema'
-import { jobTitleSchema } from '@/schemas/user.schema'
+import { emailSchema } from '@/schemas/common.schema'
+import { userSchema } from '@/schemas/user.schema'
 import { PASSWORD_REGEX } from '@/utils/regex.util'
 
 // ── Mot de passe ──────────────────────────────────────────────────────────────
@@ -18,15 +13,17 @@ const passwordSchema = z.string().min(MIN_PASSWORD_LENGTH).regex(PASSWORD_REGEX)
 
 // ── Sign up ───────────────────────────────────────────────────────────────────
 
-export const signUpWithPasswordInputSchema = z
-  .object({
+export const signUpWithPasswordInputSchema = userSchema
+  .pick({
+    email: true,
+    firstName: true,
+    jobTitle: true,
+    lastName: true,
+    phone: true,
+  })
+  .extend({
     departmentCode: z.enum(DepartmentCode),
-    email: emailSchema,
-    firstName: firstNameSchema,
-    jobTitle: jobTitleSchema.optional(),
-    lastName: lastNameSchema,
     password: passwordSchema,
-    phone: phoneValueSchema.optional(),
   })
   .strict()
 export type SignUpWithPasswordInput = z.infer<

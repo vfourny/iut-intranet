@@ -187,13 +187,23 @@ const onSubmit = async () => {
   if (!form.value.title) return
   if (!form.value.content) return
   if (isUpdate.value && !form.value.status) return
+  // La couverture est obligatoire à la création (à l'update on garde l'existante).
+  const cover = coverFile.value
+  if (!isUpdate.value && !cover) {
+    toast.add({
+      life: 5000,
+      severity: 'error',
+      summary: t('news.coverRequired'),
+    })
+    return
+  }
 
   try {
     isLoading.value = true
     if (isUpdate.value && props.news) {
       await updateNews({
         content: form.value.content,
-        cover: coverFile.value,
+        cover,
         // L'id chargé (cuid) est brandé en `NewsId` par parse, sans cast.
         newsId: newsIdSchema.parse(props.news.id),
         publishedAt:
@@ -207,11 +217,17 @@ const onSubmit = async () => {
         title: form.value.title,
       })
     } else {
-      // Au create, le service force le statut DRAFT et ignore toute date de
-      // publication : on ne porte donc que les champs du contrat `create`.
       await createNews({
         content: form.value.content,
-        cover: coverFile.value,
+        // Garanti non-`undefined` par le guard ci-dessus (couverture obligatoire).
+        cover: cover!,
+        publishedAt:
+          form.value.status === 'SCHEDULED'
+            ? form.value.publishedAt
+            : form.value.status === 'PUBLISHED'
+              ? new Date()
+              : null,
+        status: form.value.status,
         targetDepartmentCodes: toRaw(form.value.targetDepartmentCodes),
         title: form.value.title,
       })

@@ -22,10 +22,6 @@
           {{ item.title }}
         </h2>
 
-        <p v-if="item.excerpt" class="line-clamp-3 text-sm text-gray-500">
-          {{ item.excerpt }}
-        </p>
-
         <div class="flex items-center gap-2 text-xs text-gray-400">
           <span v-if="item.publishedAt">{{
             formatDate(item.publishedAt)

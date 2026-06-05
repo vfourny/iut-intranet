@@ -146,12 +146,6 @@
             <p class="line-clamp-2 font-medium text-foreground">
               {{ news.title }}
             </p>
-            <p
-              v-if="news.excerpt"
-              class="line-clamp-2 text-sm text-muted-foreground"
-            >
-              {{ news.excerpt }}
-            </p>
             <p class="mt-1 text-xs text-muted-foreground">
               {{ formatNewsDate(news.publishedAt) }}
             </p>

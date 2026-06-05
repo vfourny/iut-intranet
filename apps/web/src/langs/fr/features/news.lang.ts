@@ -1,5 +1,6 @@
 export const news = {
   cancel: 'Annuler',
+  coverRequired: 'Une image de couverture est requise',
   coverUploadFail: 'Téléversement de la couverture échoué',
   create: {
     fail: 'News non sauvegardée',

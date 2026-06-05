@@ -119,7 +119,5 @@ export const fakeEventLocation = (): string => pick(EVENT_LOCATIONS)
 export const fakeNewsTitle = (): string =>
   `${pick(NEWS_PREFIXES)} ${pick(NEWS_TOPICS)}`
 
-export const fakeNewsExcerpt = (): string => frSentence()
-
 export const fakeNewsContent = (): string =>
   Array.from({ length: faker.number.int({ max: 3, min: 1 }) }, () => `<p>${frSentence()}</p>`).join('')

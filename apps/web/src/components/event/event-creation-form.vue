@@ -132,11 +132,11 @@
 
 <script lang="ts" setup>
 import { DepartmentCode } from '@iut-intranet/db/enums'
+import { eventIdSchema } from '@iut-intranet/helpers/schemas/brand'
 import type {
   CreateEventInput,
   UpdateEventInput,
 } from '@iut-intranet/helpers/schemas/event'
-import { eventIdSchema } from '@iut-intranet/helpers/schemas/brand'
 import {
   eventWriteSchema,
   updateEventInputSchema,

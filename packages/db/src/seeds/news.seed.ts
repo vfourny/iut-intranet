@@ -1,11 +1,7 @@
 import { prisma } from '@/client'
 import type { Prisma } from '@/generated/client'
 import { NewsStatus } from '@/generated/enums'
-import {
-  fakeNewsContent,
-  fakeNewsExcerpt,
-  fakeNewsTitle,
-} from '@/seeds/faker'
+import { fakeNewsContent, fakeNewsTitle } from '@/seeds/faker'
 
 interface NewsSeed {
   createdAtDayOffset: number
@@ -13,10 +9,6 @@ interface NewsSeed {
   publishedAtDay?: number
   publishedAtHour?: number
   status: NewsStatus
-  // Cas « news nu » (brouillon sans accroche ni visuel) — porte un sens
-  // d'affichage, on le garde explicite plutôt que de le laisser à faker.
-  withCover?: boolean
-  withExcerpt?: boolean
 }
 
 const NEWS: NewsSeed[] = [
@@ -45,8 +37,6 @@ const NEWS: NewsSeed[] = [
     createdAtDayOffset: 3,
     createdAtHour: 16,
     status: NewsStatus.DRAFT,
-    withCover: false,
-    withExcerpt: false,
   },
 ]
 
@@ -107,10 +97,8 @@ export const seedNews = async () => {
       // Clé S3 déterministe (préfixe `covers`, pas de randomUUID pour qu'un
       // re-seed cible le même objet). `db:seed` n'écrit que la clé ; les octets
       // sont poussés séparément par `provider:seed`.
-      coverUrl:
-        news.withCover === false ? null : `covers/news-${i + 1}.jpg`,
+      coverUrl: `covers/news-${i + 1}.jpg`,
       createdAt,
-      excerpt: news.withExcerpt === false ? null : fakeNewsExcerpt(),
       publishedAt,
       status: news.status,
       targetDepartments: {

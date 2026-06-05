@@ -16,7 +16,7 @@ export const jobTitleSchema = z.string().trim().min(1)
 
 // ── Entité ────────────────────────────────────────────────────────────────────
 
-const userSchema = z.object({
+export const userSchema = z.object({
   email: emailSchema,
   firstName: firstNameSchema,
   jobTitle: z.string().trim().min(1).optional(),

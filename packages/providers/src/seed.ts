@@ -85,12 +85,11 @@ const seedAvatars = async (): Promise<void> => {
 const seedNewsCovers = async (): Promise<void> => {
   const news = await prisma.news.findMany({
     select: { coverUrl: true },
-    where: { coverUrl: { not: null } },
   })
 
   await Promise.all(
     news.map((news) => {
-      const key = news.coverUrl as string
+      const key = news.coverUrl
       // Seed picsum déterministe dérivé du nom de fichier de la clé.
       const slug =
         key
