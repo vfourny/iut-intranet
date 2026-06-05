@@ -15,6 +15,7 @@ export const serverEnvSchema = publicEnvSchema.extend({
     .optional()
     .default(5173),
   BETTER_AUTH_SECRET: z.string().min(1, 'BETTER_AUTH_SECRET is required'),
+  CRON_SECRET: z.string(),
   DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL'),
   EMAIL_FROM: z.string().email('EMAIL_FROM must be a valid email'),
   NODE_ENV: z

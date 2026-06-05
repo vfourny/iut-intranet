@@ -26,7 +26,8 @@
     "db:studio": "dotenvx run -- turbo db:studio --filter=@iut-intranet/db",
     "clean": "turbo clean && rimraf node_modules .turbo .cache",
     "prepare": "husky",
-    "syncpack:check": "syncpack lint --dependency-types dev,overrides,prod"
+    "syncpack:check": "syncpack lint --dependency-types dev,overrides,prod",
+    "jobs:archive-articles": "dotenvx run -- turbo run job:archive-articles"
   },
   "engines": {
     "node": "22.22.2"

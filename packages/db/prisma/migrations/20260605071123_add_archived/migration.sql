@@ -10,6 +10,9 @@ ALTER TABLE "Event" DROP CONSTRAINT "Event_department_id_fkey";
 -- AlterTable
 ALTER TABLE "Event" DROP COLUMN "department_id";
 
+-- AlterTable
+ALTER TABLE "article" ADD COLUMN     "archived_at" TIMESTAMP(3);
+
 -- CreateTable
 CREATE TABLE "_EventDepartments" (
     "A" TEXT NOT NULL,
