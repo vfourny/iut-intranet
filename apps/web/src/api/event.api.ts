@@ -45,9 +45,12 @@ export const useVisibleEvents = (
 }
 
 export const useCreateEvent = () => {
+  const queryCache = useQueryCache()
   return useMutation({
     mutation: (data: CreateEventInput) =>
       trpc.event.create.mutate(data),
+    onSettled: () =>
+      queryCache.invalidateQueries({ key: ['event', 'visible'] }),
   })
 }
 
@@ -58,14 +61,6 @@ export const useUpdateEvent = () => {
       trpc.event.update.mutate(data),
     onSettled: () =>
       queryCache.invalidateQueries({ key: ['event', 'visible'] }),
-  })
-}
-
-export const useGetEventById = (eventId: string | undefined) => {
-  return useQuery({
-    enabled: () => !!eventId,
-    key: () => ['event', 'byId', eventId ?? ''] as const,
-    query: () => trpc.event.getById.query({ eventId: eventId ?? '' }),
   })
 }
 

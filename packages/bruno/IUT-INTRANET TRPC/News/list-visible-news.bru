@@ -1,0 +1,16 @@
+meta {
+  name: List Visible News
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{SERVER_URL}}/{{TRPC}}/news.listVisible?input={"status":"PUBLISHED","page":1,"pageSize":12}
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,18 +1,19 @@
 meta {
-  name: Delete Event
+  name: Update Me
   type: http
-  seq: 1
+  seq: 5
 }
 
 post {
-  url: {{SERVER_URL}}/{{TRPC}}/event.delete
+  url: {{SERVER_URL}}/{{TRPC}}/user.updateMe
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "id": "cmp3qak28000e20oiu9n6opqc"
+    "jobTitle": "Enseignant",
+    "phone": "0612345678"
   }
 }
 

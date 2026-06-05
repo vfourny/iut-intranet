@@ -60,22 +60,6 @@ export class EventService {
   }
 
   /**
-   * Fetches an event by id with its department and invitations.
-   * @param {EventId} eventId - Id of the event to fetch
-   * @returns {Promise<EventWithDepartment>} The event with its department and invitations
-   * @throws Throws NOT_FOUND if it doesn't exist
-   */
-  public async getById(eventId: EventId): Promise<EventWithDepartment> {
-    return this.prisma.event.findUniqueOrThrow({
-      include: {
-        department: true,
-        invitations: true,
-      },
-      where: { id: eventId },
-    })
-  }
-
-  /**
    * Lists events overlapping the requested calendar window and visible to the manager.
    * @param {ListVisibleEventsInput} payload - Calendar window bounds (from/to); unbounded means no window filter
    * @param {EventManager} manager - The acting user's id and role
@@ -149,5 +133,22 @@ export class EventService {
       throw new AppError('FORBIDDEN', 'You are not allowed to manage this event')
     }
     return event
+  }
+
+  /**
+   * Fetches an event by id with its department and invitations.
+   * @param {EventId} eventId - Id of the event to fetch
+   * @returns {Promise<EventWithDepartment>} The event with its department and invitations
+   * @throws Throws NOT_FOUND if it doesn't exist
+   * @remarks Internal: used by {@link assertManageable} to resolve the organizer before update/delete.
+   */
+  private async getById(eventId: EventId): Promise<EventWithDepartment> {
+    return this.prisma.event.findUniqueOrThrow({
+      include: {
+        department: true,
+        invitations: true,
+      },
+      where: { id: eventId },
+    })
   }
 }

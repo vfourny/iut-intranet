@@ -9,13 +9,6 @@ const MAX_DESCRIPTION_LENGTH = 2000
 
 // ── Lecture ───────────────────────────────────────────────────────────────────
 
-export const getEventByIdInputSchema = z
-  .object({
-    eventId: eventIdSchema,
-  })
-  .strict()
-export type GetEventByIdInput = z.infer<typeof getEventByIdInputSchema>
-
 // Fenêtre visible du calendrier (FullCalendar `datesSet`). Optionnelle : sans
 // bornes, on renvoie tous les events visibles (utile au premier rendu).
 export const listVisibleEventsInputSchema = z

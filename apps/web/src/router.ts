@@ -17,10 +17,6 @@ export const RouteNames = {
     signUp: 'auth.sign-up',
   },
   calendar: 'calendar',
-  event: {
-    create: 'event.create',
-    update: 'event.update',
-  },
   home: 'home',
   news: {
     news: 'news',
@@ -36,7 +32,6 @@ const HomePage = () => import('@/pages/home-page.vue')
 const UserListPage = () => import('@/pages/user/user-list.vue')
 const CalendarPage = () => import('@/pages/event/event-page.vue')
 const NewsListPage = () => import('@/pages/news/news-list-page.vue')
-const AddEventPage = () => import('@/pages/event/add-event-page.vue')
 const ProfilPrivatePage = () => import('@/pages/profil/profil-page-private.vue')
 const SignInPage = () => import('@/pages/auth/sign-in-page.vue')
 const SignUpPage = () => import('@/pages/auth/sign-up-page.vue')
@@ -68,21 +63,6 @@ export const routes = [
           },
         ],
         path: 'actualites',
-      },
-      {
-        children: [
-          {
-            component: AddEventPage,
-            name: RouteNames.event.create,
-            path: 'create',
-          },
-          {
-            component: AddEventPage,
-            name: RouteNames.event.update,
-            path: ':id/update',
-          },
-        ],
-        path: 'event',
       },
       {
         component: ProfilPrivatePage,

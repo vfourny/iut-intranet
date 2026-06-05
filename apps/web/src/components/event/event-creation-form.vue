@@ -153,12 +153,10 @@ import PrimeTextarea from 'primevue/textarea'
 import PrimeToggleSwitch from 'primevue/toggleswitch'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 import { useSession } from '@/api/auth.api'
 import { useCreateEvent, useUpdateEvent } from '@/api/event.api'
 import { useI18n } from '@/composables/use-i18n'
-import { RouteNames } from '@/router'
 
 const props = defineProps<{
   departmentCode?: DepartmentCode
@@ -171,8 +169,11 @@ const props = defineProps<{
   title?: string
 }>()
 
+// `saved` est émis après une création/mise à jour réussie : le parent (la
+// page calendrier) ferme alors la modale, comme le fait news-list-page.
+const emit = defineEmits<{ saved: [] }>()
+
 const { t } = useI18n()
-const router = useRouter()
 const { currentSession } = useSession()
 const { mutateAsync: createEvent } = useCreateEvent()
 const { mutateAsync: updateEvent } = useUpdateEvent()
@@ -259,7 +260,7 @@ async function onSubmit(formEvent: FormSubmitEvent) {
         summary: t('layout.success'),
       })
     }
-    await router.push({ name: RouteNames.calendar })
+    emit('saved')
   } catch {
     toast.add({
       detail: t('event.toast.error'),

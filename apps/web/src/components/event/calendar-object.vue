@@ -4,11 +4,15 @@
       <PrimeButton
         icon="pi pi-plus"
         :label="t('event.addEvent')"
-        @click="router.push({ name: RouteNames.event.create })"
+        @click="emit('create')"
       />
     </div>
     <FullCalendar :options="calendar" />
-    <EventClickBox ref="clickBox" :event="selectedEvent" />
+    <EventClickBox
+      ref="clickBox"
+      :event="selectedEvent"
+      @edit="emit('edit', $event)"
+    />
 
     <PrimePopover ref="datePopover">
       <div class="min-w-52">
@@ -42,12 +46,10 @@ import type { TrpcOutput } from '@iut-intranet/trpc'
 import PrimeButton from 'primevue/button'
 import PrimePopover from 'primevue/popover'
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 import EventClickBox from '@/components/event/event-click-box.vue'
 import { useI18n } from '@/composables/use-i18n'
 import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
-import { RouteNames } from '@/router'
 
 type VisibleEvent = TrpcOutput['event']['listVisible'][number]
 
@@ -57,13 +59,15 @@ interface CalendarObjectProps {
 
 const { events } = defineProps<CalendarObjectProps>()
 
-// Émis à chaque changement de fenêtre visible (navigation, changement de vue) :
-// le parent recharge alors uniquement les events de l'intervalle affiché.
+// `rangeChange` : fenêtre visible (recharge des events). `create`/`edit` :
+// ouverture de la modale côté page calendrier, avec la date cliquée pour la
+// création depuis le calendrier et l'event sélectionné pour l'édition.
 const emit = defineEmits<{
+  create: [startAt?: Date]
+  edit: [VisibleEvent]
   rangeChange: [{ from: Date; to: Date }]
 }>()
 
-const router = useRouter()
 const { t } = useI18n()
 
 function getDepartmentColor(code: DepartmentCode) {
@@ -94,10 +98,7 @@ function formatClickedDate(date: Date | null) {
 
 function navigateToCreate() {
   datePopover.value?.hide()
-  router.push({
-    name: RouteNames.event.create,
-    query: { startAt: clickedDate.value?.toISOString() },
-  })
+  emit('create', clickedDate.value ?? undefined)
 }
 
 const calendar = computed(() => ({

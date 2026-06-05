@@ -40,18 +40,19 @@ import PrimePopover from 'primevue/popover'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 import { useSession } from '@/api/auth.api'
 import { useDeleteEvent } from '@/api/event.api'
 import { useI18n } from '@/composables/use-i18n'
-import { RouteNames } from '@/router'
 
 type VisibleEvent = TrpcOutput['event']['listVisible'][number]
 
 const { event } = defineProps<{ event: null | VisibleEvent }>()
 
-const router = useRouter()
+// `edit` remonte l'event au calendrier, qui ouvre la modale d'édition (plus
+// de navigation vers une page dédiée).
+const emit = defineEmits<{ edit: [VisibleEvent] }>()
+
 const { t } = useI18n()
 const { currentSession } = useSession()
 const popover = ref<InstanceType<typeof PrimePopover> | null>(null)
@@ -112,7 +113,7 @@ function formatTime(date: Date | null | string | undefined) {
 function navigateToUpdate() {
   if (!event) return
   popover.value?.hide()
-  router.push({ name: RouteNames.event.update, params: { id: event.id } })
+  emit('edit', event)
 }
 
 defineExpose({
