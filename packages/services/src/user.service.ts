@@ -1,13 +1,16 @@
-import type { prisma } from '@iut-intranet/db'
+import type { Prisma, prisma } from '@iut-intranet/db'
 import type { UserModel } from '@iut-intranet/db/models'
 import type { UserId } from '@iut-intranet/helpers/schemas/brand'
+import type { Paginated } from '@iut-intranet/helpers/schemas/common'
 import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
 import type {
   ListUsersInputSchema,
   UpdateMeInput,
   UpdateUserInput,
 } from '@iut-intranet/helpers/schemas/user'
-import { getSignedObjectUrl, uploadObject } from '@iut-intranet/providers/s3'
+import { signUrlField, uploadObject } from '@iut-intranet/providers/s3'
+
+const userInclude = { department: true } satisfies Prisma.UserInclude
 
 export class UserService {
   constructor(private prisma: prisma) {}
@@ -20,17 +23,17 @@ export class UserService {
    */
   public async getById(userId: UserId) {
     const user = await this.prisma.user.findUniqueOrThrow({
-      include: { department: true },
+      include: userInclude,
       where: { id: userId },
     })
 
-    return this.withSignedAvatar(user)
+    return signUrlField(user, 'image')
   }
 
   /**
    * Retrieves a paginated list of users, optionally filtered by name.
    * @param {ListUsersInputSchema} payload - Pagination and an optional name search term
-   * @returns {Promise<{ items: UserModel[]; total: number }>} The users (each with a signed avatar URL) and the total matching count
+   * @returns {Promise<Paginated<UserModel>>} The users (each with a signed avatar URL) and the total matching count
    */
   public async list(payload: ListUsersInputSchema) {
     const { page, pageSize, search } = payload
@@ -45,7 +48,7 @@ export class UserService {
 
     const [items, total] = await Promise.all([
       this.prisma.user.findMany({
-        include: { department: true },
+        include: userInclude,
         orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -56,10 +59,10 @@ export class UserService {
 
     return {
       items: await Promise.all(
-        items.map((item) => this.withSignedAvatar(item)),
+        items.map((item) => signUrlField(item, 'image')),
       ),
       total,
-    }
+    } satisfies Paginated<UserModel>
   }
 
   /**
@@ -73,12 +76,13 @@ export class UserService {
     payload: Omit<UpdateUserInput, 'userId'> | UpdateMeInput,
     userId: UserId,
   ) {
-    const updated = await this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       data: payload,
+      include: userInclude,
       where: { id: userId },
     })
 
-    return this.withSignedAvatar(updated)
+    return signUrlField(updatedUser, 'image')
   }
 
   /**
@@ -99,26 +103,12 @@ export class UserService {
       subFolder: userId,
     })
 
-    const user = await this.prisma.user.update({
+    const udpatedUser = await this.prisma.user.update({
       data: { image: imageKey },
+      include: userInclude,
       where: { id: userId },
     })
 
-    return this.withSignedAvatar(user)
-  }
-
-  /**
-   * Replaces a stored avatar key with a temporary signed URL the browser can load.
-   * @param {T} user - A user-shaped object carrying an `image` object key
-   * @returns {Promise<T>} The same object with `image` swapped for a signed URL (or null)
-   * @remarks The bucket is private, so URLs are generated on read, never persisted.
-   */
-  private async withSignedAvatar<T extends { image: UserModel['image'] }>(
-    user: T,
-  ): Promise<T> {
-    return {
-      ...user,
-      image: user.image ? await getSignedObjectUrl(user.image) : null,
-    }
+    return signUrlField(udpatedUser, 'image')
   }
 }

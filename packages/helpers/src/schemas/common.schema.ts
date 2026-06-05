@@ -48,3 +48,12 @@ export const paginationSchema = z.object({
 })
 
 export const searchSchema = z.string().trim().optional()
+
+/**
+ * Sortie paginée générique : la tranche d'éléments demandée et le total des
+ * lignes correspondant au filtre, toutes pages confondues (pour le front).
+ */
+export interface Paginated<T> {
+  items: T[]
+  total: number
+}

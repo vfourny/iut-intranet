@@ -48,6 +48,24 @@ export const getSignedObjectUrl = (key: string): Promise<string> =>
   )
 
 /**
+ * Swaps a storage-key field for a signed URL in place, leaving the rest of the object untouched.
+ * @param {T} obj - Any object carrying a storage key under {@link key}
+ * @param {K} key - The field holding the stored object key (or null)
+ * @returns {Promise<T>} The same object with {@link key} swapped for a signed URL, or null when unset
+ * @remarks Generic over the key, so it serves every model: `signUrlField(news, 'coverUrl')`, `signUrlField(user, 'image')`. The cast reconciles the computed-key spread back to T.
+ */
+export const signUrlField = async <T, K extends keyof T>(
+  obj: T,
+  key: K,
+): Promise<T> => {
+  const path = obj[key]
+  return {
+    ...obj,
+    [key]: typeof path === 'string' ? await getSignedObjectUrl(path) : null,
+  } as T
+}
+
+/**
  * Decodes a base64 payload, enforces the upload size limit, and writes it to the
  * given key (overwriting any existing object). Shared by {@link uploadObject}
  * (fresh key) and {@link updateObject} (existing key).
