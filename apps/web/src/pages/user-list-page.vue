@@ -98,10 +98,6 @@ enum DisplayMode {
   DATA_VIEW = 'data-view',
 }
 
-const { currentSession } = useSession()
-
-const { t } = useI18n()
-
 const SEARCH_DEBOUNCE_MS = 300
 
 const search = ref('')
