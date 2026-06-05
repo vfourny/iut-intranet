@@ -11,7 +11,7 @@ import { UserService } from '@/user.service'
 const userService = new UserService(prisma)
 const departmentService = new DepartmentService(prisma)
 const eventService = new EventService(prisma)
-const newsService = new NewsService(prisma)
+const newsService = new NewsService(prisma, userService)
 const highlightService = new HighlightService()
 const authService = new AuthService(
   betterAuthInstance,

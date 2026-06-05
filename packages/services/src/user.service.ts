@@ -1,4 +1,5 @@
 import type { Prisma, prisma } from '@iut-intranet/db'
+import type { UserRole } from '@iut-intranet/db/enums'
 import type { UserModel } from '@iut-intranet/db/models'
 import type { UserId } from '@iut-intranet/helpers/schemas/brand'
 import type { Paginated } from '@iut-intranet/helpers/schemas/common'
@@ -28,6 +29,22 @@ export class UserService {
     })
 
     return signUrlField(user, 'image')
+  }
+
+  /**
+   * Fetches a user's role, validating the user exists.
+   * @param {UserId} userId - Id of the user
+   * @returns {Promise<UserRole>} The user's role
+   * @throws Prisma P2025 (mapped to NOT_FOUND) if the user doesn't exist
+   * @remarks Lean lookup for authorization decisions: no department join, no avatar signing, unlike {@link getById}.
+   */
+  public async getRole(userId: UserId): Promise<UserRole> {
+    const { role } = await this.prisma.user.findUniqueOrThrow({
+      select: { role: true },
+      where: { id: userId },
+    })
+
+    return role
   }
 
   /**

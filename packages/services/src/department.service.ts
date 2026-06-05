@@ -1,7 +1,6 @@
 import type { prisma } from '@iut-intranet/db'
 import type { DepartmentCode } from '@iut-intranet/db/enums'
 import type { DepartmentModel } from '@iut-intranet/db/models'
-import type { DepartmentId } from '@iut-intranet/helpers/schemas/brand'
 
 export class DepartmentService {
   constructor(private prisma: prisma) {}
@@ -15,18 +14,6 @@ export class DepartmentService {
   public async getByCode(code: DepartmentCode): Promise<DepartmentModel> {
     return this.prisma.department.findUniqueOrThrow({
       where: { code },
-    })
-  }
-
-  /**
-   * Fetches a department by id.
-   * @param {DepartmentId} departmentId - Id of the department to fetch
-   * @returns {Promise<DepartmentModel>} The matching department
-   * @throws Throws if none matches
-   */
-  public async getById(departmentId: DepartmentId): Promise<DepartmentModel> {
-    return this.prisma.department.findUniqueOrThrow({
-      where: { id: departmentId },
     })
   }
 }

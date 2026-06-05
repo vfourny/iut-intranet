@@ -81,7 +81,7 @@ export const useVisibleNews = (
         page: toValue(page),
         pageSize,
         search: toValue(search).trim() || undefined,
-        status,
+        status: [status],
       })
       return {
         items: result.items.map(coerceNews),

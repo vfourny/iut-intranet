@@ -69,6 +69,7 @@ Validated via zod in `packages/helpers/src/env.ts`. Use `getEnv('KEY1', 'KEY2', 
 - **ESLint config** — packages extend `@iut-intranet/configs/eslint/node` (which itself extends `@vfourny/node-toolkit/eslint/node` and disables `no-redeclare`). The API allows `console` in `src/index.ts` only.
 - **TS path aliases** — packages use `@/*` aliases that point to `src/*`; `tsc-alias` rewrites them on build.
 - **Prefer `satisfies`** — when possible, use `satisfies` rather than an `as` cast or an explicit type annotation. It keeps the narrowest inferred type while still checking the value against the expected shape, instead of widening or silently overriding it.
+- **Prefer early returns** — bail out early on the simple/edge cases (guard clauses) instead of nesting or chaining ternaries. Keeps the happy path flat and lets later values stay narrowly typed (e.g. non-null after an early `return`).
 
 ### Status of scaffolded packages
 

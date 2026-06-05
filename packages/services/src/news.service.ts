@@ -4,14 +4,16 @@ import { NewsStatus } from '@iut-intranet/db'
 import type { NewsModel } from '@iut-intranet/db/models'
 import { AppError } from '@iut-intranet/helpers/errors'
 import type { NewsId, UserId } from '@iut-intranet/helpers/schemas/brand'
+import type { Paginated } from '@iut-intranet/helpers/schemas/common'
 import type {
   CreateNewsInput,
   UpdateNewsInput,
 } from '@iut-intranet/helpers/schemas/news'
 import type { ListVisibleNewsInput } from '@iut-intranet/helpers/schemas/news'
+import { resolvePublishedAt } from '@iut-intranet/helpers/utils/news'
 import { isEditorRole } from '@iut-intranet/helpers/utils/role'
 import {
-  getSignedObjectUrl,
+  signUrlField,
   StorageFolders,
   uploadObject,
 } from '@iut-intranet/providers/s3'
@@ -24,6 +26,11 @@ import {
  * @throws {AppError} BAD_REQUEST when a SCHEDULED news lacks a future date, or a PUBLISHED news carries a future one
  * @remarks Only the clock-dependent rules live here; the structural ones (a draft has no date, a scheduled news has a date) are enforced upfront by the input schema. Shared by create/update — the latter passes the merged status (payload ?? stored), which the schema cannot know.
  */
+const newsInclude = {
+  author: { select: { firstName: true, lastName: true } },
+  targetDepartments: { select: { code: true } },
+} satisfies Prisma.NewsInclude
+
 function validateStatus(status: NewsStatus, publishedAt?: Date | null) {
   const now = new Date()
 
@@ -54,11 +61,14 @@ export class NewsService {
    */
   public async create(payload: CreateNewsInput, userId: UserId) {
     const now = new Date()
-    // Date de publication pilotée par le service pour un PUBLISHED (= l'instant de
-    // publication) ; le schéma a déjà mis le `publishedAt` du payload à `null` pour
-    // ce statut. Draft → null, scheduled → date fournie (validée future plus bas).
-    const publishedAt =
-      payload.status === NewsStatus.PUBLISHED ? now : payload.publishedAt
+    // Date de publication pilotée par le service : un PUBLISHED est daté à `now`
+    // (l'instant de publication), un draft n'a pas de date, un scheduled garde
+    // la date fournie (validée future plus bas).
+    const publishedAt = resolvePublishedAt(
+      payload.status,
+      payload.publishedAt,
+      now,
+    )
     validateStatus(payload.status, publishedAt)
 
     const departments = await this.prisma.department.findMany({
@@ -67,11 +77,6 @@ export class NewsService {
         code: { in: payload.targetDepartmentCodes as DepartmentCode[] },
       },
     })
-    const include = {
-      author: { select: { firstName: true, lastName: true } },
-      targetDepartments: { select: { code: true } },
-    } satisfies Prisma.NewsInclude
-
     const created = await this.prisma.news.create({
       data: {
         authorId: userId,
@@ -83,7 +88,7 @@ export class NewsService {
         },
         title: payload.title,
       },
-      include,
+      include: newsInclude,
     })
 
     // Cover uploadée après la création : la clé est partitionnée par `news.id`
@@ -101,12 +106,12 @@ export class NewsService {
     const news = coverUrl
       ? await this.prisma.news.update({
           data: { coverUrl },
-          include,
+          include: newsInclude,
           where: { id: created.id },
         })
       : created
 
-    return this.withSignedCover(news)
+    return signUrlField(news, 'coverUrl')
   }
 
   /**
@@ -114,7 +119,8 @@ export class NewsService {
    * @param {NewsId} newsId - Id of the news to fetch
    * @param {UserId} userId - Id of the caller, used for the editor gate
    * @returns {Promise<NewsModel>} The news with its author, target departments and a signed cover URL
-   * @throws {AppError} NOT_FOUND if the caller isn't an editor or the news doesn't exist
+   * @throws {AppError} NOT_FOUND if the caller isn't an editor
+   * @throws Prisma P2025 (mapped to NOT_FOUND) if the news doesn't exist
    * @remarks Editor-gated: non-editors get NOT_FOUND rather than FORBIDDEN so the resource's existence isn't leaked.
    */
   public async getById(newsId: NewsId, userId: UserId) {
@@ -122,32 +128,28 @@ export class NewsService {
     if (!user || !isEditorRole(user.role)) {
       throw new AppError('NOT_FOUND', 'User not found')
     }
-    const news = await this.prisma.news.findUnique({
-      include: {
-        author: { select: { firstName: true, lastName: true } },
-        targetDepartments: { select: { code: true } },
-      },
+    const news = await this.prisma.news.findUniqueOrThrow({
+      include: newsInclude,
       where: { id: newsId },
     })
-    if (!news) throw new AppError('NOT_FOUND', 'News not found')
-    return this.withSignedCover(news)
+    return signUrlField(news, 'coverUrl')
   }
 
   /**
    * Lists news visible to a user, paginated and filtered server-side.
    * @param {ListVisibleNewsInput} payload - Status filter, search term, department codes and pagination
    * @param {UserId} userId - Id of the caller, scoping DRAFT/SCHEDULED to their author
-   * @returns {Promise<{ items: NewsModel[]; total: number }>} The visible news (each with a signed cover URL) and the total matching count
-   * @throws {AppError} NOT_FOUND if the user doesn't exist
+   * @returns {Promise<Paginated<NewsModel>>} The visible news (each with a signed cover URL) and the total matching count
+   * @throws Prisma P2025 (mapped to NOT_FOUND) if the user doesn't exist
    * @remarks PUBLISHED news are visible to everyone; DRAFT/SCHEDULED are restricted to their author. The status is part of the WHERE clause so the pagination count stays correct, and search/department filters are applied in SQL rather than in memory.
    */
-  public async listVisible(payload: ListVisibleNewsInput, userId: UserId) {
+  public async listVisible(
+    payload: ListVisibleNewsInput,
+    userId: UserId,
+  ): Promise<Paginated<NewsModel>> {
     const { departmentCodes, page, pageSize, search, status } = payload
 
-    const user = await this.prisma.user.findUnique({ where: { id: userId } })
-    if (!user) {
-      throw new AppError('NOT_FOUND', 'User not found')
-    }
+    await this.prisma.user.findUniqueOrThrow({ where: { id: userId } })
 
     const isAuthorScoped =
       status === NewsStatus.DRAFT || status === NewsStatus.SCHEDULED
@@ -167,10 +169,7 @@ export class NewsService {
 
     const [news, total] = await Promise.all([
       this.prisma.news.findMany({
-        include: {
-          author: { select: { firstName: true, lastName: true } },
-          targetDepartments: { select: { code: true } },
-        },
+        include: newsInclude,
         orderBy: { publishedAt: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -180,7 +179,9 @@ export class NewsService {
     ])
 
     return {
-      items: await Promise.all(news.map((news) => this.withSignedCover(news))),
+      items: await Promise.all(
+        news.map((news) => signUrlField(news, 'coverUrl')),
+      ),
       total,
     }
   }
@@ -199,11 +200,12 @@ export class NewsService {
     const status = payload.status ?? news.status
     // Date pilotée par le service pour un PUBLISHED : `now` à la première
     // publication, date d'origine conservée ensuite (un simple édit ne la
-    // réinitialise pas). Le schéma a déjà mis le `publishedAt` du payload à `null`.
-    const publishedAt =
-      status === NewsStatus.PUBLISHED
-        ? (news.publishedAt ?? now)
-        : payload.publishedAt
+    // réinitialise pas).
+    const publishedAt = resolvePublishedAt(
+      status,
+      payload.publishedAt,
+      news.publishedAt ?? now,
+    )
     validateStatus(status, publishedAt)
 
     const departments = await this.prisma.department.findMany({
@@ -243,27 +245,9 @@ export class NewsService {
         },
         title: payload.title,
       },
-      include: {
-        author: { select: { firstName: true, lastName: true } },
-        targetDepartments: { select: { code: true } },
-      },
+      include: newsInclude,
       where: { id: payload.newsId },
     })
-    return this.withSignedCover(updated)
-  }
-
-  /**
-   * Replaces a stored cover object key with a temporary signed URL the browser can load.
-   * @param {T} news - A news-shaped object carrying a `coverUrl` object key
-   * @returns {Promise<T>} The same object with `coverUrl` swapped for a signed URL (or null)
-   * @remarks The bucket is private, so URLs are generated on read, never persisted (mirrors the avatar flow in {@link UserService}).
-   */
-  private async withSignedCover<T extends { coverUrl: NewsModel['coverUrl'] }>(
-    news: T,
-  ): Promise<T> {
-    return {
-      ...news,
-      coverUrl: news.coverUrl ? await getSignedObjectUrl(news.coverUrl) : null,
-    }
+    return signUrlField(updated, 'coverUrl')
   }
 }

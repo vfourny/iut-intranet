@@ -35,13 +35,16 @@
 import type {
   DatesSetArg,
   EventClickArg,
+  EventDropArg,
 } from '@fullcalendar/core/index.js'
+import frLocale from '@fullcalendar/core/locales/fr'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import { type DateClickArg } from '@fullcalendar/interaction'
 import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import FullCalendar from '@fullcalendar/vue3'
 import type { DepartmentCode } from '@iut-intranet/db/enums'
+import { eventIdSchema } from '@iut-intranet/helpers/schemas/brand'
 import type { TrpcOutput } from '@iut-intranet/trpc'
 import PrimeButton from 'primevue/button'
 import PrimePopover from 'primevue/popover'
@@ -50,7 +53,7 @@ import { computed, ref } from 'vue'
 import { useUpdateEvent } from '@/api/event.api'
 import EventClickBox from '@/components/event/event-click-box.vue'
 import { useI18n } from '@/composables/use-i18n'
-import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
+import { SPECIALTY_BY_DEPARTMENT, SPECIALTY_COLORS } from '@/lib/department'
 
 type VisibleEvent = TrpcOutput['event']['listVisible'][number]
 
@@ -116,7 +119,8 @@ const calendar = computed(() => ({
   eventDrop: (info: EventDropArg) => {
     updateEvent({
       endAt: info.event.end ?? undefined,
-      id: info.event.id,
+      // L'id FullCalendar (cuid) est brandé en `EventId` par parse, sans cast.
+      id: eventIdSchema.parse(info.event.id),
       startAt: info.event.start ?? undefined,
     })
   },
