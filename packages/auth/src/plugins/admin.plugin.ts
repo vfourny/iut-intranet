@@ -19,7 +19,7 @@ export const acUserRoles = {
     ...adminAc.statements,
   }),
   [UserRole.EDITOR]: ac.newRole({
-    ...adminAc.statements,
+    ...userAc.statements,
   }),
   [UserRole.USER]: ac.newRole({
     ...userAc.statements,

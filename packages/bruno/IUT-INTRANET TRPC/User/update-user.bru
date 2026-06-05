@@ -1,0 +1,31 @@
+meta {
+  name: Update User
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{SERVER_URL}}/{{TRPC}}/user.updateUser
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "userId": "{{activeUserId}}",
+    "firstName": "Bruno",
+    "lastName": "API Request",
+    "jobTitle": "Enseignant",
+    "phone": "0612345678",
+    "role": "USER"
+  }
+}
+
+vars:pre-request {
+  activeUserId: cmp3qak28000e20oiu9n6opqc
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

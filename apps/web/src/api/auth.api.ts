@@ -1,11 +1,12 @@
 import type {
   SignInWithPasswordInput,
   SignUpWithPasswordInput,
-} from '@iut-intranet/helpers/types/auth'
+} from '@iut-intranet/helpers/schemas/auth'
 import { isAdminRole } from '@iut-intranet/helpers/utils/role'
 import {
   defineMutation,
   defineQuery,
+  toCacheKey,
   useMutation,
   useQuery,
   useQueryCache,
@@ -40,13 +41,17 @@ export const useSession = defineQuery(() => {
   }
 })
 
+const refetchSession = async (queryCache: ReturnType<typeof useQueryCache>) => {
+  const session = await trpc.auth.getSession.query()
+  queryCache.setQueryData(AUTH_KEYS.session(), session)
+}
+
 export const useSignIn = defineMutation(() => {
   const queryCache = useQueryCache()
   return useMutation({
     mutation: (input: SignInWithPasswordInput) =>
       trpc.auth.signInWithPassword.mutate(input),
-    onSuccess: (session) =>
-      queryCache.setQueryData(AUTH_KEYS.session(), session),
+    onSuccess: () => refetchSession(queryCache),
   })
 })
 
@@ -55,8 +60,7 @@ export const useSignUp = defineMutation(() => {
   return useMutation({
     mutation: (input: SignUpWithPasswordInput) =>
       trpc.auth.signUpWithPassword.mutate(input),
-    onSuccess: (session) =>
-      queryCache.setQueryData(AUTH_KEYS.session(), session),
+    onSuccess: () => refetchSession(queryCache),
   })
 })
 
@@ -64,6 +68,15 @@ export const useSignOut = defineMutation(() => {
   const queryCache = useQueryCache()
   return useMutation({
     mutation: () => trpc.auth.signOut.mutate(),
-    onSuccess: () => queryCache.setQueryData(AUTH_KEYS.session(), undefined),
+    // À la déconnexion, on purge tout le cache (données utilisateur, listes…)
+    // sauf l'entrée session, qu'on remet à null pour refléter l'état déconnecté.
+    onSuccess: () => {
+      const sessionKeyHash = toCacheKey(AUTH_KEYS.session())
+      queryCache
+        .getEntries()
+        .filter((entry) => entry.keyHash !== sessionKeyHash)
+        .forEach((entry) => queryCache.remove(entry))
+      queryCache.setQueryData(AUTH_KEYS.session(), null)
+    },
   })
 })

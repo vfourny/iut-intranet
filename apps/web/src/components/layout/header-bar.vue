@@ -1,20 +1,38 @@
 <template>
   <header
-    class="flex items-center justify-between border-b border-border bg-card px-6 py-3"
+    class="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-card/80 px-6 py-2.5 backdrop-blur-md"
   >
     <div class="flex items-center gap-2">
-      <RouterLink :to="{ name: RouteNames.home }">
+      <RouterLink class="flex items-center" :to="{ name: RouteNames.home }">
         <img
-          class="h-22 w-44 object-contain"
+          alt="IUT"
+          class="h-10 w-auto object-contain"
           src="../../assets/img/logo_iut.png"
         />
       </RouterLink>
     </div>
 
-    <PrimeMenubar :model="items">
+    <PrimeMenubar
+      :model="items"
+      :dt="{
+        background: 'transparent',
+        borderColor: 'transparent',
+        borderRadius: '0',
+        padding: '0',
+        gap: '0.25rem',
+      }"
+    >
       <template #item="{ item, props }">
-        <a class="flex items-center gap-2" v-bind="props.action">
-          <i :class="item.icon" />
+        <a
+          v-bind="props.action"
+          class="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-150"
+          :class="
+            isActive(item)
+              ? 'bg-iut-blue-50 text-iut-blue-600'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+          "
+        >
+          <i :class="item.icon" class="text-[0.95rem]" />
           <span>{{ item.label }}</span>
         </a>
       </template>
@@ -24,8 +42,8 @@
       <PrimeButton severity="secondary" text @click="profilMenu.toggle($event)">
         <div class="flex items-center gap-2">
           <PrimeAvatar
-            v-if="currentSession?.user.image"
-            :image="currentSession.user.image"
+            v-if="me?.image"
+            :image="me.image"
             shape="circle"
           />
           <PrimeAvatar v-else icon="pi pi-user" shape="circle" />
@@ -44,42 +62,38 @@
 
 <script lang="ts" setup>
 import PrimeAvatar from 'primevue/avatar'
+import PrimeButton from 'primevue/button'
 import PrimeMenu from 'primevue/menu'
+import PrimeMenubar from 'primevue/menubar'
 import type { MenuItem } from 'primevue/menuitem'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import { useSession, useSignOut } from '@/api/auth.api'
+import { useMe } from '@/api/users.api'
 import { useI18n } from '@/composables/use-i18n'
-import { RouteNames } from '@/router'
+import { NAV_ITEMS, RouteNames } from '@/router'
 
 const { t } = useI18n()
 const router = useRouter()
+const route = useRoute()
 const { mutateAsync: signOut } = useSignOut()
 const { currentSession } = useSession()
+// L'avatar vient de `me` (URL signée), pas de la session better-auth qui ne
+// contient que la clé S3 brute — inexploitable avec le bucket privé.
+const { data: me } = useMe()
 
-const items = ref<MenuItem[]>([
-  {
-    command: () => router.push({ name: RouteNames.home }),
-    icon: 'pi pi-home',
-    label: t('layout.default.nav.home'),
-  },
-  {
-    command: () => router.push({ name: RouteNames.directory }),
-    icon: 'pi pi-users',
-    label: t('layout.default.nav.directory'),
-  },
-  {
-    command: () => router.push({ name: RouteNames.calendar }),
-    icon: 'pi pi-calendar',
-    label: t('layout.default.nav.calendar'),
-  },
-  {
-    command: () => router.push({ name: RouteNames.article.news }),
-    icon: 'pi pi-file',
-    label: t('layout.default.nav.news'),
-  },
-])
+const items = computed<MenuItem[]>(() =>
+  Object.values(NAV_ITEMS).map((nav) => ({
+    command: () => router.push({ name: nav.route }),
+    icon: nav.icon,
+    label: t(nav.label),
+    route: nav.route,
+  })),
+)
+
+// La page courante se détecte par son nom de route, posé sur chaque item.
+const isActive = (item: MenuItem) => route.name === item.route
 
 async function handleSignOut() {
   await signOut()
@@ -90,7 +104,7 @@ const profilMenu = ref()
 
 const profilMenuItem = ref<MenuItem[]>([
   {
-    command: () => router.push({ name: RouteNames.profil.private }),
+    command: () => router.push({ name: RouteNames.profil }),
     icon: 'pi pi-user',
     label: t('profil.access_profil'),
   },

@@ -18,7 +18,7 @@ All scripts go through Turbo at the repo root:
 
 Database (all delegate to the `@iut-intranet/db` package via Turbo filters):
 
-- `npm run db:start` / `npm run db:down` — local Postgres 15 in Docker (`docker/local.compose.yml`). Data persists in `.cache/db_data_local`.
+- `npm run env:start` / `npm run env:stop` — local environment (Postgres 15 + MinIO) in Docker (`docker/local.compose.yml`). Data persists in `.cache/db_data_local` and `.cache/minio_data_local`.
 - `npm run db:generate` — `prisma generate` (output goes to `packages/db/src/generated`, not `node_modules`).
 - `npm run db:migrate -- <name>` — `prisma migrate dev --name <name>`. Note the `--` is required because the script is `prisma migrate dev --name`.
 - `npm run db:deploy` / `npm run db:push` / `npm run db:reset` / `npm run db:seed` / `npm run db:studio`.
@@ -68,6 +68,8 @@ Validated via zod in `packages/helpers/src/env.ts`. Use `getEnv('KEY1', 'KEY2', 
 - **Conventional commits** — commitlint config extends `@iut-intranet/configs/commitlint`, run via husky `commit-msg`. Husky `pre-commit` runs `lint-staged` (eslint --fix on TS/JS, prettier on everything else).
 - **ESLint config** — packages extend `@iut-intranet/configs/eslint/node` (which itself extends `@vfourny/node-toolkit/eslint/node` and disables `no-redeclare`). The API allows `console` in `src/index.ts` only.
 - **TS path aliases** — packages use `@/*` aliases that point to `src/*`; `tsc-alias` rewrites them on build.
+- **Prefer `satisfies`** — when possible, use `satisfies` rather than an `as` cast or an explicit type annotation. It keeps the narrowest inferred type while still checking the value against the expected shape, instead of widening or silently overriding it.
+- **Prefer early returns** — bail out early on the simple/edge cases (guard clauses) instead of nesting or chaining ternaries. Keeps the happy path flat and lets later values stay narrowly typed (e.g. non-null after an early `return`).
 
 ### Status of scaffolded packages
 

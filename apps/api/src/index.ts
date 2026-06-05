@@ -7,7 +7,7 @@ import cors from 'cors'
 import express from 'express'
 import cron from 'node-cron'
 
-import { ArchiveArticlesJob } from '@/jobs/archive-articles.job'
+import { startCrons } from '@/cron'
 
 const { API_PORT, PUBLIC_API_URL, PUBLIC_APP_URL } = getServerEnv(
   'API_PORT',
@@ -42,19 +42,8 @@ app.use(
   }),
 )
 
-cron.schedule(
-  '0 2 * * *',
-  async () => {
-    try {
-      await ArchiveArticlesJob(logger)
-    } catch (error) {
-      logger.error(error, 'Error during archive articles job:')
-    }
-  },
-  {
-    timezone: 'Europe/Paris',
-  },
-)
+// Archivage automatique des news publiées trop anciennes, etc.
+startCrons()
 
 app.listen(API_PORT, () => {
   console.log(`Server is running on ${PUBLIC_API_URL}`)

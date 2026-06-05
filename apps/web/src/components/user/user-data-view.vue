@@ -1,5 +1,12 @@
 <template>
-  <PrimeDataView layout="grid" :value="users">
+  <PrimeDataView
+    layout="grid"
+    :pt="{
+      root: { class: 'bg-transparent border-0' },
+      content: { class: 'bg-transparent' },
+    }"
+    :value="users"
+  >
     <template #grid>
       <div class="grid grid-cols-12 gap-4">
         <div
@@ -8,21 +15,21 @@
           class="col-span-12 sm:col-span-6 md:col-span-4 xl:col-span-3 p-2"
         >
           <div
-            class="p-6 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded flex flex-col cursor-pointer hover:shadow-lg"
+            class="p-6 border border-surface-200 bg-surface-0 rounded flex flex-col cursor-pointer hover:shadow-lg"
             @click="
               router.push({ name: RouteNames.home, params: { id: user.id } })
             "
           >
-            <div class="bg-surface-50 flex justify-center rounded p-4">
+            <div class="aspect-square w-full overflow-hidden rounded bg-surface-50">
               <img
                 v-if="user.image"
                 :alt="`${user.firstName} ${user.lastName}`"
-                class="h-24 w-24 rounded-full object-cover"
+                class="h-full w-full object-cover"
                 :src="user.image"
               />
               <div
                 v-else
-                class="h-24 w-24 rounded-full bg-surface-200 dark:bg-surface-700 flex items-center justify-center text-xl font-medium text-surface-700 dark:text-surface-200"
+                class="flex h-full w-full items-center justify-center bg-surface-200 text-4xl font-medium text-surface-700"
               >
                 {{ getInitials(user) }}
               </div>
@@ -40,19 +47,19 @@
                 </div>
               </div>
               <div class="flex flex-col gap-2 mt-4">
-                <span class="text-sm text-surface-600 dark:text-surface-300">
+                <span class="text-sm text-surface-600">
                   {{ user.jobTitle }}
                 </span>
                 <span
                   v-if="user.email"
-                  class="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-300"
+                  class="flex items-center gap-2 text-sm text-surface-600"
                 >
                   <i class="pi pi-envelope" />
                   {{ user.email }}
                 </span>
                 <span
                   v-if="user.phone"
-                  class="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-300"
+                  class="flex items-center gap-2 text-sm text-surface-600"
                 >
                   <i class="pi pi-phone" />
                   {{ user.phone }}
@@ -67,7 +74,7 @@
   <div ref="sentinelRef" class="h-8" />
   <div
     v-if="loading"
-    class="flex justify-center py-4 text-surface-500 dark:text-surface-400"
+    class="flex justify-center py-4 text-surface-500"
   >
     <i class="pi pi-spinner pi-spin text-2xl" />
   </div>

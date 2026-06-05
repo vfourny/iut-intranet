@@ -1,17 +1,3 @@
-<script lang="ts" setup>
-import type { getMeWithDepartmentInput } from '@iut-intranet/helpers/types/user'
-import { useI18n } from 'vue-i18n'
-
-import DepartmentTag from '@/components/department/department-tag.vue'
-import FormUpdateProfil from '@/components/profil/form-update-profil.vue'
-
-defineProps<{
-  user: getMeWithDepartmentInput
-}>()
-
-const { t } = useI18n()
-</script>
-
 <template>
   <div class="space-y-4">
     <div
@@ -39,3 +25,17 @@ const { t } = useI18n()
     <FormUpdateProfil :user="user" />
   </div>
 </template>
+
+<script lang="ts" setup>
+import { useI18n } from 'vue-i18n'
+
+import type { MeWithDepartment } from '@/api/users.api'
+import DepartmentTag from '@/components/department/department-tag.vue'
+import FormUpdateProfil from '@/components/profil/form-update-profil.vue'
+
+defineProps<{
+  user: MeWithDepartment
+}>()
+
+const { t } = useI18n()
+</script>

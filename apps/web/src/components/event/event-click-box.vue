@@ -1,7 +1,7 @@
 <template>
   <PrimePopover ref="popover">
     <div class="min-w-52 max-w-80">
-      <h3 class="font-semibold text-gray-800 mb-2">{{ event?.titre }}</h3>
+      <h3 class="font-semibold text-gray-800 mb-2">{{ event?.title }}</h3>
       <p class="text-sm text-gray-600">{{ event?.location }}</p>
       <p class="text-sm text-gray-600">
         {{ formatTime(event?.startAt) }} – {{ formatTime(event?.endAt) }}
@@ -32,6 +32,7 @@
 </template>
 
 <script lang="ts" setup>
+import { isAdminRole } from '@iut-intranet/helpers/utils/role'
 import type { TrpcOutput } from '@iut-intranet/trpc'
 import PrimeButton from 'primevue/button'
 import PrimeConfirmDialog from 'primevue/confirmdialog'
@@ -39,18 +40,19 @@ import PrimePopover from 'primevue/popover'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 import { useSession } from '@/api/auth.api'
 import { useDeleteEvent } from '@/api/event.api'
 import { useI18n } from '@/composables/use-i18n'
-import { RouteNames } from '@/router'
 
-type VisibleEvent = TrpcOutput['event']['listVisibleEventsForUser'][number]
+type VisibleEvent = TrpcOutput['event']['listVisible'][number]
 
 const { event } = defineProps<{ event: null | VisibleEvent }>()
 
-const router = useRouter()
+// `edit` remonte l'event au calendrier, qui ouvre la modale d'édition (plus
+// de navigation vers une page dédiée).
+const emit = defineEmits<{ edit: [VisibleEvent] }>()
+
 const { t } = useI18n()
 const { currentSession } = useSession()
 const popover = ref<InstanceType<typeof PrimePopover> | null>(null)
@@ -68,7 +70,7 @@ const canEdit = computed(
     event &&
     currentSession.value &&
     (event.organizerId === currentSession.value.user.id ||
-      currentSession.value.user.role === 'ADMIN'),
+      isAdminRole(currentSession.value.user.role)),
 )
 
 function confirmDelete() {
@@ -77,7 +79,7 @@ function confirmDelete() {
       if (!event) return
       popover.value?.hide()
       try {
-        await deleteEvent({ id: event.id })
+        await deleteEvent({ eventId: event.id })
         toast.add({
           detail: t('event.toast.deleted'),
           life: 3000,
@@ -111,7 +113,7 @@ function formatTime(date: Date | null | string | undefined) {
 function navigateToUpdate() {
   if (!event) return
   popover.value?.hide()
-  router.push({ name: RouteNames.event.update, params: { id: event.id } })
+  emit('edit', event)
 }
 
 defineExpose({

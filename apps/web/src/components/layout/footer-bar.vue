@@ -1,13 +1,13 @@
 <template>
-  <footer class="border-t border-slate-200 bg-white px-6 py-4">
+  <footer class="border-t border-border bg-card px-6 py-4">
     <div
-      class="flex flex-col items-center gap-1 text-center text-sm text-slate-500"
+      class="flex flex-col items-center gap-1 text-center text-sm text-muted-foreground"
     >
       <span
         >{{ t('layout.footer.location')
         }}{{ t('layout.footer.contactPhoneNumber') }}</span
       >
-      <span class="font-medium text-slate-700">{{
+      <span class="font-medium text-foreground">{{
         t('layout.footer.title')
       }}</span>
       <span>{{ t('layout.footer.legals') }}</span>

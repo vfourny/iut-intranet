@@ -12,7 +12,7 @@ model User {
   emailVerified Boolean   @default(false) @map("email_verified")
   image         String?
   createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
   role          UserRole  @default(USER)
   banned        Boolean?  @default(false)
   banReason     String?
@@ -26,13 +26,14 @@ model User {
   manager      User?      @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
   subordinates User[]     @relation("UserManager")
 
-  sessions Session[]
-  accounts Account[]
-  organizedEvents   Event[]
-  eventInvitations  EventInvitation[]
-  articles Article[]
-  images Image[]
+  sessions         Session[]
+  accounts         Account[]
+  organizedEvents  Event[]
+  eventInvitations EventInvitation[]
+  news             News[]
 
+  @@index([departmentId])
+  @@index([managerId])
   @@map("user")
 }
 
@@ -52,6 +53,7 @@ model Account {
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
 
+  @@index([userId])
   @@map("account")
 }
 
@@ -68,6 +70,7 @@ model Session {
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   activeOrganizationId String?  @map("active_organization_id")
 
+  @@index([userId])
   @@map("session")
 }
 
@@ -77,7 +80,7 @@ model Verification {
   value      String
   expiresAt  DateTime @map("expires_at")
   createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   @@map("verification")
 }

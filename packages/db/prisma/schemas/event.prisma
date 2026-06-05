@@ -1,30 +1,39 @@
-enum Status {
-    PENDING
-    ACCEPTED
-    DECLINED
+enum EventInvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
 
 model Event {
-    id           String   @id @default(cuid())
-    titre        String
-    description  String
-    startAt      DateTime
-    endAt        DateTime
-    location     String
-    organizerId  String   @map("user_id")
-    isPublic     Boolean
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  startAt      DateTime
+  endAt        DateTime
+  location     String
+  organizerId  String   @map("user_id")
+  isPublic     Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-    organizer   User              @relation(fields: [organizerId], references: [id])
-    departments Department[]      @relation("EventDepartments")
-    invitations EventInvitation[]
+  departments Department[]      @relation("EventDepartments")
+  organizer   User              @relation(fields: [organizerId], references: [id], onDelete: Restrict)
+  invitations EventInvitation[]
+
+  @@index([organizerId])
+  @@map("event")
 }
 
 model EventInvitation {
-    id String @id @default(cuid())
-    eventId String @map("event_id")
-    userId String @map("user_id")
-    status Status
+  id      String                @id @default(cuid())
+  eventId String                @map("event_id")
+  userId  String                @map("user_id")
+  status  EventInvitationStatus
 
-    event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-    user User @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId])
+  @@map("event_invitation")
 }

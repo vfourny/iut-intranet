@@ -1,140 +1,3 @@
-<script lang="ts" setup>
-import {
-  createEventFormulaireInputSchema,
-  updateEventFormulaireInputSchema,
-} from '@iut-intranet/helpers/schemas/event'
-import type {
-  createEventFormulaireInput,
-  updateEventFormulaireInput,
-} from '@iut-intranet/helpers/types/event'
-import type { FormSubmitEvent } from '@primevue/forms'
-import { Form as PrimeForm } from '@primevue/forms'
-import { zodResolver } from '@primevue/forms/resolvers/zod'
-import PrimeButton from 'primevue/button'
-import PrimeDatePicker from 'primevue/datepicker'
-import PrimeInputText from 'primevue/inputtext'
-import PrimeMessage from 'primevue/message'
-import PrimeMultiSelect from 'primevue/multiselect'
-import PrimeTextarea from 'primevue/textarea'
-import PrimeToggleSwitch from 'primevue/toggleswitch'
-import { useToast } from 'primevue/usetoast'
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-
-import { useSession } from '@/api/auth.api'
-import { useGetDepartments } from '@/api/department.api'
-import { useCreateEvent, useUpdateEvent } from '@/api/event.api'
-import { useI18n } from '@/composables/use-i18n'
-import { RouteNames } from '@/router'
-
-const props = defineProps<{
-  departmentIds?: string[]
-  description?: string
-  endAt?: Date
-  eventId?: string
-  isPublic?: boolean
-  location?: string
-  startAt?: Date
-  titre?: string
-}>()
-
-const { t } = useI18n()
-const router = useRouter()
-const { currentSession } = useSession()
-const { data: departments, isPending: isDepartmentsLoading } =
-  useGetDepartments()
-const { mutateAsync: createEvent } = useCreateEvent()
-const { mutateAsync: updateEvent } = useUpdateEvent()
-
-const isUpdateMode = computed(() => !!props.eventId)
-
-const resolver = zodResolver(
-  isUpdateMode.value
-    ? updateEventFormulaireInputSchema
-    : createEventFormulaireInputSchema.omit({
-        departmentIds: true,
-        organizerId: true,
-      }),
-)
-
-const initialValues = computed(() => ({
-  departmentIds: props.departmentIds ?? [
-    currentSession.value?.user?.departmentId ?? '',
-  ],
-  description: props.description ?? '',
-  endAt: props.endAt,
-  isPublic: props.isPublic ?? false,
-  location: props.location ?? '',
-  startAt: props.startAt,
-  titre: props.titre ?? '',
-}))
-
-const selectedDepartmentIds = ref<string[]>(
-  props.departmentIds ?? [currentSession.value?.user?.departmentId ?? ''],
-)
-
-const startAtValue = ref<Date>(props.startAt ?? new Date())
-const endAtValue = ref<Date>(props.endAt ?? new Date())
-const titreValue = ref<string>(props.titre ?? '')
-const descriptionValue = ref<string>(props.description ?? '')
-const locationValue = ref<string>(props.location ?? '')
-const isPublicValue = ref<boolean>(props.isPublic ?? false)
-
-const toast = useToast()
-
-async function onSubmit(formEvent: FormSubmitEvent) {
-  if (!formEvent.valid || !currentSession.value) return
-  try {
-    if (isUpdateMode.value) {
-      if (!props.eventId) return
-      const payload: updateEventFormulaireInput = {
-        departmentIds: selectedDepartmentIds.value,
-        description: descriptionValue.value,
-        endAt: endAtValue.value,
-        id: props.eventId,
-        isPublic: isPublicValue.value,
-        location: locationValue.value,
-        startAt: startAtValue.value,
-        titre: titreValue.value,
-      }
-      await updateEvent(payload)
-      toast.add({
-        detail: t('event.toast.updated'),
-        life: 3000,
-        severity: 'success',
-        summary: t('layout.success'),
-      })
-    } else {
-      const payload: createEventFormulaireInput = {
-        departmentIds: selectedDepartmentIds.value,
-        description: descriptionValue.value,
-        endAt: endAtValue.value,
-        isPublic: isPublicValue.value,
-        location: locationValue.value,
-        organizerId: currentSession.value.user.id,
-        startAt: startAtValue.value,
-        titre: titreValue.value,
-      }
-      await createEvent(payload)
-      toast.add({
-        detail: t('event.toast.created'),
-        life: 3000,
-        severity: 'success',
-        summary: t('layout.success'),
-      })
-    }
-    await router.push({ name: RouteNames.calendar })
-  } catch {
-    toast.add({
-      detail: t('event.toast.error'),
-      life: 3000,
-      severity: 'error',
-      summary: t('layout.error'),
-    })
-  }
-}
-</script>
-
 <template>
   <div class="flex flex-col gap-4 p-4">
     <PrimeForm
@@ -145,20 +8,20 @@ async function onSubmit(formEvent: FormSubmitEvent) {
     >
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-1">
-          <label>{{ t('event.titre') }}</label>
+          <label>{{ t('event.title') }}</label>
           <PrimeInputText
-            v-model="titreValue"
+            v-model="titleValue"
             fluid
-            name="titre"
-            :placeholder="t('event.placeholder.titre')"
+            name="title"
+            :placeholder="t('event.placeholder.title')"
           />
           <PrimeMessage
-            v-if="$form?.titre?.invalid"
+            v-if="$form?.title?.invalid"
             severity="error"
             size="small"
             variant="simple"
           >
-            {{ $form?.titre?.error?.message }}
+            {{ $form?.title?.error?.message }}
           </PrimeMessage>
         </div>
 
@@ -184,12 +47,12 @@ async function onSubmit(formEvent: FormSubmitEvent) {
         <div class="flex flex-col gap-1">
           <label>{{ t('event.department') }}</label>
           <PrimeMultiSelect
-            v-model="selectedDepartmentIds"
+            v-model="selectedDepartmentCodes"
+            display="chip"
             fluid
-            :loading="isDepartmentsLoading"
-            option-label="code"
-            option-value="id"
-            :options="departments ?? []"
+            option-label="label"
+            option-value="value"
+            :options="departmentOptions"
             :placeholder="t('event.placeholder.department')"
           />
         </div>
@@ -266,3 +129,150 @@ async function onSubmit(formEvent: FormSubmitEvent) {
     </PrimeForm>
   </div>
 </template>
+
+<script lang="ts" setup>
+import { DepartmentCode } from '@iut-intranet/db/enums'
+import { eventIdSchema } from '@iut-intranet/helpers/schemas/brand'
+import type {
+  CreateEventInput,
+  UpdateEventInput,
+} from '@iut-intranet/helpers/schemas/event'
+import {
+  eventWriteSchema,
+  updateEventInputSchema,
+} from '@iut-intranet/helpers/schemas/event'
+import type { FormSubmitEvent } from '@primevue/forms'
+import { Form as PrimeForm } from '@primevue/forms'
+import { zodResolver } from '@primevue/forms/resolvers/zod'
+import PrimeButton from 'primevue/button'
+import PrimeDatePicker from 'primevue/datepicker'
+import PrimeInputText from 'primevue/inputtext'
+import PrimeMessage from 'primevue/message'
+import PrimeMultiSelect from 'primevue/multiselect'
+import PrimeTextarea from 'primevue/textarea'
+import PrimeToggleSwitch from 'primevue/toggleswitch'
+import { useToast } from 'primevue/usetoast'
+import { computed, ref } from 'vue'
+
+import { useSession } from '@/api/auth.api'
+import { useCreateEvent, useUpdateEvent } from '@/api/event.api'
+import { useI18n } from '@/composables/use-i18n'
+
+const props = defineProps<{
+  departmentCodes?: DepartmentCode[]
+  description?: string
+  endAt?: Date
+  eventId?: string
+  isPublic?: boolean
+  location?: string
+  startAt?: Date
+  title?: string
+}>()
+
+// `saved` est émis après une création/mise à jour réussie : le parent (la
+// page calendrier) ferme alors la modale, comme le fait news-list-page.
+const emit = defineEmits<{ saved: [] }>()
+
+const { t } = useI18n()
+const { currentSession } = useSession()
+const { mutateAsync: createEvent } = useCreateEvent()
+const { mutateAsync: updateEvent } = useUpdateEvent()
+
+// Les départements sont une énumération métier : on construit les options
+// directement depuis l'enum, sans appel réseau. Le backend résout le code en id.
+const departmentOptions = Object.values(DepartmentCode).map((code) => ({
+  label: code,
+  value: code,
+}))
+
+const isUpdateMode = computed(() => !!props.eventId)
+
+const resolver = zodResolver(
+  isUpdateMode.value
+    ? updateEventInputSchema
+    : eventWriteSchema.omit({
+        departmentCodes: true,
+      }),
+)
+
+// Par défaut, on pré-sélectionne le département de l'utilisateur courant ; à
+// l'édition on reprend les départements de l'event.
+const defaultDepartmentCodes = (): DepartmentCode[] => {
+  if (props.departmentCodes) return props.departmentCodes
+  const own = currentSession.value?.user?.department?.code
+  return own ? [own] : []
+}
+
+const initialValues = computed(() => ({
+  departmentCodes: defaultDepartmentCodes(),
+  description: props.description ?? '',
+  endAt: props.endAt,
+  isPublic: props.isPublic ?? false,
+  location: props.location ?? '',
+  startAt: props.startAt,
+  title: props.title ?? '',
+}))
+
+const selectedDepartmentCodes = ref<DepartmentCode[]>(defaultDepartmentCodes())
+
+const startAtValue = ref<Date>(props.startAt ?? new Date())
+const endAtValue = ref<Date>(props.endAt ?? new Date())
+const titleValue = ref<string>(props.title ?? '')
+const descriptionValue = ref<string>(props.description ?? '')
+const locationValue = ref<string>(props.location ?? '')
+const isPublicValue = ref<boolean>(props.isPublic ?? false)
+
+const toast = useToast()
+
+async function onSubmit(formEvent: FormSubmitEvent) {
+  if (!formEvent.valid || !currentSession.value) return
+  try {
+    if (isUpdateMode.value) {
+      if (!props.eventId) return
+      const payload: UpdateEventInput = {
+        departmentCodes: selectedDepartmentCodes.value,
+        description: descriptionValue.value,
+        endAt: endAtValue.value,
+        // L'id chargé (cuid) est brandé en `EventId` par parse, sans cast.
+        id: eventIdSchema.parse(props.eventId),
+        isPublic: isPublicValue.value,
+        location: locationValue.value,
+        startAt: startAtValue.value,
+        title: titleValue.value,
+      }
+      await updateEvent(payload)
+      toast.add({
+        detail: t('event.toast.updated'),
+        life: 3000,
+        severity: 'success',
+        summary: t('layout.success'),
+      })
+    } else {
+      const payload: CreateEventInput = {
+        departmentCodes: selectedDepartmentCodes.value,
+        description: descriptionValue.value,
+        endAt: endAtValue.value,
+        isPublic: isPublicValue.value,
+        location: locationValue.value,
+        startAt: startAtValue.value,
+        title: titleValue.value,
+      }
+      await createEvent(payload)
+      toast.add({
+        detail: t('event.toast.created'),
+        life: 3000,
+        severity: 'success',
+        summary: t('layout.success'),
+      })
+    }
+    emit('saved')
+  } catch {
+    toast.add({
+      detail: t('event.toast.error'),
+      life: 3000,
+      severity: 'error',
+      summary: t('layout.error'),
+    })
+  }
+}
+</script>

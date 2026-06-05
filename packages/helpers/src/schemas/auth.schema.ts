@@ -1,43 +1,44 @@
 import { DepartmentCode } from '@iut-intranet/db/enums'
 import { z } from 'zod'
 
-import {
-  emailSchema,
-  firstNameSchema,
-  jobTitleSchema,
-  lastNameSchema,
-  phoneSchema,
-} from '@/schemas/common.schema'
+import { emailSchema } from '@/schemas/common.schema'
+import { userSchema } from '@/schemas/user.schema'
 import { PASSWORD_REGEX } from '@/utils/regex.util'
+
+// ── Mot de passe ──────────────────────────────────────────────────────────────
 
 export const MIN_PASSWORD_LENGTH = 8
 
-export const passwordSchema = z
-  .string()
-  .min(MIN_PASSWORD_LENGTH)
-  .regex(PASSWORD_REGEX)
+const passwordSchema = z.string().min(MIN_PASSWORD_LENGTH).regex(PASSWORD_REGEX)
 
-export const signUpWithPasswordInputSchema = z.object({
-  departmentCode: z.enum(DepartmentCode),
-  email: emailSchema,
-  firstName: firstNameSchema,
-  jobTitle: jobTitleSchema.optional(),
-  lastName: lastNameSchema,
-  password: passwordSchema,
-  phone: phoneSchema.optional(),
-})
+// ── Sign up ───────────────────────────────────────────────────────────────────
 
-export const signInWithPasswordInputSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
-  rememberMe: z.boolean().default(false).optional(),
-})
+export const signUpWithPasswordInputSchema = userSchema
+  .pick({
+    email: true,
+    firstName: true,
+    jobTitle: true,
+    lastName: true,
+    phone: true,
+  })
+  .extend({
+    departmentCode: z.enum(DepartmentCode),
+    password: passwordSchema,
+  })
+  .strict()
+export type SignUpWithPasswordInput = z.infer<
+  typeof signUpWithPasswordInputSchema
+>
 
-export const forgotPasswordInputSchema = z.object({
-  email: emailSchema,
-})
+// ── Sign in ───────────────────────────────────────────────────────────────────
 
-export const resetPasswordInputSchema = z.object({
-  password: passwordSchema,
-  token: z.string(),
-})
+export const signInWithPasswordInputSchema = z
+  .object({
+    email: emailSchema,
+    password: passwordSchema,
+    rememberMe: z.boolean().default(false).optional(),
+  })
+  .strict()
+export type SignInWithPasswordInput = z.infer<
+  typeof signInWithPasswordInputSchema
+>

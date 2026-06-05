@@ -26,7 +26,12 @@
       "types": "./dist/prettier.config.d.ts",
       "default": "./dist/prettier.config.js"
     },
-    "./tsconfig/*": "./dist/tsconfig/*.json"
+    "./tsconfig/*": "./dist/tsconfig/*.json",
+    "./vitest": {
+      "source": "./src/vitest.ts",
+      "types": "./dist/vitest.d.ts",
+      "default": "./dist/vitest.js"
+    }
   },
   "name": "@iut-intranet/configs",
   "private": true,

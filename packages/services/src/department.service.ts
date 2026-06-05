@@ -6,34 +6,14 @@ export class DepartmentService {
   constructor(private prisma: prisma) {}
 
   /**
-   * Retrieves a department by its business code
-   * @param {DepartmentCode} code - Department business code (e.g. INFO, GACO)
-   * @returns {Promise<DepartmentModel>} Department object
-   * @throws {Error} If department does not exist
+   * Fetches a department by its business code (e.g. INFO, GACO).
+   * @param {DepartmentCode} code - The department business code
+   * @returns {Promise<DepartmentModel>} The matching department
+   * @throws Throws if none matches
    */
   public async getByCode(code: DepartmentCode): Promise<DepartmentModel> {
     return this.prisma.department.findUniqueOrThrow({
       where: { code },
     })
-  }
-
-  /**
-   * Retrieves a department by ID
-   * @param {string} departmentId - Department unique identifier
-   * @returns {Promise<DepartmentModel>} Department object
-   * @throws {Error} If department does not exist
-   */
-  public async getById(departmentId: string): Promise<DepartmentModel> {
-    return this.prisma.department.findUniqueOrThrow({
-      where: { id: departmentId },
-    })
-  }
-
-  /**
-   * Retrieves all departments
-   * @returns {Promise<DepartmentModel[]>} Array of all departments
-   */
-  public async list(): Promise<DepartmentModel[]> {
-    return this.prisma.department.findMany()
   }
 }

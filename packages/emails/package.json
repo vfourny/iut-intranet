@@ -29,7 +29,7 @@
     "dev:tsc": "tsc --watch --preserveWatchOutput",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "ts:check": "tsc --noEmit "
+    "ts:check": "tsc --noEmit && tsc --noEmit --project tsconfig.test.json"
   },
   "type": "module",
   "version": "1.0.0"

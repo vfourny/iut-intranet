@@ -1,0 +1,23 @@
+meta {
+  name: Update Me
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{SERVER_URL}}/{{TRPC}}/user.updateMe
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "jobTitle": "Enseignant",
+    "phone": "0612345678"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

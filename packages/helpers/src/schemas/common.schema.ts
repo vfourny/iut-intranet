@@ -1,9 +1,11 @@
 import { z } from 'zod'
 
-import { NAME_PATTERN_REGEX, PHONE_FR_REGEX } from '@/utils/regex.util'
+import { formatPhoneForStorage, isValidPhone } from '@/utils/phone.util'
+import { NAME_PATTERN_REGEX } from '@/utils/regex.util'
+
+// ── Identité ────────────────────────────────────────────────────────────────
 
 const MAX_NAME_LENGTH = 70
-const MAX_JOB_TITLE_LENGTH = 100
 
 export const firstNameSchema = z
   .string()
@@ -18,22 +20,31 @@ export const lastNameSchema = z
   .max(MAX_NAME_LENGTH)
   .regex(NAME_PATTERN_REGEX)
 
+const UNIV_EMAIL_DOMAIN = 'univ-littoral.fr'
 export const emailSchema = z
   .string()
   .trim()
   .toLowerCase()
   .email()
-  .endsWith('@univ-littoral.fr', {
-    message: "L'adresse doit être un e-mail officiel @univ-littoral.fr",
+  .endsWith(`@${UNIV_EMAIL_DOMAIN}`, {
+    message: `L'adresse e-mail doit appartenir au domaine @${UNIV_EMAIL_DOMAIN}`,
   })
 
-export const phoneSchema = z.string().trim().regex(PHONE_FR_REGEX)
+// Accepte un numéro saisi au format national (avec espaces) ou international,
+// le valide via libphonenumber et le normalise en E.164 pour le stockage.
+export const phoneValueSchema = z
+  .string()
+  .refine(isValidPhone)
+  .transform(formatPhoneForStorage)
 
-export const jobTitleSchema = z.string().trim().min(1).max(MAX_JOB_TITLE_LENGTH)
+// ── Listing (pagination & recherche) ──────────────────────────────────────────
 
 const DEFAULT_PAGE_SIZE = 10
 const MAX_PAGE_SIZE = 100
 
+/**
+ * Schéma de pagination partagé : `page`/`pageSize` avec une taille de page par
+ */
 export const paginationSchema = z.object({
   page: z.number().int().min(1).default(1),
   pageSize: z
@@ -45,3 +56,12 @@ export const paginationSchema = z.object({
 })
 
 export const searchSchema = z.string().trim().optional()
+
+/**
+ * Sortie paginée générique : la tranche d'éléments demandée et le total des
+ * lignes correspondant au filtre, toutes pages confondues (pour le front).
+ */
+export interface Paginated<T> {
+  items: T[]
+  total: number
+}

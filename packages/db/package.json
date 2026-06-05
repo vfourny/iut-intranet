@@ -5,6 +5,7 @@
     "argon2": "0.44.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "10.4.0",
     "@iut-intranet/configs": "*",
     "prisma": "7.6.0"
   },

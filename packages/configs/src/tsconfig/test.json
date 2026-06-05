@@ -1,0 +1,4 @@
+{
+  "display": "Test Configuration",
+  "extends": "@vfourny/node-toolkit/tsconfig/test"
+}

@@ -1,0 +1,27 @@
+meta {
+  name: Upload Highlight
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{SERVER_URL}}/{{TRPC}}/highlight.upload
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "base64": "{{highlightBase64}}",
+    "contentType": "image/png"
+  }
+}
+
+vars:pre-request {
+  highlightBase64: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

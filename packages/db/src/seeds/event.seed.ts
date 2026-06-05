@@ -1,176 +1,182 @@
 import { prisma } from '@/client'
-import { DepartmentCode, Status } from '@/generated/enums'
+import type { Prisma } from '@/generated/client'
+import { DepartmentCode, EventInvitationStatus } from '@/generated/enums'
+import {
+  fakeEventDescription,
+  fakeEventLocation,
+  fakeEventTitle,
+} from '@/seeds/faker'
 import { ADMIN, EDITOR, USER } from '@/seeds/user.seed'
 
 interface EventInviteeSeed {
   email: string
-  status: Status
+  status: EventInvitationStatus
 }
 
 interface EventSeed {
   departmentCodes: DepartmentCode[]
-  description: string
   endDayOffset?: number
   endHour: number
   endMinute?: number
   id: string
   invitees: EventInviteeSeed[]
   isPublic: boolean
-  location: string
   organizerEmail: string
   startDayOffset: number
   startHour: number
   startMinute?: number
-  titre: string
 }
 
 const EVENTS: EventSeed[] = [
   {
     departmentCodes: [DepartmentCode.INFO],
-    description: 'Soutenances finales devant le jury pédagogique.',
     endHour: 11,
     id: 'evt-soutenances-info',
     invitees: [
-      { email: USER.email, status: Status.ACCEPTED },
-      { email: EDITOR.email, status: Status.PENDING },
+      { email: USER.email, status: EventInvitationStatus.ACCEPTED },
+      { email: EDITOR.email, status: EventInvitationStatus.PENDING },
     ],
     isPublic: true,
-    location: 'Amphi A',
     organizerEmail: ADMIN.email,
     startDayOffset: 0,
     startHour: 9,
-    titre: 'Soutenances de projets tuteurés INFO',
   },
   {
-    departmentCodes: [DepartmentCode.INFO],
-    description: 'Visioconférence',
+    departmentCodes: [DepartmentCode.GACO],
     endHour: 16,
     id: 'ia-presentation',
     invitees: [
-      { email: USER.email, status: Status.ACCEPTED },
-      { email: EDITOR.email, status: Status.PENDING },
+      { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
+      { email: ADMIN.email, status: EventInvitationStatus.PENDING },
     ],
     isPublic: true,
-    location: 'Grand amphi',
-    organizerEmail: ADMIN.email,
-    startDayOffset: 0,
-    startHour: 13.5,
-    titre:
-      "Lancement et présentation des outils et formations à l'IA générative de google",
-  },
-  {
-    departmentCodes: [
-      DepartmentCode.GACO,
-      DepartmentCode.GEA,
-      DepartmentCode.TC,
-      DepartmentCode.INFO,
-      DepartmentCode.GEII,
-      DepartmentCode.GIM,
-      DepartmentCode.GB,
-      DepartmentCode.GTE,
-    ],
-    description: '',
-    endHour: 14.3,
-    id: 'journée-cohesion',
-    invitees: [
-      { email: EDITOR.email, status: Status.ACCEPTED },
-      { email: ADMIN.email, status: Status.PENDING },
-    ],
-    isPublic: true,
-    location: 'Bowling de Saint-Omer',
     organizerEmail: USER.email,
     startDayOffset: 0,
-    startHour: 9.5,
-    titre: "Journée de Cohésion d'équipe",
+    startHour: 14,
   },
   {
     departmentCodes: [DepartmentCode.TC],
-    description: "Visite annuelle des locaux d'une entreprise partenaire.",
     endHour: 17,
     id: 'evt-visite-tc',
-    invitees: [{ email: ADMIN.email, status: Status.DECLINED }],
+    invitees: [{ email: ADMIN.email, status: EventInvitationStatus.DECLINED }],
     isPublic: true,
-    location: 'Site partenaire — Calais',
     organizerEmail: EDITOR.email,
     startDayOffset: 1,
     startHour: 13,
-    titre: "Visite d'entreprise TC",
   },
   {
     departmentCodes: [DepartmentCode.INFO],
-    description: 'Conseil pédagogique trimestriel (huis clos).',
     endHour: 12,
     id: 'evt-conseil-pedago',
     invitees: [
-      { email: USER.email, status: Status.ACCEPTED },
-      { email: EDITOR.email, status: Status.ACCEPTED },
+      { email: USER.email, status: EventInvitationStatus.ACCEPTED },
+      { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
     ],
     isPublic: false,
-    location: 'Salle de réunion direction',
     organizerEmail: ADMIN.email,
     startDayOffset: 2,
     startHour: 9,
-    titre: 'Conseil pédagogique INFO',
+  },
+  {
+    // JPO : concerne tous les départements du site → plusieurs codes.
+    departmentCodes: [
+      DepartmentCode.INFO,
+      DepartmentCode.GACO,
+      DepartmentCode.TC,
+    ],
+    endHour: 17,
+    id: 'evt-jpo',
+    invitees: [],
+    isPublic: true,
+    organizerEmail: ADMIN.email,
+    startDayOffset: 3,
+    startHour: 9,
   },
   {
     departmentCodes: [DepartmentCode.GACO],
-    description: 'Salon étudiant sur deux jours — stand GACO.',
     endDayOffset: 5,
     endHour: 18,
     id: 'evt-salon-gaco',
-    invitees: [{ email: EDITOR.email, status: Status.PENDING }],
+    invitees: [{ email: EDITOR.email, status: EventInvitationStatus.PENDING }],
     isPublic: true,
-    location: 'Parc des expositions',
     organizerEmail: USER.email,
     startDayOffset: 4,
     startHour: 9,
-    titre: 'Salon étudiant — stand GACO',
   },
   {
     departmentCodes: [DepartmentCode.TC],
-    description: 'Compétition régionale de techniques de vente.',
     endHour: 11,
     endMinute: 30,
     id: 'evt-challenge-vente',
-    invitees: [{ email: ADMIN.email, status: Status.ACCEPTED }],
+    invitees: [{ email: ADMIN.email, status: EventInvitationStatus.ACCEPTED }],
     isPublic: true,
-    location: 'Amphi B',
     organizerEmail: EDITOR.email,
     startDayOffset: 7,
     startHour: 9,
-    titre: 'Challenge de la vente TC',
   },
   {
     departmentCodes: [DepartmentCode.GACO],
-    description: 'Soutenances de stage de fin de cursus.',
     endHour: 17,
     id: 'evt-soutenances-gaco',
     invitees: [
-      { email: ADMIN.email, status: Status.DECLINED },
-      { email: EDITOR.email, status: Status.ACCEPTED },
+      { email: ADMIN.email, status: EventInvitationStatus.DECLINED },
+      { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
     ],
     isPublic: true,
-    location: 'Amphi A',
     organizerEmail: USER.email,
     startDayOffset: 8,
     startHour: 14,
-    titre: 'Soutenances de stage GACO',
   },
   {
     departmentCodes: [DepartmentCode.INFO],
-    description: 'Point hebdomadaire équipe de direction.',
     endHour: 11,
     id: 'evt-reunion-direction',
     invitees: [
-      { email: USER.email, status: Status.ACCEPTED },
-      { email: EDITOR.email, status: Status.PENDING },
+      { email: USER.email, status: EventInvitationStatus.ACCEPTED },
+      { email: EDITOR.email, status: EventInvitationStatus.PENDING },
     ],
     isPublic: false,
-    location: 'Bureau direction',
     organizerEmail: ADMIN.email,
     startDayOffset: 9,
     startHour: 10,
-    titre: 'Réunion de direction',
+  },
+  {
+    // Chevauche volontairement evt-reunion-direction (même créneau)
+    departmentCodes: [DepartmentCode.INFO],
+    endHour: 12,
+    id: 'evt-comite-qualite',
+    invitees: [{ email: USER.email, status: EventInvitationStatus.PENDING }],
+    isPublic: true,
+    organizerEmail: ADMIN.email,
+    startDayOffset: 9,
+    startHour: 10,
+  },
+  {
+    departmentCodes: [DepartmentCode.TC],
+    endHour: 15,
+    id: 'evt-projet-tutore',
+    invitees: [
+      { email: ADMIN.email, status: EventInvitationStatus.ACCEPTED },
+      { email: USER.email, status: EventInvitationStatus.ACCEPTED },
+    ],
+    isPublic: true,
+    organizerEmail: EDITOR.email,
+    startDayOffset: 10,
+    startHour: 13,
+  },
+  {
+    // Fête de fin d'année : inter-départements.
+    departmentCodes: [DepartmentCode.INFO, DepartmentCode.GACO],
+    endHour: 23,
+    id: 'evt-fete-fin-annee',
+    invitees: [
+      { email: USER.email, status: EventInvitationStatus.ACCEPTED },
+      { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
+    ],
+    isPublic: true,
+    organizerEmail: ADMIN.email,
+    startDayOffset: 11,
+    startHour: 18,
   },
 ]
 
@@ -197,77 +203,66 @@ const buildDate = (
 }
 
 export const seedEvents = async () => {
-  const [departments, users] = await Promise.all([
-    prisma.department.findMany(),
-    prisma.user.findMany(),
-  ])
-  const departmentIdByCode = new Map(departments.map((d) => [d.code, d.id]))
+  const users = await prisma.user.findMany()
   const userIdByEmail = new Map(users.map((u) => [u.email, u.id]))
 
   const monday = getMondayThisWeek()
 
-  const eventsData = EVENTS.map((event) => {
-    const departmentIds = event.departmentCodes.map((code) => {
-      const id = departmentIdByCode.get(code)
-      if (!id) throw new Error(`Department ${code} not found`)
-      return id
-    })
-
-    const organizerId = userIdByEmail.get(event.organizerEmail)
-    if (!organizerId) throw new Error(`User ${event.organizerEmail} not found`)
-
-    return {
-      departmentIds,
-      description: event.description,
-      endAt: buildDate(
-        monday,
-        event.endDayOffset ?? event.startDayOffset,
-        event.endHour,
-        event.endMinute ?? 0,
-      ),
-      id: event.id,
-      isPublic: event.isPublic,
-      location: event.location,
-      organizerId,
-      startAt: buildDate(
-        monday,
-        event.startDayOffset,
-        event.startHour,
-        event.startMinute ?? 0,
-      ),
-      titre: event.titre,
-    }
-  })
-
+  // Un event cible un ou plusieurs départements : on les rattache par `connect`
+  // sur le code (`@unique`), donc pas besoin de résoudre les ids au préalable.
   await Promise.all(
-    eventsData.map(({ departmentIds, ...data }) =>
-      prisma.event.upsert({
+    EVENTS.map((event) => {
+      const organizerId = userIdByEmail.get(event.organizerEmail)
+      if (!organizerId)
+        throw new Error(`User ${event.organizerEmail} not found`)
+
+      return prisma.event.upsert({
         create: {
-          ...data,
           departments: {
-            connect: departmentIds.map((id) => ({ id })),
+            connect: event.departmentCodes.map((code) => ({ code })),
           },
+          description: fakeEventDescription(),
+          endAt: buildDate(
+            monday,
+            event.endDayOffset ?? event.startDayOffset,
+            event.endHour,
+            event.endMinute ?? 0,
+          ),
+          id: event.id,
+          isPublic: event.isPublic,
+          location: fakeEventLocation(),
+          organizerId,
+          startAt: buildDate(
+            monday,
+            event.startDayOffset,
+            event.startHour,
+            event.startMinute ?? 0,
+          ),
+          title: fakeEventTitle(),
         },
         update: {},
-        where: { id: data.id },
-      }),
-    ),
-  )
-
-  const invitationsData = EVENTS.flatMap((event) =>
-    event.invitees.map((invitee) => {
-      const userId = userIdByEmail.get(invitee.email)
-      if (!userId) {
-        throw new Error(`User ${invitee.email} not found — run seedUsers first`)
-      }
-      return {
-        eventId: event.id,
-        id: `${event.id}-inv-${invitee.email.split('@')[0]}`,
-        status: invitee.status,
-        userId,
-      }
+        where: { id: event.id },
+      })
     }),
   )
+
+  const invitationsData: Prisma.EventInvitationCreateManyInput[] =
+    EVENTS.flatMap((event) =>
+      event.invitees.map((invitee) => {
+        const userId = userIdByEmail.get(invitee.email)
+        if (!userId) {
+          throw new Error(
+            `User ${invitee.email} not found — run seedUsers first`,
+          )
+        }
+        return {
+          eventId: event.id,
+          id: `${event.id}-inv-${invitee.email.split('@')[0]}`,
+          status: invitee.status,
+          userId,
+        }
+      }),
+    )
 
   if (invitationsData.length > 0) {
     await prisma.eventInvitation.createMany({

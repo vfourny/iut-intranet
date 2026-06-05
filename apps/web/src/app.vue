@@ -2,9 +2,11 @@
   <component :is="activeLayout">
     <RouterView />
   </component>
+  <Toast />
 </template>
 
 <script lang="ts" setup>
+import Toast from 'primevue/toast'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -20,6 +22,6 @@ const LayoutComponents = {
 } as const satisfies Record<Layout, typeof DefaultLayout>
 
 const activeLayout = computed(
-  () => LayoutComponents[route.meta.layout] ?? DefaultLayout,
+  () => LayoutComponents[route.meta.layout ?? 'default'],
 )
 </script>

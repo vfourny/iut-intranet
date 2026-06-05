@@ -1,12 +1,20 @@
-import z from 'zod'
+import { z } from 'zod'
 
-export const avatarContentTypeSchema = z.enum([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-])
+export const MAX_UPLOAD_BYTES = 2 * 1024 * 1024
 
-export const uploadAvatarInputSchema = z.object({
-  base64: z.string().min(1),
-  contentType: avatarContentTypeSchema,
-})
+export const ContentType = {
+  IMAGE_JPEG: 'image/jpeg',
+  IMAGE_PNG: 'image/png',
+  IMAGE_WEBP: 'image/webp',
+} as const
+export type ContentType = (typeof ContentType)[keyof typeof ContentType]
+
+// ── Input d'upload ────────────────────────────────────────────────────────────
+
+export const uploadObjectInputSchema = z
+  .object({
+    base64: z.string().min(1),
+    contentType: z.enum(ContentType),
+  })
+  .strict()
+export type UploadFileInput = z.infer<typeof uploadObjectInputSchema>

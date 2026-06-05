@@ -1,97 +1,67 @@
-import { DepartmentCode, Site, UserRole } from '@iut-intranet/db/enums'
-import { parsePhoneNumberWithError } from 'libphonenumber-js'
+import { DepartmentCode, UserRole } from '@iut-intranet/db/enums'
 import { z } from 'zod'
 
+import { userIdSchema } from '@/schemas/brand.schema'
 import {
   emailSchema,
   firstNameSchema,
   jobTitleSchema,
   lastNameSchema,
   paginationSchema,
+  phoneValueSchema,
   searchSchema,
 } from '@/schemas/common.schema'
-import { isValidPhone } from '@/utils/phone.util'
+import { uploadObjectInputSchema } from '@/schemas/storage.schema'
 
-const userRoleSchema = z.enum(UserRole)
+export const jobTitleSchema = z.string().trim().min(1)
 
-export const phoneValueSchema = z
-  .string()
-  .refine(isValidPhone)
-  .transform((phone) => parsePhoneNumberWithError(phone).number)
+// ── Entité ────────────────────────────────────────────────────────────────────
 
 export const userSchema = z.object({
   email: emailSchema,
   firstName: firstNameSchema,
+  jobTitle: z.string().trim().min(1).optional(),
   lastName: lastNameSchema,
-  role: userRoleSchema,
-  userId: z.cuid(),
+  phone: phoneValueSchema.optional(),
+  role: z.enum(UserRole),
+  userId: userIdSchema,
 })
+
+// ── Inputs (mise à jour) ──────────────────────────────────────────────────────
 
 export const updateUserInputSchema = userSchema
   .partial()
   .required({ userId: true })
+  .strict()
+export type UpdateUserInput = z.infer<typeof updateUserInputSchema>
 
-export const updateOwnProfileInputSchema = updateUserInputSchema
-  .omit({
-    email: true,
-    firstName: true,
-    lastName: true,
-    role: true,
-    userId: true,
-  })
+export const updateMeInputSchema = userSchema
+  .pick({ jobTitle: true, phone: true })
+  .partial()
+  .strict()
+export type UpdateMeInput = z.infer<typeof updateMeInputSchema>
+
+// ── Inputs (création par un admin) ────────────────────────────────────────────
+
+export const createUserInputSchema = userSchema
+  .omit({ userId: true })
   .extend({
-    image: z.string().optional(),
-    jobTitle: z.string().optional(),
-    phone: phoneValueSchema.optional(),
+    departmentCode: z.enum(DepartmentCode),
+    role: z.enum(UserRole).default(UserRole.USER),
   })
   .strict()
-export const getUserByIdInputSchema = z.object({
-  userId: z.cuid(),
-})
+export type CreateUserInput = z.infer<typeof createUserInputSchema>
 
-export const listUsersInputSchema = paginationSchema.extend({
-  department: z
-    .enum(
-      Object.values(DepartmentCode) as [DepartmentCode, ...DepartmentCode[]],
-    )
-    .optional(),
-  search: searchSchema,
-})
+// ── Upload (avatar) ───────────────────────────────────────────────────────────
 
-export const deleteUserInputSchema = z.object({
-  userId: z.cuid(),
-})
+export const uploadMyAvatarInputSchema = uploadObjectInputSchema
+export type UploadMyAvatarInput = z.infer<typeof uploadMyAvatarInputSchema>
 
-export const getMeWithDepartmentSchema = z.object({
-  banExpires: z.string().nullable(),
-  banned: z.boolean().nullable(),
-  banReason: z.string().nullable(),
-  createdAt: z.string(),
-  department: z.object({
-    code: z.enum(DepartmentCode),
-    id: z.string(),
-    site: z.enum(Site),
-  }),
-  departmentId: z.string(),
-  email: z.string(),
-  emailVerified: z.boolean(),
-  firstName: z.string(),
-  id: z.string(),
-  image: z.string().nullable(),
-  jobTitle: z.string().nullable(),
-  lastName: z.string(),
-  managerId: z.string().nullable(),
-  phone: phoneValueSchema.nullable(),
-  role: z.enum(UserRole),
-  updatedAt: z.string(),
-})
+// ── Listing ───────────────────────────────────────────────────────────────────
 
-export const createUserSchema = z.object({
-  departmentCode: z.enum(DepartmentCode),
-  email: emailSchema,
-  firstName: firstNameSchema,
-  jobTitle: jobTitleSchema.optional(),
-  lastName: lastNameSchema,
-  phone: z.string().optional(),
-  role: z.enum(UserRole).default(UserRole.USER),
-})
+export const listUsersInputSchema = paginationSchema
+  .extend({
+    search: searchSchema,
+  })
+  .strict()
+export type ListUsersInputSchema = z.infer<typeof listUsersInputSchema>

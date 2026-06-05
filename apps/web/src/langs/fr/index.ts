@@ -1,21 +1,23 @@
-import { article } from '@/langs/fr/article.langs'
-import { auth } from '@/langs/fr/auth.lang'
-import { department } from '@/langs/fr/department.lang'
-import { event } from '@/langs/fr/event.langs'
-import { home } from '@/langs/fr/home.lang'
+import { common } from '@/langs/fr/common.lang'
+import { enums } from '@/langs/fr/enums.lang'
+import { auth } from '@/langs/fr/features/auth.lang'
+import { event } from '@/langs/fr/features/event.lang'
+import { home } from '@/langs/fr/features/home.lang'
+import { news } from '@/langs/fr/features/news.lang'
+import { profil } from '@/langs/fr/features/profil.lang'
+import { user } from '@/langs/fr/features/user.lang'
 import { layout } from '@/langs/fr/layout.lang'
-import { profil } from '@/langs/fr/profil.langs'
-import { user } from '@/langs/fr/user.lang'
 
 export const fr = {
-  article,
   auth,
-  department,
+  common,
+  enums,
   event,
   home,
   layout,
+  news,
   profil,
   user,
 } as const
 
-export type FrMessages = typeof fr
+export type Messages = typeof fr

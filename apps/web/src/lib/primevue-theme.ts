@@ -32,17 +32,20 @@ const iutGrey = {
 }
 
 export const IutPreset = definePreset(Aura, {
+  primitive: {
+    // Coins légèrement plus arrondis qu'Aura par défaut → look « app » moderne,
+    // sans tomber dans le pill. md sert aux inputs, xl aux cartes/overlays.
+    borderRadius: {
+      lg: '10px',
+      md: '8px',
+      none: '0',
+      sm: '6px',
+      xl: '14px',
+      xs: '4px',
+    },
+  },
   semantic: {
     colorScheme: {
-      dark: {
-        primary: {
-          activeColor: '{primary.200}',
-          color: '{primary.400}',
-          contrastColor: 'var(--color-iut-grey-950)',
-          hoverColor: '{primary.300}',
-        },
-        surface: iutGrey,
-      },
       light: {
         primary: {
           activeColor: '{primary.700}',
@@ -52,6 +55,23 @@ export const IutPreset = definePreset(Aura, {
         },
         surface: iutGrey,
       },
+    },
+    content: {
+      borderRadius: '{border.radius.xl}',
+    },
+    // Anneau de focus « halo » discret (style Linear) au lieu du trait sec.
+    focusRing: {
+      color: '{primary.color}',
+      offset: '2px',
+      shadow: '0 0 0 4px color-mix(in srgb, {primary.color} 18%, transparent)',
+      style: 'solid',
+      width: '2px',
+    },
+    // Inputs plus hauts et arrondis : plus d'air, moins « formulaire scolaire ».
+    formField: {
+      borderRadius: '{border.radius.lg}',
+      paddingX: '0.875rem',
+      paddingY: '0.625rem',
     },
     primary: iutBlue,
   },

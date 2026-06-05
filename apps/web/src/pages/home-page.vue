@@ -1,49 +1,30 @@
-<script lang="ts" setup>
-import type { FileUploadUploaderEvent } from 'primevue/fileupload'
-import PrimeFileUpload from 'primevue/fileupload'
-import { useI18n } from 'vue-i18n'
-
-import { useImages, useUploadImage } from '@/api/image.api'
-import ImageCarousel from '@/components/image/carroussel-image.vue'
-
-const { t } = useI18n()
-const { mutate: uploadImage } = useUploadImage()
-const { data: images, refetch } = useImages()
-
-const handleUpload = async (event: FileUploadUploaderEvent) => {
-  const file = Array.isArray(event.files) ? event.files[0] : event.files
-  if (!file) return
-
-  const base64 = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve((reader.result as string).split(',')[1])
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-
-  await uploadImage({
-    base64,
-    contentType: file.type as 'image/jpeg' | 'image/png' | 'image/webp',
-    name: '',
-  })
-  await refetch()
-}
-</script>
-
 <template>
-  <div class="flex flex-col gap-6 p-6">
-    <div class="h-[200px] overflow-hidden">
-      <ImageCarousel :images="images ?? []" />
-    </div>
-    <div class="flex justify-center">
-      <PrimeFileUpload
-        accept="image/jpeg,image/png,image/webp"
-        auto
-        :choose-label="t('home.addPicture')"
-        custom-upload
-        mode="basic"
-        @uploader="handleUpload"
-      />
-    </div>
+  <div class="flex flex-col gap-8">
+    <!-- L'en-tête générique (titre « Accueil ») est rendu par le layout ; on y
+      téléporte seulement la date du jour comme sous-titre. -->
+    <Teleport :to="pageHeaderSelector.subtitle">{{ todayLabel }}</Teleport>
+
+    <DashboardStats />
+
+    <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <HighlightCarousel />
+      <UpcomingEvents />
+    </section>
+
+    <LatestNews />
   </div>
 </template>
+
+<script lang="ts" setup>
+import DashboardStats from '@/components/home/dashboard-stats.vue'
+import HighlightCarousel from '@/components/home/highlight-carousel.vue'
+import LatestNews from '@/components/home/latest-news.vue'
+import UpcomingEvents from '@/components/home/upcoming-events.vue'
+import { pageHeaderSelector } from '@/lib/page-header'
+
+const todayLabel = new Intl.DateTimeFormat('fr-FR', {
+  day: 'numeric',
+  month: 'long',
+  weekday: 'long',
+}).format(new Date())
+</script>

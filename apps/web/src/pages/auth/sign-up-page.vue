@@ -1,7 +1,7 @@
 <template>
   <AuthFormCard
     :error="signUpStatus === 'error' ? t('auth.signUp.error') : undefined"
-    :loading="signUpStatus === 'pending'"
+    :loading="asyncStatus === 'loading'"
     :submit-label="t('auth.signUp.submit')"
     :subtitle="t('auth.signUp.header.subtitle')"
     :title="t('auth.signUp.header.title')"
@@ -38,7 +38,7 @@
       :label="t('auth.signUp.fields.department.label')"
       name="departmentCode"
       option-label="label"
-      option-value="code"
+      option-value="value"
       :options="departmentOptions"
       :placeholder="t('auth.signUp.fields.department.placeholder')"
     />
@@ -59,6 +59,7 @@
       :label="t('auth.signUp.fields.phone.label')"
       name="phone"
       :placeholder="t('auth.signUp.fields.phone.placeholder')"
+      @input="onPhoneInput"
     />
 
     <PrimeFileUpload
@@ -102,29 +103,31 @@
 </template>
 
 <script lang="ts" setup>
-import { DepartmentCode } from '@iut-intranet/db/enums'
 import { signUpWithPasswordInputSchema } from '@iut-intranet/helpers/schemas/auth'
+import { formatPhoneNational } from '@iut-intranet/helpers/utils/phone'
 import type { FileUploadSelectEvent } from 'primevue/fileupload'
 import PrimeFileUpload from 'primevue/fileupload'
 import { useForm } from 'vee-validate'
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { z } from 'zod'
 
 import { useSignUp } from '@/api/auth.api'
-import { useUploadAvatar } from '@/api/users.api'
+import { useUploadMyAvatar } from '@/api/users.api'
 import AuthFormCard from '@/components/auth/auth-form-card.vue'
 import InputField from '@/components/ui/input-field.vue'
 import PasswordField from '@/components/ui/password-field.vue'
 import SelectField from '@/components/ui/select-field.vue'
+import { useEnumOptions } from '@/composables/use-enum-options'
 import { useI18n } from '@/composables/use-i18n'
-import { fileToAvatarInput } from '@/lib/file'
-import { RouteNames } from '@/router'
+import { fileToUploadInput } from '@/lib/file'
+import { resolveRedirect, RouteNames } from '@/router'
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
-const { mutateAsync: signUp, status: signUpStatus } = useSignUp()
-const { mutateAsync: mutateAvatar } = useUploadAvatar()
+const { asyncStatus, mutateAsync: signUp, status: signUpStatus } = useSignUp()
+const { mutateAsync: mutateAvatar } = useUploadMyAvatar()
 
 const selectedAvatarFile = ref<File | null>(null)
 
@@ -144,12 +147,7 @@ const onAvatarSelect = (event: FileUploadSelectEvent) => {
   selectedAvatarFile.value = file
 }
 
-const departmentOptions = computed(() =>
-  Object.values(DepartmentCode).map((code) => ({
-    code,
-    label: t(`department.label.${code}`),
-  })),
-)
+const departmentOptions = useEnumOptions('department')
 
 const signUpFormSchema = signUpWithPasswordInputSchema
   .extend({
@@ -179,14 +177,23 @@ const [lastName] = defineField('lastName')
 const [password] = defineField('password')
 const [phone] = defineField('phone')
 
+const onPhoneInput = (event: Event) => {
+  // Ne pas reformater lors d'une suppression : AsYouType ré-insérerait les
+  // séparateurs et empêcherait d'effacer un espace.
+  if ((event as InputEvent).inputType?.startsWith('delete')) return
+  phone.value = formatPhoneNational(phone.value ?? '')
+}
+
 const handleSubmit = createSubmitHandler(
   async ({ confirmPassword: _, ...values }) => {
     await signUp(values)
 
     if (selectedAvatarFile.value) {
-      await mutateAvatar(await fileToAvatarInput(selectedAvatarFile.value))
+      await mutateAvatar(await fileToUploadInput(selectedAvatarFile.value))
     }
-    await router.push({ name: RouteNames.home })
+    await router.replace(
+      resolveRedirect(route.query.redirect) ?? { name: RouteNames.home },
+    )
   },
 )
 </script>

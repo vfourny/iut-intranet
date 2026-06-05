@@ -8,6 +8,9 @@ Intranet de l'IUT — monorepo Turbo regroupant l'API tRPC, le front Vue 3 et le
 - **npm workspaces** + **Turbo** pour l'orchestration des tâches
 - **API** : Express 5, tRPC v11, Prisma 7 (Postgres 15), better-auth, pino
 - **Web** : Vue 3, Vite, Pinia + Pinia Colada, PrimeVue, Tailwind, vee-validate, vue-i18n
+- **Stockage** : S3 (MinIO en local) via `packages/providers`
+- **Env** : `dotenvx` charge le `.env` pour les scripts qui en dépendent (`build`, `dev`, `db:*`, `env:reset`)
+- **Tests** : Vitest, exécutés dans Docker (`docker/test.compose.yml`)
 - **Tooling** : ESLint, Prettier, syncpack, commitlint, husky, lint-staged
 
 ## Pourquoi un monorepo ?
@@ -31,11 +34,12 @@ packages/
   auth/               Setup better-auth (instance, plugins, types de session)
   db/                 Schéma Prisma + client généré dans src/generated
   services/           Couche métier (AuthService, UserService, etc.) appelée par les procedures tRPC
+  providers/          Clients d'infra (S3/MinIO) + seeds de buckets (provider:seed)
   helpers/            Code transverse non métier : env (zod), errors, schemas Zod partagés, types, utils
   configs/            Configs partagées (eslint, prettier, tsconfig, logger pino, commitlint)
   emails/             Templates d'emails Handlebars + sender
   bruno/              Collection de tests API Bruno
-docker/               Compose Postgres local + Dockerfile prod
+docker/               Compose Postgres + MinIO local, compose de tests, Dockerfile prod
 docs/                 Cahier des charges + MCD
 ```
 
@@ -72,34 +76,43 @@ Prérequis : Docker + l'extension **Dev Containers** (VS Code) ou le support **D
 3. À la première création, `npm run db:deploy` est exécuté automatiquement (`postCreateCommand`).
 4. Une fois dans le conteneur : `npm install` puis `npm run dev`.
 
-Ports forwardés : `8000` (API), `5432` (Postgres). La base tourne dans le service `postgres-dev` du compose ; pas besoin de lancer `npm run db:start`.
+Ports forwardés : `8000` (API), `5432` (Postgres). La base tourne dans le service `postgres-dev` du compose ; pas besoin de lancer `npm run env:start`.
 
 ## Lancer le projet (installation locale)
 
 ```bash
-npm run db:start        # démarre Postgres dans Docker
+npm run env:start       # démarre l'environnement local (Postgres + MinIO) dans Docker
 npm run db:generate     # génère le client Prisma
 npm run db:migrate -- init   # applique les migrations (au premier run)
+npm run db:seed         # peuple la base avec des données de démo
+npx turbo provider:seed --filter=@iut-intranet/providers   # crée/peuple les buckets S3 (MinIO)
 npm run dev             # lance API + Web en watch
 ```
+
+Raccourci pour repartir d'une base propre : `npm run env:reset` (reset complet de la base + reseed des buckets S3).
 
 - API : http://localhost:8000
 - Web : http://localhost:5173
 
 ## Commandes utiles
 
-| Commande                            | Description                                      |
-| ----------------------------------- | ------------------------------------------------ |
-| `npm run dev`                       | Lance toutes les apps en mode watch              |
-| `npm run build`                     | Build de production                              |
-| `npm run ts:check`                  | Type-check global                                |
-| `npm run lint` / `npm run lint:fix` | Lint global                                      |
-| `npm run format`                    | Formatte le repo avec Prettier                   |
-| `npm run syncpack:check`            | Vérifie l'uniformité des versions de dépendances |
-| `npm run db:start` / `db:down`      | Démarre / arrête Postgres local                  |
-| `npm run db:migrate -- <name>`      | Crée et applique une migration                   |
-| `npm run db:reset`                  | Reset complet de la base                         |
-| `npm run db:studio`                 | Ouvre Prisma Studio                              |
+| Commande                                  | Description                                                      |
+| ----------------------------------------- | --------------------------------------------------------------- |
+| `npm run dev`                             | Lance toutes les apps en mode watch (via `dotenvx`)             |
+| `npm run build`                           | Build de production (via `dotenvx`)                             |
+| `npm run ts:check`                        | Type-check global                                               |
+| `npm run lint` / `npm run lint:fix`       | Lint global                                                     |
+| `npm run format` / `npm run format:check` | Formatte / vérifie le formatage Prettier                       |
+| `npm run syncpack:check`                  | Vérifie l'uniformité des versions de dépendances               |
+| `npm run env:start` / `env:stop`          | Démarre / arrête l'environnement local (Postgres + MinIO)      |
+| `npm run env:reset`                       | Reset complet de la base + reseed des buckets S3               |
+| `npm run db:migrate -- <name>`            | Crée et applique une migration                                 |
+| `npm run db:deploy`                       | Applique les migrations existantes (CI / prod)                 |
+| `npm run db:seed`                         | Peuple la base avec des données de démo                        |
+| `npm run db:studio`                       | Ouvre Prisma Studio                                            |
+| `npm run test`                            | Lance la suite Vitest dans Docker                             |
+| `npm run test:watch`                      | Vitest en watch + UI dans Docker                              |
+| `npm run clean`                           | Nettoie `dist`, `.turbo`, `.cache` et `node_modules`         |
 
 Cibler un seul package : `npx turbo <task> --filter=@iut-intranet/<pkg>`.
 

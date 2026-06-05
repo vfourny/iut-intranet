@@ -1,0 +1,16 @@
+meta {
+  name: Get News By Id
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{SERVER_URL}}/{{TRPC}}/news.getById?input={"newsId":"cmpdrqmip000br4oiq5wut5rk"}
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

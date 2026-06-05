@@ -11,6 +11,7 @@
 
 <script lang="ts" setup>
 import { toKebabCase } from '@iut-intranet/helpers/utils/format'
+import PrimePassword from 'primevue/password'
 
 import FieldWrapper, {
   type FieldWrapperProps,

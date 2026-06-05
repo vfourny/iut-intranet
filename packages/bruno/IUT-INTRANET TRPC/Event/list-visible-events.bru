@@ -1,0 +1,20 @@
+meta {
+  name: List Visible Events
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{SERVER_URL}}/{{TRPC}}/event.listVisible?input={}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  input: {}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

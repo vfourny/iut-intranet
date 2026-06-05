@@ -1,0 +1,24 @@
+meta {
+  name: Create News
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{SERVER_URL}}/{{TRPC}}/news.create
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "Ma news",
+    "content": { "blocks": [] },
+    "targetDepartmentIds": []
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

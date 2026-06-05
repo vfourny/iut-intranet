@@ -1,3 +1,4 @@
+import { userIdSchema } from '@iut-intranet/helpers/schemas/brand'
 import { TRPCError } from '@trpc/server'
 
 import { middleware } from '@/trpc'
@@ -14,7 +15,9 @@ export const requireAuthMiddleware = middleware(async ({ ctx, next }) => {
   return next({
     ctx: {
       ...ctx,
-      user: session.user,
+      // `parse` valide le format (cuid) ET appose le brand `UserId`, sans cast :
+      // tous les `ctx.user.id` qui alimentent les services en héritent.
+      user: { ...session.user, id: userIdSchema.parse(session.user.id) },
     },
   })
 })

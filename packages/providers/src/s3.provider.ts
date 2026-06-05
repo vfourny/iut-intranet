@@ -1,105 +1,189 @@
 import { randomUUID } from 'node:crypto'
 
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { getServerEnv } from '@iut-intranet/helpers/env'
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+} from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { AppError } from '@iut-intranet/helpers/errors'
+import { ContentType } from '@iut-intranet/helpers/schemas/storage'
+import { MAX_UPLOAD_BYTES } from '@iut-intranet/helpers/schemas/storage'
 
-const {
-  S3_ACCESS_KEY_ID,
-  S3_AVATARS_BUCKET,
-  S3_ENDPOINT,
-  S3_REGION,
-  S3_SECRET_ACCESS_KEY,
-} = getServerEnv(
-  'S3_ACCESS_KEY_ID',
-  'S3_AVATARS_BUCKET',
-  'S3_ENDPOINT',
-  'S3_REGION',
-  'S3_SECRET_ACCESS_KEY',
-)
+import { S3_BUCKET_NAME, s3Client } from '@/s3.client'
 
-const MAX_AVATAR_BYTES = 2 * 1024 * 1024
+const SIGNED_URL_TTL_SECONDS = 24 * 60 * 60
 
-const extensionByContentType = {
-  'image/jpeg': 'jpg',
-  'image/png': 'png',
-  'image/webp': 'webp',
+const ExtensionByContentType = {
+  [ContentType.IMAGE_JPEG]: 'jpg',
+  [ContentType.IMAGE_PNG]: 'png',
+  [ContentType.IMAGE_WEBP]: 'webp',
+} as const satisfies Record<ContentType, string>
+
+export const StorageFolders = {
+  highlights: 'highlights',
+  news: 'news',
+  users: 'users',
 } as const
 
-type AvatarContentType = keyof typeof extensionByContentType
+type StorageFolder = keyof typeof StorageFolders
 
-const s3Client = new S3Client({
-  credentials: {
-    accessKeyId: S3_ACCESS_KEY_ID,
-    secretAccessKey: S3_SECRET_ACCESS_KEY,
-  },
-  endpoint: S3_ENDPOINT,
-  forcePathStyle: true,
-  region: S3_REGION,
-})
+/** Folders whose objects are partitioned by a {@link subFolder} segment in their key. */
+const ScopedFolder = ['users'] as const satisfies StorageFolder[]
+type ScopedFolder = (typeof ScopedFolder)[number]
 
-export interface UploadUserAvatarObjectPayload {
-  base64: string
-  contentType: AvatarContentType
-  userId: string
+/**
+ * Generates a temporary presigned URL granting read access to a private object.
+ * The bucket is private, so stored object keys are turned into usable URLs only
+ * at read time — never persisted (the signature expires).
+ */
+export const getSignedObjectUrl = (key: string): Promise<string> =>
+  getSignedUrl(
+    s3Client,
+    new GetObjectCommand({ Bucket: S3_BUCKET_NAME, Key: key }),
+    {
+      expiresIn: SIGNED_URL_TTL_SECONDS,
+    },
+  )
+
+/**
+ * Swaps a storage-key field for a signed URL in place, leaving the rest of the object untouched.
+ * @param {T} obj - Any object carrying a storage key under {@link key}
+ * @param {K} key - The field holding the stored object key (or null)
+ * @returns {Promise<T>} The same object with {@link key} swapped for a signed URL, or null when unset
+ * @remarks Generic over the key, so it serves every model: `signUrlField(news, 'coverUrl')`, `signUrlField(user, 'image')`. The cast reconciles the computed-key spread back to T.
+ */
+export const signUrlField = async <T, K extends keyof T>(
+  obj: T,
+  key: K,
+): Promise<T> => {
+  const path = obj[key]
+  return {
+    ...obj,
+    [key]: typeof path === 'string' ? await getSignedObjectUrl(path) : null,
+  } as T
 }
 
-export interface UploadImageObjectPayload {
-  base64: string
-  contentType: AvatarContentType
-}
-
-export interface GetImageUploadUrlResult {
-  publicUrl: string
-  uploadUrl: string
-}
-
-export const uploadUserAvatarObject = async (
-  payload: UploadUserAvatarObjectPayload,
-): Promise<string> => {
-  const { base64, contentType, userId } = payload
-
+/**
+ * Decodes a base64 payload, enforces the upload size limit, and writes it to the
+ * given key (overwriting any existing object). Shared by {@link uploadObject}
+ * (fresh key) and {@link updateObject} (existing key).
+ */
+const putObject = async (
+  key: string,
+  base64: string,
+  contentType: ContentType,
+): Promise<void> => {
   const body = Buffer.from(base64, 'base64')
-  if (body.byteLength > MAX_AVATAR_BYTES) {
+  if (body.byteLength > MAX_UPLOAD_BYTES) {
     throw new AppError(
       'PAYLOAD_TOO_LARGE',
-      'Avatar exceeds the maximum size of 2MB',
+      'File exceeds the maximum upload size',
     )
   }
 
-  const key = `avatars/${userId}/${randomUUID()}.${extensionByContentType[contentType]}`
-
   await s3Client.send(
     new PutObjectCommand({
-      ACL: 'public-read',
       Body: body,
-      Bucket: S3_AVATARS_BUCKET,
+      Bucket: S3_BUCKET_NAME,
       ContentType: contentType,
       Key: key,
     }),
   )
-
-  return `${S3_ENDPOINT}/${S3_AVATARS_BUCKET}/${key}`
 }
 
-export const uploadImageObject = async (
-  payload: UploadImageObjectPayload,
+/** The raw content shared by every write to storage. */
+interface ObjectBase {
+  base64: string
+  contentType: ContentType
+}
+
+export type UploadObjectPayload = ObjectBase & {
+  fileName?: string
+} & (
+    | {
+        folder: ScopedFolder
+        subFolder: string
+      }
+    | {
+        folder: Exclude<StorageFolder, ScopedFolder>
+        subFolder?: string
+      }
+  )
+
+/**
+ * Uploads an object to private storage under the given folder.
+ * @returns The object key (e.g. `users/<userId>/avatar.png`), to be persisted
+ * and later turned into a usable URL via {@link getSignedObjectUrl} (or listed
+ * via {@link listObjects} then signed, e.g. for the highlight folder).
+ */
+export const uploadObject = async (
+  payload: UploadObjectPayload,
 ): Promise<string> => {
-  const { base64, contentType } = payload
+  const { base64, contentType, fileName, folder, subFolder } = payload
 
-  const body = Buffer.from(base64, 'base64')
+  const base = StorageFolders[folder]
+  const prefix = subFolder ? `${base}/${subFolder}` : base
+  const name = fileName ?? randomUUID()
+  const key = `${prefix}/${name}.${ExtensionByContentType[contentType]}`
 
-  const key = `image/${randomUUID()}.${extensionByContentType[contentType]}`
+  await putObject(key, base64, contentType)
 
-  await s3Client.send(
-    new PutObjectCommand({
-      ACL: 'public-read',
-      Body: body,
-      Bucket: S3_AVATARS_BUCKET,
-      ContentType: contentType,
-      Key: key,
+  return key
+}
+
+export interface UpdateObjectPayload extends ObjectBase {
+  key: string
+}
+
+/**
+ * Overwrites an existing object in place, keeping the same key. The new
+ * `contentType` is stored as object metadata even if it differs from the one the
+ * key's extension was derived from (the extension is cosmetic — the bucket is
+ * private and objects are served by their `ContentType` header, not their name).
+ * @returns The unchanged object key, for symmetry with {@link uploadObject}.
+ */
+export const updateObject = async (
+  payload: UpdateObjectPayload,
+): Promise<string> => {
+  const { base64, contentType, key } = payload
+
+  await putObject(key, base64, contentType)
+
+  return key
+}
+
+export interface StorageObject {
+  key: string
+  lastModified?: Date
+}
+
+/**
+ * Lists the objects stored under a folder prefix (e.g. `StorageFolders.highlights`).
+ * Returns raw keys, not URLs: the caller signs them on read via
+ * {@link getSignedObjectUrl}. The folder placeholder object (key equal to the
+ * prefix itself) is filtered out.
+ */
+export const listObjects = async (prefix: string): Promise<StorageObject[]> => {
+  const { Contents } = await s3Client.send(
+    new ListObjectsV2Command({
+      Bucket: S3_BUCKET_NAME,
+      Prefix: `${prefix}/`,
     }),
   )
 
-  return `${S3_ENDPOINT}/${S3_AVATARS_BUCKET}/${key}`
+  return (Contents ?? [])
+    .filter((object) => object.Key && object.Key !== prefix)
+    .map((object) => ({
+      key: object.Key as string,
+      lastModified: object.LastModified,
+    }))
+}
+
+/** Permanently removes an object from storage (no-op if the key doesn't exist). */
+export const deleteObject = async (key: string): Promise<void> => {
+  await s3Client.send(
+    new DeleteObjectCommand({ Bucket: S3_BUCKET_NAME, Key: key }),
+  )
 }
