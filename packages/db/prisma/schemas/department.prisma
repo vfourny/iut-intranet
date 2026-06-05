@@ -22,7 +22,7 @@ model Department {
   site Site
 
   users          User[]
-  events         Event[]
+  events         Event[] @relation("EventDepartments")
   targetedByNews News[]
 
   @@map("department")

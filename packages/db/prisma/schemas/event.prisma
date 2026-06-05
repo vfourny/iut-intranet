@@ -12,18 +12,15 @@ model Event {
   endAt        DateTime
   location     String
   organizerId  String   @map("user_id")
-  departmentId String   @map("department_id")
   isPublic     Boolean  @default(false)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-    departments Department[]      @relation("EventDepartments")
+  departments Department[]      @relation("EventDepartments")
   organizer   User              @relation(fields: [organizerId], references: [id], onDelete: Restrict)
-  department  Department        @relation(fields: [departmentId], references: [id], onDelete: Restrict)
   invitations EventInvitation[]
 
   @@index([organizerId])
-  @@index([departmentId])
   @@map("event")
 }
 

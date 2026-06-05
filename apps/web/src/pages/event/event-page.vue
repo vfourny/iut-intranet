@@ -15,7 +15,9 @@
     >
       <EventFormulaire
         :key="formEvent?.id ?? 'create'"
-        :department-code="formEvent?.department.code"
+        :department-codes="
+          formEvent?.departments.map((department) => department.code)
+        "
         :description="formEvent?.description"
         :end-at="formEvent ? new Date(formEvent.endAt) : undefined"
         :event-id="formEvent?.id"

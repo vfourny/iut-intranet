@@ -4,7 +4,7 @@ import { AppError } from '@iut-intranet/helpers/errors'
 import type { EventId, UserId } from '@iut-intranet/helpers/schemas/brand'
 import type {
   CreateEventInput,
-  EventWithDepartment,
+  EventWithDepartments,
   ListVisibleEventsInput,
   UpdateEventInput,
 } from '@iut-intranet/helpers/schemas/event'
@@ -24,16 +24,18 @@ export class EventService {
   constructor(private prisma: prisma) {}
 
   /**
-   * Creates an event organized by the given user, connected to a department.
-   * @param {CreateEventInput} payload - Event details and target department code
+   * Creates an event organized by the given user, connected to one or more departments.
+   * @param {CreateEventInput} payload - Event details and target department codes
    * @param {UserId} userId - Id of the organizing user
    * @returns {Promise<EventModel>} The created event
-   * @remarks The endAt > startAt invariant is enforced by the input schema at the tRPC boundary, so it isn't re-checked here.
+   * @remarks The endAt > startAt invariant is enforced by the input schema at the tRPC boundary, so it isn't re-checked here. Department codes are resolved via Prisma's `connect` on the unique `code`.
    */
   public async createEvent(payload: CreateEventInput, userId: UserId) {
     return this.prisma.event.create({
       data: {
-        department: { connect: { code: payload.departmentCode } },
+        departments: {
+          connect: payload.departmentCodes.map((code) => ({ code })),
+        },
         description: payload.description ?? '',
         endAt: payload.endAt,
         isPublic: payload.isPublic,
@@ -100,20 +102,21 @@ export class EventService {
   }
 
   /**
-   * Updates an event the manager may manage (its organizer or an admin), optionally moving it to another department.
-   * @param {UpdateEventInput} payload - Fields to update, including the event id and an optional department code
+   * Updates an event the manager may manage (its organizer or an admin), optionally replacing its set of departments.
+   * @param {UpdateEventInput} payload - Fields to update, including the event id and an optional list of department codes
    * @param {EventManager} manager - The acting user's id and role
    * @returns {Promise<EventModel>} The updated event
    * @throws {AppError} FORBIDDEN if the manager may not manage the event
+   * @remarks When `departmentCodes` is provided it fully replaces the event's departments (`set`, not a merge); omitting it leaves them untouched.
    */
   public async updateEvent(payload: UpdateEventInput, manager: EventManager) {
-    const { departmentCode, id, ...data } = payload
+    const { departmentCodes, id, ...data } = payload
     await this.assertManageable(id, manager)
     return this.prisma.event.update({
       data: {
         ...data,
-        ...(departmentCode && {
-          department: { connect: { code: departmentCode } },
+        ...(departmentCodes && {
+          departments: { set: departmentCodes.map((code) => ({ code })) },
         }),
       },
       where: { id },
@@ -124,13 +127,16 @@ export class EventService {
    * Ensures the user may manage (update/delete) the event: only its organizer or an admin can.
    * @param {EventId} eventId - Id of the event to check
    * @param {EventManager} manager - The acting user's id and role
-   * @returns {Promise<EventWithDepartment>} The event, when it is manageable by the caller
+   * @returns {Promise<EventWithDepartments>} The event, when it is manageable by the caller
    * @throws {AppError} FORBIDDEN otherwise (mapped to a tRPC error)
    */
   private async assertManageable(eventId: EventId, manager: EventManager) {
     const event = await this.getById(eventId)
     if (event.organizerId !== manager.id && !isAdminRole(manager.role)) {
-      throw new AppError('FORBIDDEN', 'You are not allowed to manage this event')
+      throw new AppError(
+        'FORBIDDEN',
+        'You are not allowed to manage this event',
+      )
     }
     return event
   }
@@ -138,14 +144,14 @@ export class EventService {
   /**
    * Fetches an event by id with its department and invitations.
    * @param {EventId} eventId - Id of the event to fetch
-   * @returns {Promise<EventWithDepartment>} The event with its department and invitations
+   * @returns {Promise<EventWithDepartments>} The event with its departments and invitations
    * @throws Throws NOT_FOUND if it doesn't exist
    * @remarks Internal: used by {@link assertManageable} to resolve the organizer before update/delete.
    */
-  private async getById(eventId: EventId): Promise<EventWithDepartment> {
+  private async getById(eventId: EventId): Promise<EventWithDepartments> {
     return this.prisma.event.findUniqueOrThrow({
       include: {
-        department: true,
+        departments: true,
         invitations: true,
       },
       where: { id: eventId },

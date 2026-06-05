@@ -14,7 +14,7 @@ interface EventInviteeSeed {
 }
 
 interface EventSeed {
-  departmentCode: DepartmentCode
+  departmentCodes: DepartmentCode[]
   endDayOffset?: number
   endHour: number
   endMinute?: number
@@ -29,7 +29,7 @@ interface EventSeed {
 
 const EVENTS: EventSeed[] = [
   {
-    departmentCode: DepartmentCode.INFO,
+    departmentCodes: [DepartmentCode.INFO],
     endHour: 11,
     id: 'evt-soutenances-info',
     invitees: [
@@ -42,7 +42,7 @@ const EVENTS: EventSeed[] = [
     startHour: 9,
   },
   {
-    departmentCode: DepartmentCode.GACO,
+    departmentCodes: [DepartmentCode.GACO],
     endHour: 16,
     id: 'ia-presentation',
     invitees: [
@@ -55,7 +55,7 @@ const EVENTS: EventSeed[] = [
     startHour: 14,
   },
   {
-    departmentCode: DepartmentCode.TC,
+    departmentCodes: [DepartmentCode.TC],
     endHour: 17,
     id: 'evt-visite-tc',
     invitees: [{ email: ADMIN.email, status: EventInvitationStatus.DECLINED }],
@@ -65,7 +65,7 @@ const EVENTS: EventSeed[] = [
     startHour: 13,
   },
   {
-    departmentCode: DepartmentCode.INFO,
+    departmentCodes: [DepartmentCode.INFO],
     endHour: 12,
     id: 'evt-conseil-pedago',
     invitees: [
@@ -78,7 +78,12 @@ const EVENTS: EventSeed[] = [
     startHour: 9,
   },
   {
-    departmentCode: DepartmentCode.INFO,
+    // JPO : concerne tous les départements du site → plusieurs codes.
+    departmentCodes: [
+      DepartmentCode.INFO,
+      DepartmentCode.GACO,
+      DepartmentCode.TC,
+    ],
     endHour: 17,
     id: 'evt-jpo',
     invitees: [],
@@ -88,7 +93,7 @@ const EVENTS: EventSeed[] = [
     startHour: 9,
   },
   {
-    departmentCode: DepartmentCode.GACO,
+    departmentCodes: [DepartmentCode.GACO],
     endDayOffset: 5,
     endHour: 18,
     id: 'evt-salon-gaco',
@@ -99,7 +104,7 @@ const EVENTS: EventSeed[] = [
     startHour: 9,
   },
   {
-    departmentCode: DepartmentCode.TC,
+    departmentCodes: [DepartmentCode.TC],
     endHour: 11,
     endMinute: 30,
     id: 'evt-challenge-vente',
@@ -110,7 +115,7 @@ const EVENTS: EventSeed[] = [
     startHour: 9,
   },
   {
-    departmentCode: DepartmentCode.GACO,
+    departmentCodes: [DepartmentCode.GACO],
     endHour: 17,
     id: 'evt-soutenances-gaco',
     invitees: [
@@ -123,7 +128,7 @@ const EVENTS: EventSeed[] = [
     startHour: 14,
   },
   {
-    departmentCode: DepartmentCode.INFO,
+    departmentCodes: [DepartmentCode.INFO],
     endHour: 11,
     id: 'evt-reunion-direction',
     invitees: [
@@ -137,7 +142,7 @@ const EVENTS: EventSeed[] = [
   },
   {
     // Chevauche volontairement evt-reunion-direction (même créneau)
-    departmentCode: DepartmentCode.INFO,
+    departmentCodes: [DepartmentCode.INFO],
     endHour: 12,
     id: 'evt-comite-qualite',
     invitees: [{ email: USER.email, status: EventInvitationStatus.PENDING }],
@@ -147,7 +152,7 @@ const EVENTS: EventSeed[] = [
     startHour: 10,
   },
   {
-    departmentCode: DepartmentCode.TC,
+    departmentCodes: [DepartmentCode.TC],
     endHour: 15,
     id: 'evt-projet-tutore',
     invitees: [
@@ -160,7 +165,8 @@ const EVENTS: EventSeed[] = [
     startHour: 13,
   },
   {
-    departmentCode: DepartmentCode.INFO,
+    // Fête de fin d'année : inter-départements.
+    departmentCodes: [DepartmentCode.INFO, DepartmentCode.GACO],
     endHour: 23,
     id: 'evt-fete-fin-annee',
     invitees: [
@@ -197,61 +203,47 @@ const buildDate = (
 }
 
 export const seedEvents = async () => {
-  const [departments, users] = await Promise.all([
-    prisma.department.findMany(),
-    prisma.user.findMany(),
-  ])
-  const departmentIdByCode = new Map(departments.map((d) => [d.code, d.id]))
+  const users = await prisma.user.findMany()
   const userIdByEmail = new Map(users.map((u) => [u.email, u.id]))
 
   const monday = getMondayThisWeek()
 
-  const eventsData: Prisma.EventCreateManyInput[] = EVENTS.map((event) => {
-    const departmentId = departmentIdByCode.get(event.departmentCode)
-    if (!departmentId) {
-      throw new Error(
-        `Department ${event.departmentCode} not found — run seedDepartments first`,
-      )
-    }
-    const organizerId = userIdByEmail.get(event.organizerEmail)
-    if (!organizerId) throw new Error(`User ${event.organizerEmail} not found`)
-
-    return {
-      departmentId,
-      description: fakeEventDescription(),
-      endAt: buildDate(
-        monday,
-        event.endDayOffset ?? event.startDayOffset,
-        event.endHour,
-        event.endMinute ?? 0,
-      ),
-      id: event.id,
-      isPublic: event.isPublic,
-      location: fakeEventLocation(),
-      organizerId,
-      startAt: buildDate(
-        monday,
-        event.startDayOffset,
-        event.startHour,
-        event.startMinute ?? 0,
-      ),
-      title: fakeEventTitle(),
-    }
-  })
-
+  // Un event cible un ou plusieurs départements : on les rattache par `connect`
+  // sur le code (`@unique`), donc pas besoin de résoudre les ids au préalable.
   await Promise.all(
-    eventsData.map(({ departmentIds, ...data }) =>
-      prisma.event.upsert({
+    EVENTS.map((event) => {
+      const organizerId = userIdByEmail.get(event.organizerEmail)
+      if (!organizerId)
+        throw new Error(`User ${event.organizerEmail} not found`)
+
+      return prisma.event.upsert({
         create: {
-          ...data,
           departments: {
-            connect: departmentIds.map((id) => ({ id })),
+            connect: event.departmentCodes.map((code) => ({ code })),
           },
+          description: fakeEventDescription(),
+          endAt: buildDate(
+            monday,
+            event.endDayOffset ?? event.startDayOffset,
+            event.endHour,
+            event.endMinute ?? 0,
+          ),
+          id: event.id,
+          isPublic: event.isPublic,
+          location: fakeEventLocation(),
+          organizerId,
+          startAt: buildDate(
+            monday,
+            event.startDayOffset,
+            event.startHour,
+            event.startMinute ?? 0,
+          ),
+          title: fakeEventTitle(),
         },
         update: {},
-        where: { id: data.id },
-      }),
-    ),
+        where: { id: event.id },
+      })
+    }),
   )
 
   const invitationsData: Prisma.EventInvitationCreateManyInput[] =

@@ -29,9 +29,10 @@ export type ListVisibleEventsInput = z.infer<
 // produit un `ZodEffects` qui n'est plus composable.
 export const eventWriteSchema = z.object({
   // L'organisateur est dérivé de la session (ctx.user.id), jamais de l'input.
-  // Le département est ciblé par son code métier ; le service résout le code
-  // vers l'id en base (le code est `@unique`), comme pour les news.
-  departmentCode: z.enum(DepartmentCode),
+  // Un event cible un ou plusieurs départements par leur code métier ; le
+  // service résout les codes vers les ids en base (le code est `@unique`),
+  // comme pour les news. Au moins un département est requis.
+  departmentCodes: z.array(z.enum(DepartmentCode)).min(1),
   description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
   endAt: z.coerce.date(),
   isPublic: z.boolean().default(false),
@@ -74,6 +75,6 @@ export type DeleteEventInput = z.infer<typeof deleteEventInputSchema>
 // par cohésion (tout ce qui concerne l'event au même endroit) faute d'un fichier
 // de types DB dédié.
 
-export type EventWithDepartment = Prisma.EventGetPayload<{
-  include: { department: true }
+export type EventWithDepartments = Prisma.EventGetPayload<{
+  include: { departments: true }
 }>

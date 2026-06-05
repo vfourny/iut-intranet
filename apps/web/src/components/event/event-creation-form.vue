@@ -46,8 +46,9 @@
 
         <div class="flex flex-col gap-1">
           <label>{{ t('event.department') }}</label>
-          <PrimeSelect
-            v-model="selectedDepartmentCode"
+          <PrimeMultiSelect
+            v-model="selectedDepartmentCodes"
+            display="chip"
             fluid
             option-label="label"
             option-value="value"
@@ -147,7 +148,7 @@ import PrimeButton from 'primevue/button'
 import PrimeDatePicker from 'primevue/datepicker'
 import PrimeInputText from 'primevue/inputtext'
 import PrimeMessage from 'primevue/message'
-import PrimeSelect from 'primevue/select'
+import PrimeMultiSelect from 'primevue/multiselect'
 import PrimeTextarea from 'primevue/textarea'
 import PrimeToggleSwitch from 'primevue/toggleswitch'
 import { useToast } from 'primevue/usetoast'
@@ -158,7 +159,7 @@ import { useCreateEvent, useUpdateEvent } from '@/api/event.api'
 import { useI18n } from '@/composables/use-i18n'
 
 const props = defineProps<{
-  departmentCode?: DepartmentCode
+  departmentCodes?: DepartmentCode[]
   description?: string
   endAt?: Date
   eventId?: string
@@ -190,13 +191,20 @@ const resolver = zodResolver(
   isUpdateMode.value
     ? updateEventInputSchema
     : eventWriteSchema.omit({
-        departmentCode: true,
+        departmentCodes: true,
       }),
 )
 
+// Par défaut, on pré-sélectionne le département de l'utilisateur courant ; à
+// l'édition on reprend les départements de l'event.
+const defaultDepartmentCodes = (): DepartmentCode[] => {
+  if (props.departmentCodes) return props.departmentCodes
+  const own = currentSession.value?.user?.department?.code
+  return own ? [own] : []
+}
+
 const initialValues = computed(() => ({
-  departmentCode:
-    props.departmentCode ?? currentSession.value?.user?.department?.code ?? '',
+  departmentCodes: defaultDepartmentCodes(),
   description: props.description ?? '',
   endAt: props.endAt,
   isPublic: props.isPublic ?? false,
@@ -205,9 +213,7 @@ const initialValues = computed(() => ({
   title: props.title ?? '',
 }))
 
-const selectedDepartmentCode = ref(
-  props.departmentCode ?? currentSession.value?.user?.department?.code ?? '',
-)
+const selectedDepartmentCodes = ref<DepartmentCode[]>(defaultDepartmentCodes())
 
 const startAtValue = ref<Date>(props.startAt ?? new Date())
 const endAtValue = ref<Date>(props.endAt ?? new Date())
@@ -224,7 +230,7 @@ async function onSubmit(formEvent: FormSubmitEvent) {
     if (isUpdateMode.value) {
       if (!props.eventId) return
       const payload: UpdateEventInput = {
-        departmentCode: selectedDepartmentCode.value as DepartmentCode,
+        departmentCodes: selectedDepartmentCodes.value,
         description: descriptionValue.value,
         endAt: endAtValue.value,
         // L'id chargé (cuid) est brandé en `EventId` par parse, sans cast.
@@ -243,7 +249,7 @@ async function onSubmit(formEvent: FormSubmitEvent) {
       })
     } else {
       const payload: CreateEventInput = {
-        departmentCode: selectedDepartmentCode.value as DepartmentCode,
+        departmentCodes: selectedDepartmentCodes.value,
         description: descriptionValue.value,
         endAt: endAtValue.value,
         isPublic: isPublicValue.value,
