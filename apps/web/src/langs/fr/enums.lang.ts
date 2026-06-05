@@ -1,4 +1,10 @@
-import { DepartmentCode } from '@iut-intranet/db/enums'
+import { DepartmentCode, UserRole } from '@iut-intranet/db/enums'
+
+const role = {
+  [UserRole.ADMIN]: 'Administrateur',
+  [UserRole.EDITOR]: 'Éditeur',
+  [UserRole.USER]: 'Utilisateur',
+} as const satisfies Record<UserRole, string>
 
 const department = {
   [DepartmentCode.GACO]:
@@ -14,4 +20,5 @@ const department = {
 
 export const enums = {
   department,
+  role,
 } as const

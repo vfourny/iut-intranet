@@ -1,4 +1,4 @@
-import { UserRole } from '@iut-intranet/db/enums'
+import { DepartmentCode, UserRole } from '@iut-intranet/db/enums'
 import { z } from 'zod'
 
 import { userIdSchema } from '@/schemas/brand.schema'
@@ -39,6 +39,17 @@ export const updateMeInputSchema = userSchema
   .partial()
   .strict()
 export type UpdateMeInput = z.infer<typeof updateMeInputSchema>
+
+// ── Inputs (création par un admin) ────────────────────────────────────────────
+
+export const createUserInputSchema = userSchema
+  .omit({ userId: true })
+  .extend({
+    departmentCode: z.enum(DepartmentCode),
+    role: z.enum(UserRole).default(UserRole.USER),
+  })
+  .strict()
+export type CreateUserInput = z.infer<typeof createUserInputSchema>
 
 // ── Upload (avatar) ───────────────────────────────────────────────────────────
 

@@ -19,6 +19,7 @@
   generic="TOption extends Record<string, unknown>, TValue"
 >
 import { toKebabCase } from '@iut-intranet/helpers/utils/format'
+import PrimeSelect from 'primevue/select'
 
 import FieldWrapper, {
   type FieldWrapperProps,

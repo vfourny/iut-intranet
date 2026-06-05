@@ -52,6 +52,7 @@
 <script lang="ts" setup>
 import type { SignInWithPasswordInput } from '@iut-intranet/helpers/schemas/auth'
 import { signInWithPasswordInputSchema } from '@iut-intranet/helpers/schemas/auth'
+import PrimeCheckbox from 'primevue/checkbox'
 import { useForm } from 'vee-validate'
 import { useRoute, useRouter } from 'vue-router'
 

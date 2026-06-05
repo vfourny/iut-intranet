@@ -31,7 +31,8 @@
     "test:watch:exec": "vitest watch --ui",
     "clean": "turbo clean && rimraf node_modules .turbo .cache",
     "prepare": "husky",
-    "syncpack:check": "syncpack lint --dependency-types dev,overrides,prod"
+    "syncpack:check": "syncpack lint --dependency-types dev,overrides,prod",
+    "cron:archive-news": "dotenvx run -- turbo run cron:archive-news --filter=@iut-intranet/api"
   },
   "engines": {
     "node": "22.22.2"

@@ -4,7 +4,7 @@ import { prisma } from '@iut-intranet/db'
 
 // Mot de passe de l'admin seedé (cf. packages/db/src/seeds/user.seed.ts).
 export const DEFAULT_PASSWORD = 'Password123!'
-export const ADMIN_EMAIL = 'admin@iut-intranet.com'
+export const ADMIN_EMAIL = 'john.admin@univ-littoral.fr'
 
 /** Extrait le cookie de session de la réponse better-auth en en-têtes de requête. */
 const toSessionHeaders = (responseHeaders: Headers): Headers => {
@@ -25,7 +25,9 @@ export const createDbUserFixture = async () => {
   return prisma.user.create({
     data: {
       departmentId: department.id,
-      email: faker.internet.email().toLowerCase(),
+      email: faker.internet
+        .email({ provider: 'univ-littoral.fr' })
+        .toLowerCase(),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName().toUpperCase(),
     },

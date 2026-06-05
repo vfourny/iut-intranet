@@ -6,6 +6,8 @@ import { createExpressMiddleware } from '@trpc/server/adapters/express'
 import cors from 'cors'
 import express from 'express'
 
+import { startCrons } from '@/cron'
+
 const { API_PORT, PUBLIC_API_URL, PUBLIC_APP_URL } = getServerEnv(
   'API_PORT',
   'PUBLIC_API_URL',
@@ -36,6 +38,9 @@ app.use(
     router: appRouter,
   }),
 )
+
+// Archivage automatique des news publiées trop anciennes, etc.
+startCrons()
 
 app.listen(API_PORT, () => {
   console.log(`Server is running on ${PUBLIC_API_URL}`)

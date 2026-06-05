@@ -78,6 +78,10 @@
     },
     "clean": {
       "cache": false
+    },
+    "cron:archive-news": {
+      "cache": false,
+      "dependsOn": ["^build"]
     }
   },
   "globalEnv": [

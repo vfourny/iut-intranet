@@ -18,6 +18,9 @@ export const acUserRoles = {
   [UserRole.ADMIN]: ac.newRole({
     ...adminAc.statements,
   }),
+  [UserRole.EDITOR]: ac.newRole({
+    ...userAc.statements,
+  }),
   [UserRole.USER]: ac.newRole({
     ...userAc.statements,
   }),

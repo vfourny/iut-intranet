@@ -29,6 +29,11 @@
 </template>
 
 <script lang="ts" setup>
+import PrimeButton from 'primevue/button'
+import PrimeCard from 'primevue/card'
+import PrimeFluid from 'primevue/fluid'
+import PrimeMessage from 'primevue/message'
+
 defineProps<{
   error?: string
   loading?: boolean

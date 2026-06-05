@@ -1,5 +1,8 @@
 import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
-import type { UpdateMeInput } from '@iut-intranet/helpers/schemas/user'
+import type {
+  CreateUserInput,
+  UpdateMeInput,
+} from '@iut-intranet/helpers/schemas/user'
 import {
   useInfiniteQuery,
   useMutation,
@@ -107,6 +110,17 @@ export const useUpdateMe = () => {
       queryCache.invalidateQueries({
         key: ['user', 'me', currentSession.value?.user.id ?? null],
       })
+    },
+  })
+}
+
+export const useCreateUser = () => {
+  const queryCache = useQueryCache()
+
+  return useMutation({
+    mutation: (input: CreateUserInput) => trpc.user.create.mutate(input),
+    onSuccess: () => {
+      queryCache.invalidateQueries({ key: ['user', 'list'] })
     },
   })
 }

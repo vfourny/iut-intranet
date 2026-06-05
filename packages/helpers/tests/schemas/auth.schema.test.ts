@@ -8,7 +8,7 @@ import {
 
 const validSignUp = {
   departmentCode: DepartmentCode.INFO,
-  email: 'jane.doe@example.com',
+  email: 'jane.doe@univ-littoral.fr',
   firstName: 'Jane',
   lastName: 'Doe',
   password: 'Password123!',
@@ -18,7 +18,7 @@ describe('signUpWithPasswordInputSchema', () => {
   it('should accept and normalise a valid payload', () => {
     const result = signUpWithPasswordInputSchema.parse(validSignUp)
 
-    expect(result.email).toBe('jane.doe@example.com')
+    expect(result.email).toBe('jane.doe@univ-littoral.fr')
     expect(result.lastName).toBe('DOE')
     expect(result.departmentCode).toBe(DepartmentCode.INFO)
   })
@@ -45,16 +45,16 @@ describe('signUpWithPasswordInputSchema', () => {
 describe('signInWithPasswordInputSchema', () => {
   it('should accept valid credentials', () => {
     const result = signInWithPasswordInputSchema.parse({
-      email: 'jane.doe@example.com',
+      email: 'jane.doe@univ-littoral.fr',
       password: 'Password123!',
     })
 
-    expect(result.email).toBe('jane.doe@example.com')
+    expect(result.email).toBe('jane.doe@univ-littoral.fr')
   })
 
   it('should keep an explicit rememberMe flag', () => {
     const result = signInWithPasswordInputSchema.parse({
-      email: 'jane.doe@example.com',
+      email: 'jane.doe@univ-littoral.fr',
       password: 'Password123!',
       rememberMe: true,
     })

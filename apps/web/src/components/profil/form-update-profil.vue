@@ -65,8 +65,10 @@ import {
   formatPhoneNational,
   parsePhone,
 } from '@iut-intranet/helpers/utils/phone'
+import PrimeButton from 'primevue/button'
 import type { FileUploadUploaderEvent } from 'primevue/fileupload'
 import PrimeFileUpload from 'primevue/fileupload'
+import PrimeInputText from 'primevue/inputtext'
 import { useToast } from 'primevue/usetoast'
 import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'

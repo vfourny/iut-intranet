@@ -20,7 +20,15 @@ export const lastNameSchema = z
   .max(MAX_NAME_LENGTH)
   .regex(NAME_PATTERN_REGEX)
 
-export const emailSchema = z.string().trim().toLowerCase().email()
+const UNIV_EMAIL_DOMAIN = 'univ-littoral.fr'
+export const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email()
+  .endsWith(`@${UNIV_EMAIL_DOMAIN}`, {
+    message: `L'adresse e-mail doit appartenir au domaine @${UNIV_EMAIL_DOMAIN}`,
+  })
 
 // Accepte un numéro saisi au format national (avec espaces) ou international,
 // le valide via libphonenumber et le normalise en E.164 pour le stockage.

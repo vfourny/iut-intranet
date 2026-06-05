@@ -1,8 +1,12 @@
+import { randomBytes } from 'node:crypto'
+
+import type { BetterAuthInstance } from '@iut-intranet/auth/types'
 import type { prisma } from '@iut-intranet/db'
 import type { UserRole } from '@iut-intranet/db/enums'
 import type { UserId } from '@iut-intranet/helpers/schemas/brand'
 import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
 import type {
+  CreateUserInput,
   ListUsersInputSchema,
   UpdateMeInput,
   UpdateUserInput,
@@ -12,7 +16,51 @@ import { signUrlField, uploadObject } from '@iut-intranet/providers/s3'
 import { userInclude, userListSelect } from '@/user/user.query'
 
 export class UserService {
-  constructor(private prisma: prisma) {}
+  constructor(
+    private prisma: prisma,
+    private betterAuth: BetterAuthInstance,
+  ) {}
+
+  /**
+   * Creates a user account on behalf of an admin, with a generated password.
+   * @param {CreateUserInput} payload - Identity, contact, role and target department code of the account to create
+   * @returns The created user as returned by the auth provider
+   * @throws Prisma P2025 (mapped to NOT_FOUND) if the target department code doesn't exist
+   * @remarks Admin-only operation — authorization is enforced upstream by the `adminProcedure`, so the service trusts its caller and never re-checks the actor's role. The password is generated server-side (the account is provisioned, not self-registered); delivering it to the new user is out of this method's scope. Account creation goes through better-auth (hashing, account row, schema field mapping) rather than a raw Prisma insert, and the department code is resolved to its id since the auth schema stores `departmentId`.
+   */
+  public async create(payload: CreateUserInput) {
+    const {
+      departmentCode,
+      email,
+      firstName,
+      jobTitle,
+      lastName,
+      phone,
+      role,
+    } = payload
+    const password = randomBytes(12).toString('base64url')
+
+    const { id: departmentId } = await this.prisma.department.findUniqueOrThrow(
+      {
+        where: { code: departmentCode },
+      },
+    )
+
+    return this.betterAuth.api.createUser({
+      body: {
+        data: {
+          departmentId,
+          firstName,
+          jobTitle,
+          phone,
+        },
+        email,
+        name: lastName,
+        password,
+        role,
+      },
+    })
+  }
 
   /**
    * Fetches a user by id with their department.

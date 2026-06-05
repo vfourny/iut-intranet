@@ -8,7 +8,7 @@ import { HighlightService } from '@/highlight.service'
 import { NewsService } from '@/news/news.service'
 import { UserService } from '@/user/user.service'
 
-const userService = new UserService(prisma)
+const userService = new UserService(prisma, betterAuthInstance)
 const departmentService = new DepartmentService(prisma)
 const eventService = new EventService(prisma)
 const newsService = new NewsService(prisma, userService)

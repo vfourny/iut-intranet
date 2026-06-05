@@ -18,4 +18,5 @@ export const profil = {
   save: 'Sauvegarder les modifications du profil',
   saved: 'Changements sauvegardés',
   savedFailed: 'Changements annulés',
+  title: 'Mon profil',
 }

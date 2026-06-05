@@ -32,10 +32,9 @@
         </div>
 
         <div
-          v-if="item.targetDepartments.length > 0 || item.status"
+          v-if="item.targetDepartments.length > 0"
           class="flex flex-wrap items-center gap-1"
         >
-          <NewsTag :key="item.id" :status="item.status" />
           <DepartmentTag
             v-for="dept in item.targetDepartments"
             :key="dept.code"
@@ -60,11 +59,11 @@
 
 <script lang="ts" setup>
 import type { DepartmentCode } from '@iut-intranet/db/enums'
+import PrimeButton from 'primevue/button'
 import PrimeProgressSpinner from 'primevue/progressspinner'
 
 import type { NewsList, NewsListItem } from '@/api/news.api'
 import DepartmentTag from '@/components/department/department-tag.vue'
-import NewsTag from '@/components/news/news-tag.vue'
 import { useI18n } from '@/composables/use-i18n'
 
 const { t } = useI18n()

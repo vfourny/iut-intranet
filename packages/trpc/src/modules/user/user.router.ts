@@ -1,3 +1,4 @@
+import { createUserProcedure } from '@/modules/user/procedures/create-user.procedure'
 import { getMeProcedure } from '@/modules/user/procedures/get-me.procedure'
 import { listUsersProcedure } from '@/modules/user/procedures/list-users.procedure'
 import { updateMeProcedure } from '@/modules/user/procedures/update-me.procedure'
@@ -6,6 +7,7 @@ import { uploadMyAvatarProcedure } from '@/modules/user/procedures/upload-my-ava
 import { router } from '@/trpc'
 
 export const userRouter = router({
+  create: createUserProcedure,
   getMe: getMeProcedure,
   list: listUsersProcedure,
   updateMe: updateMeProcedure,

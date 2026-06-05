@@ -11,7 +11,7 @@ CREATE TYPE "DepartmentCode" AS ENUM ('GACO', 'GEA', 'TC', 'INFO', 'GEII', 'GIM'
 CREATE TYPE "EventInvitationStatus" AS ENUM ('PENDING', 'ACCEPTED', 'DECLINED');
 
 -- CreateEnum
-CREATE TYPE "NewsStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'SCHEDULED');
+CREATE TYPE "NewsStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'SCHEDULED', 'ARCHIVED');
 
 -- CreateTable
 CREATE TABLE "user" (
@@ -126,6 +126,7 @@ CREATE TABLE "news" (
     "author_id" TEXT NOT NULL,
     "status" "NewsStatus" NOT NULL DEFAULT 'DRAFT',
     "published_at" TIMESTAMP(3),
+    "archived_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 

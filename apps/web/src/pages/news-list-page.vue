@@ -1,19 +1,12 @@
 <template>
-  <div class="flex flex-col gap-6 p-6">
-    <div
-      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-    >
-      <h1 class="text-3xl font-bold text-gray-900">
-        {{ t('news.list.title') }}
-      </h1>
-
+  <div class="flex flex-col gap-6">
+    <Teleport :to="pageHeaderSelector.actions">
       <PrimeButton
-        class="w-full sm:w-auto"
         icon="pi pi-plus"
         :label="t('news.list.createNews')"
         @click="openCreate"
       />
-    </div>
+    </Teleport>
 
     <div class="flex flex-col md:flex-row gap-4">
       <UserSearchBar @search="onSearch" />
@@ -89,6 +82,7 @@
 <script lang="ts" setup>
 import { NewsStatus } from '@iut-intranet/db/enums'
 import { isEditorRole } from '@iut-intranet/helpers/utils/role'
+import PrimeButton from 'primevue/button'
 import PrimeDialog from 'primevue/dialog'
 import PrimeMultiSelect from 'primevue/multiselect'
 import PrimePaginator from 'primevue/paginator'
@@ -102,6 +96,7 @@ import {
   useNewsId,
   useVisibleNews,
 } from '@/api/news.api'
+import { pageHeaderSelector } from '@/lib/page-header'
 import NewsCard from '@/components/news/news-card.vue'
 import NewsDetail from '@/components/news/news-detail.vue'
 import NewsForm from '@/components/news/news-form.vue'

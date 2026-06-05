@@ -22,6 +22,6 @@ const LayoutComponents = {
 } as const satisfies Record<Layout, typeof DefaultLayout>
 
 const activeLayout = computed(
-  () => LayoutComponents[route.meta.layout] ?? DefaultLayout,
+  () => LayoutComponents[route.meta.layout ?? 'default'],
 )
 </script>

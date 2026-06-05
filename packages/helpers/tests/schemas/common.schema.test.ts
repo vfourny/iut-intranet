@@ -25,13 +25,17 @@ describe('lastNameSchema', () => {
 
 describe('emailSchema', () => {
   it('should trim and lowercase the email', () => {
-    expect(emailSchema.parse('  John.DOE@Example.COM ')).toBe(
-      'john.doe@example.com',
+    expect(emailSchema.parse('  John.DOE@Univ-Littoral.FR ')).toBe(
+      'john.doe@univ-littoral.fr',
     )
   })
 
   it('should reject an invalid email', () => {
     expect(emailSchema.safeParse('not-an-email').success).toBe(false)
+  })
+
+  it('should reject an email outside the @univ-littoral.fr domain', () => {
+    expect(emailSchema.safeParse('john.doe@example.com').success).toBe(false)
   })
 })
 

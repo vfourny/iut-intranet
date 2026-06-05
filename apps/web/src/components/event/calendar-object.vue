@@ -1,13 +1,25 @@
 <template>
   <div>
-    <div class="mb-4 flex justify-end">
+    <div class="mb-4 flex items-center justify-between gap-4">
+      <PrimeSelectButton
+        :allow-empty="false"
+        :model-value="displayMode"
+        option-label="label"
+        option-value="value"
+        :options="displayModeOptions"
+        @value-change="displayMode = $event"
+      >
+        <template #option="slotProps">
+          <i :class="slotProps.option.icon"></i>
+        </template>
+      </PrimeSelectButton>
       <PrimeButton
         icon="pi pi-plus"
         :label="t('event.addEvent')"
         @click="emit('create')"
       />
     </div>
-    <FullCalendar :options="calendar">
+    <FullCalendar ref="calendarRef" :options="calendar">
       <template #eventContent="arg">
         <span
           v-tooltip="eventTooltip(arg.event.extendedProps.source)"
@@ -58,8 +70,9 @@ import { eventIdSchema } from '@iut-intranet/helpers/schemas/brand'
 import type { TrpcOutput } from '@iut-intranet/trpc'
 import PrimeButton from 'primevue/button'
 import PrimePopover from 'primevue/popover'
+import PrimeSelectButton from 'primevue/selectbutton'
 import vTooltip from 'primevue/tooltip'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import { useUpdateEvent } from '@/api/event.api'
 import EventClickBox from '@/components/event/event-click-box.vue'
@@ -91,6 +104,52 @@ function getDepartmentColor(code: DepartmentCode) {
 }
 
 const isMobile = window.innerWidth < 768
+
+// Deux vues (comme l'annuaire) : « Planning » = liste FullCalendar
+// (listDay/Week/Month), « Calendrier » = grille type Google/Apple
+// (timeGridDay/Week, dayGridMonth). On garde les 3 granularités jour/semaine/mois
+// dans les deux modes : `granularity` est tenue à jour depuis `datesSet` puis
+// préservée quand on bascule de mode.
+enum DisplayMode {
+  CALENDAR = 'calendar',
+  PLANNING = 'planning',
+}
+
+type Granularity = 'day' | 'month' | 'week'
+
+const VIEW_BY_MODE = {
+  [DisplayMode.CALENDAR]: {
+    day: 'timeGridDay',
+    month: 'dayGridMonth',
+    week: 'timeGridWeek',
+  },
+  [DisplayMode.PLANNING]: {
+    day: 'listDay',
+    month: 'listMonth',
+    week: 'listWeek',
+  },
+} satisfies Record<DisplayMode, Record<Granularity, string>>
+
+const displayModeOptions = [
+  { icon: 'pi pi-list', label: 'Planning', value: DisplayMode.PLANNING },
+  { icon: 'pi pi-calendar', label: 'Calendrier', value: DisplayMode.CALENDAR },
+]
+
+function granularityOf(viewType: string): Granularity {
+  if (viewType.endsWith('Day')) return 'day'
+  if (viewType.endsWith('Week')) return 'week'
+  return 'month'
+}
+
+const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null)
+const displayMode = ref<DisplayMode>(DisplayMode.PLANNING)
+const granularity = ref<Granularity>(isMobile ? 'day' : 'week')
+
+watch(displayMode, (mode) => {
+  calendarRef.value
+    ?.getApi()
+    .changeView(VIEW_BY_MODE[mode][granularity.value])
+})
 
 const selectedEvent = ref<null | VisibleEvent>(null)
 const clickBox = ref<InstanceType<typeof EventClickBox> | null>(null)
@@ -148,6 +207,7 @@ const calendar = computed(() => ({
     datePopover.value?.show(info.jsEvent, info.jsEvent.target as HTMLElement)
   },
   datesSet: (arg: DatesSetArg) => {
+    granularity.value = granularityOf(arg.view.type)
     emit('rangeChange', { from: arg.start, to: arg.end })
   },
   editable: true,
@@ -181,21 +241,26 @@ const calendar = computed(() => ({
     : {
         center: 'title',
         left: 'prev,next today',
-        right: 'listDay,listWeek,listMonth',
+        // Filtres jour/semaine/mois conservés dans les deux modes, en pointant
+        // sur les vues liste ou grille selon le mode courant.
+        right: Object.values(VIEW_BY_MODE[displayMode.value]).join(','),
       },
   height: 'auto',
-  initialView: isMobile ? 'listDay' : 'listWeek',
+  initialView: VIEW_BY_MODE[displayMode.value][granularity.value],
   locale: frLocale,
   plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
-  views: {
-    listDay: { buttonText: 'Jour' },
-    listMonth: { buttonText: 'Mois' },
-    listWeek: { buttonText: 'Semaine' },
-  },
   scrollTime: '08:00:00',
   selectable: true,
   slotEventOverlap: false,
   slotMaxTime: '20:00:00',
   slotMinTime: '07:00:00',
+  views: {
+    dayGridMonth: { buttonText: 'Mois' },
+    listDay: { buttonText: 'Jour' },
+    listMonth: { buttonText: 'Mois' },
+    listWeek: { buttonText: 'Semaine' },
+    timeGridDay: { buttonText: 'Jour' },
+    timeGridWeek: { buttonText: 'Semaine' },
+  },
 }))
 </script>

@@ -1,5 +1,12 @@
 <template>
-  <PrimeDataView layout="grid" :value="users">
+  <PrimeDataView
+    layout="grid"
+    :pt="{
+      root: { class: 'bg-transparent border-0' },
+      content: { class: 'bg-transparent' },
+    }"
+    :value="users"
+  >
     <template #grid>
       <div class="grid grid-cols-12 gap-4">
         <div
@@ -13,16 +20,16 @@
               router.push({ name: RouteNames.home, params: { id: user.id } })
             "
           >
-            <div class="bg-surface-50 flex justify-center rounded p-4">
+            <div class="aspect-square w-full overflow-hidden rounded bg-surface-50">
               <img
                 v-if="user.image"
                 :alt="`${user.firstName} ${user.lastName}`"
-                class="h-24 w-24 rounded-full object-cover"
+                class="h-full w-full object-cover"
                 :src="user.image"
               />
               <div
                 v-else
-                class="h-24 w-24 rounded-full bg-surface-200 flex items-center justify-center text-xl font-medium text-surface-700"
+                class="flex h-full w-full items-center justify-center bg-surface-200 text-4xl font-medium text-surface-700"
               >
                 {{ getInitials(user) }}
               </div>

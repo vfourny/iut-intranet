@@ -28,6 +28,16 @@
     />
     <UserSearchBar @search="onSearch" />
   </div>
+
+  <Teleport :to="pageHeaderSelector.actions">
+    <PrimeButton
+      v-if="isAdmin"
+      icon="pi pi-user-plus"
+      icon-pos="right"
+      :label="t('user.add.actions.create')"
+      @click="createVisible = true"
+    />
+  </Teleport>
   <UserDataTable
     v-if="displayMode === DisplayMode.DATA_TABLE"
     :loading="paginatedStatus === 'loading'"
@@ -44,23 +54,43 @@
     :users="infiniteUsers"
     @load-more="infiniteLoadNextPage()"
   />
+
+  <PrimeDialog
+    v-model:visible="createVisible"
+    class="w-full max-w-2xl"
+    :header="t('user.add.title')"
+    modal
+  >
+    <AddUser @cancel="createVisible = false" @saved="createVisible = false" />
+  </PrimeDialog>
 </template>
 
 <script lang="ts" setup>
 import { DepartmentCode } from '@iut-intranet/db/enums'
+import PrimeButton from 'primevue/button'
+import PrimeDialog from 'primevue/dialog'
 import PrimeDropdown from 'primevue/dropdown'
 import PrimeSelectButton from 'primevue/selectbutton'
 import { computed, ref } from 'vue'
 
+import { useSession } from '@/api/auth.api'
 import {
   USER_PAGE_SIZE,
   useUsersInfinite,
   useUsersPaginated,
 } from '@/api/users.api'
+import { pageHeaderSelector } from '@/lib/page-header'
 import UserSearchBar from '@/components/ui/search-bar.vue'
+import AddUser from '@/components/user/add-user.vue'
 import UserDataTable from '@/components/user/user-data-table.vue'
 import UserDataView from '@/components/user/user-data-view.vue'
+import { useI18n } from '@/composables/use-i18n'
 import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
+
+const { t } = useI18n()
+const { isAdmin } = useSession()
+
+const createVisible = ref(false)
 
 enum DisplayMode {
   DATA_TABLE = 'data-table',
@@ -71,12 +101,12 @@ const SEARCH_DEBOUNCE_MS = 300
 
 const search = ref('')
 const page = ref(1)
-const displayMode = ref(DisplayMode.DATA_TABLE)
+const displayMode = ref(DisplayMode.DATA_VIEW)
 const department = ref<DepartmentCode | undefined>(undefined)
 
 const displayModeOptions = ref([
-  { icon: 'pi pi-table', label: 'Tableau', value: DisplayMode.DATA_TABLE },
   { icon: 'pi pi-th-large', label: 'Vue', value: DisplayMode.DATA_VIEW },
+  { icon: 'pi pi-table', label: 'Tableau', value: DisplayMode.DATA_TABLE },
 ])
 
 const departmentOptions = Object.values(DepartmentCode).map((code) => ({

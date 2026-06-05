@@ -1,4 +1,5 @@
 import type { Prisma, prisma } from '@iut-intranet/db'
+import { NewsStatus } from '@iut-intranet/db'
 import type { NewsId, UserId } from '@iut-intranet/helpers/schemas/brand'
 import type {
   CreateNewsInput,
@@ -27,6 +28,24 @@ export class NewsService {
     private prisma: prisma,
     private userService: UserService,
   ) {}
+
+  /**
+   * Auto-archives published news whose publication date is older than one month.
+   * @returns {Promise<{ count: number }>} The number of news transitioned to ARCHIVED
+   * @remarks Clock-driven maintenance run by the daily archive cron, not a user action: it sweeps every PUBLISHED news older than the retention window in a single `updateMany`. SCHEDULED and DRAFT news are left untouched. The retention window (one month) is the inactivity delay after which a published news is considered stale.
+   */
+  public async archivePastPublishedNews(): Promise<{ count: number }> {
+    const retentionLimit = new Date()
+    retentionLimit.setMonth(retentionLimit.getMonth() - 1)
+
+    return this.prisma.news.updateMany({
+      data: { status: NewsStatus.ARCHIVED },
+      where: {
+        publishedAt: { lt: retentionLimit },
+        status: NewsStatus.PUBLISHED,
+      },
+    })
+  }
 
   /**
    * Creates a news owned by the given user with the requested status and publication date.

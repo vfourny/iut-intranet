@@ -3,18 +3,8 @@ import 'primeicons/primeicons.css'
 
 import { PiniaColada } from '@pinia/colada'
 import { createPinia } from 'pinia'
-import Avatar from 'primevue/avatar'
-import Button from 'primevue/button'
-import Card from 'primevue/card'
-import Checkbox from 'primevue/checkbox'
 import PrimeVue from 'primevue/config'
 import ConfirmationService from 'primevue/confirmationservice'
-import Fluid from 'primevue/fluid'
-import InputText from 'primevue/inputtext'
-import Menubar from 'primevue/menubar'
-import Message from 'primevue/message'
-import Password from 'primevue/password'
-import Select from 'primevue/select'
 import ToastService from 'primevue/toastservice'
 import { createApp } from 'vue'
 
@@ -44,17 +34,6 @@ app.use(PrimeVue, {
     preset: IutPreset,
   },
 })
-
-app.component('PrimeAvatar', Avatar)
-app.component('PrimeButton', Button)
-app.component('PrimeCard', Card)
-app.component('PrimeCheckbox', Checkbox)
-app.component('PrimeFluid', Fluid)
-app.component('PrimeInputText', InputText)
-app.component('PrimeMenubar', Menubar)
-app.component('PrimeMessage', Message)
-app.component('PrimePassword', Password)
-app.component('PrimeSelect', Select)
 
 app.use(i18n)
 app.use(router)

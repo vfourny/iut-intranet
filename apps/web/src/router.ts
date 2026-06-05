@@ -2,12 +2,17 @@ import type { LocationQueryValue, RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import { useSession } from '@/api/auth.api'
+import type { TranslationKey } from '@/composables/use-i18n'
+import type { MessageSchema } from '@/plugins/i18n.plugin'
 import type { Layout } from '@/types/layout.type'
 
 declare module 'vue-router' {
   interface RouteMeta {
     access?: 'authenticated' | 'guest'
-    layout: Layout
+    layout?: Layout
+    // Clés i18n de l'en-tête de page, rendues par `default-layout`.
+    subtitle?: TranslationKey
+    title?: TranslationKey
   }
 }
 
@@ -18,21 +23,58 @@ export const RouteNames = {
   },
   calendar: 'calendar',
   home: 'home',
-  news: {
-    news: 'news',
-  },
-  profil: {
-    private: 'profil.private',
-    public: 'profil.public',
-  },
+  news: 'news',
+  profil: 'profil',
   users: 'users',
 } as const
 
+// Union de tous les noms de route « feuilles » (y compris imbriqués comme
+// `auth.sign-in`), pour typer une cible de navigation sans `string` nu.
+type RouteNameLeaves<T> = T extends string
+  ? T
+  : { [K in keyof T]: RouteNameLeaves<T[K]> }[keyof T]
+export type RouteName = RouteNameLeaves<typeof RouteNames>
+
+// Clés de la nav principale, calées sur les libellés i18n existants : ajouter
+// une entrée `layout.default.nav.*` force à compléter `NAV_ITEMS` (exhaustif).
+export type NavKey = keyof MessageSchema['layout']['default']['nav']
+
+export type NavItem = {
+  icon: string
+  label: TranslationKey
+  route: RouteName
+}
+
+// Source unique de la barre de navigation : libellé i18n, icône et route au
+// même endroit. `header-bar` ne fait que projeter ça en `MenuItem` PrimeVue.
+export const NAV_ITEMS = {
+  home: {
+    icon: 'pi pi-home',
+    label: 'layout.default.nav.home',
+    route: RouteNames.home,
+  },
+  directory: {
+    icon: 'pi pi-users',
+    label: 'layout.default.nav.directory',
+    route: RouteNames.users,
+  },
+  calendar: {
+    icon: 'pi pi-calendar',
+    label: 'layout.default.nav.calendar',
+    route: RouteNames.calendar,
+  },
+  news: {
+    icon: 'pi pi-file',
+    label: 'layout.default.nav.news',
+    route: RouteNames.news,
+  },
+} as const satisfies Record<NavKey, NavItem>
+
 const HomePage = () => import('@/pages/home-page.vue')
-const UserListPage = () => import('@/pages/user/user-list.vue')
-const CalendarPage = () => import('@/pages/event/event-page.vue')
-const NewsListPage = () => import('@/pages/news/news-list-page.vue')
-const ProfilPrivatePage = () => import('@/pages/profil/profil-page-private.vue')
+const UserListPage = () => import('@/pages/user-list-page.vue')
+const CalendarPage = () => import('@/pages/event-page.vue')
+const NewsListPage = () => import('@/pages/news-list-page.vue')
+const ProfilPage = () => import('@/pages/profil-page.vue')
 const SignInPage = () => import('@/pages/auth/sign-in-page.vue')
 const SignUpPage = () => import('@/pages/auth/sign-up-page.vue')
 
@@ -41,16 +83,19 @@ export const routes = [
     children: [
       {
         component: HomePage,
+        meta: { title: 'layout.default.nav.home' },
         name: RouteNames.home,
         path: '',
       },
       {
         component: UserListPage,
+        meta: { title: 'layout.default.nav.directory' },
         name: RouteNames.users,
         path: 'users',
       },
       {
         component: CalendarPage,
+        meta: { title: 'layout.default.nav.calendar' },
         name: RouteNames.calendar,
         path: 'calendar',
       },
@@ -58,15 +103,17 @@ export const routes = [
         children: [
           {
             component: NewsListPage,
-            name: RouteNames.news.news,
+            meta: { title: 'layout.default.nav.news' },
+            name: RouteNames.news,
             path: '',
           },
         ],
         path: 'actualites',
       },
       {
-        component: ProfilPrivatePage,
-        name: RouteNames.profil.private,
+        component: ProfilPage,
+        meta: { title: 'profil.title' },
+        name: RouteNames.profil,
         path: 'profil',
       },
     ],
@@ -104,8 +151,6 @@ export const router = createRouter({
   routes,
 })
 
-// N'autorise qu'une redirection interne (chemin relatif), pour éviter un
-// open-redirect via le query param `?redirect=`.
 export const resolveRedirect = (
   redirect: LocationQueryValue | LocationQueryValue[] | undefined,
 ): string | undefined => {
