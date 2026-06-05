@@ -41,10 +41,12 @@ export class ArticleService {
 
   async archivePastPublishedArticles(): Promise<{ count: number }> {
     const startOfToday = new Date()
+    const limitDate = new Date()
+    limitDate.setMonth(limitDate.getMonth() + 1)
     const { count } = await prisma.article.updateMany({
       data: { archivedAt: startOfToday, status: ArticleStatus.ARCHIVED },
       where: {
-        publishedAt: { lt: startOfToday },
+        publishedAt: { lt: limitDate },
         status: ArticleStatus.PUBLISHED,
       },
     })

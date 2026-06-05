@@ -134,6 +134,7 @@ const calendar = computed(() => ({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
   scrollTime: '08:00:00',
   selectable: true,
+  slotEventOverlap: false,
   slotMaxTime: '20:00:00',
   slotMinTime: '07:00:00',
 }))
