@@ -1,5 +1,5 @@
-import type { DepartmentCode, prisma } from '@iut-intranet/db'
-import type { Prisma } from '@iut-intranet/db'
+import type { DepartmentCode, Prisma } from '@iut-intranet/db'
+import { prisma } from '@iut-intranet/db'
 import { ArticleStatus } from '@iut-intranet/db'
 import { AppError } from '@iut-intranet/helpers/errors'
 import type {
@@ -38,6 +38,20 @@ function validateStatus(status: ArticleStatus, publishedAt?: Date | null) {
 
 export class ArticleService {
   constructor(private prisma: prisma) {}
+
+  async archivePastPublishedArticles(): Promise<{ count: number }> {
+    const startOfToday = new Date()
+    const limitDate = new Date()
+    limitDate.setMonth(limitDate.getMonth() + 1)
+    const { count } = await prisma.article.updateMany({
+      data: { archivedAt: startOfToday, status: ArticleStatus.ARCHIVED },
+      where: {
+        publishedAt: { lt: limitDate },
+        status: ArticleStatus.PUBLISHED,
+      },
+    })
+    return { count }
+  }
 
   async create(input: createArticleInput) {
     const departments = await this.prisma.department.findMany({
@@ -174,8 +188,22 @@ export class ArticleService {
     }
 
     const article = await this.getById(input.articleId)
-    const status = input.status ?? article.status
+    const previousStatus = article.status
+    const status = input.status ?? previousStatus
     validateStatus(status, input.publishedAt)
+
+    let publishedAt = input.publishedAt
+    let archivedAt = article.archivedAt
+
+    if (previousStatus === 'ARCHIVED' && status === 'PUBLISHED') {
+      archivedAt = null
+      publishedAt = input.publishedAt ?? new Date()
+    } else if (
+      ['PUBLISHED', 'SCHEDULED'].includes(previousStatus) &&
+      status === 'DRAFT'
+    ) {
+      publishedAt = null
+    }
 
     const departments = await this.prisma.department.findMany({
       select: { id: true },
@@ -193,10 +221,11 @@ export class ArticleService {
 
     return this.prisma.article.update({
       data: {
+        archivedAt,
         content: input.content as Prisma.InputJsonValue,
         coverUrl: input.coverUrl ?? null,
-        publishedAt: input.publishedAt,
-        status: status,
+        publishedAt,
+        status,
         targetDepartments: {
           connect: departments.map((department) => ({ id: department.id })),
         },

@@ -1,7 +1,7 @@
 <template>
   <EventFormulaire
     v-if="ready"
-    :department-id="event?.departmentId"
+    :department-ids="event?.departments.map((d) => d.id)"
     :description="event?.description"
     :end-at="endAt"
     :event-id="eventId"

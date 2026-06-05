@@ -1,6 +1,7 @@
 import type { z } from 'zod'
 
 import type {
+  createUserSchema,
   deleteUserInputSchema,
   getMeWithDepartmentSchema,
   getUserByIdInputSchema,
@@ -20,3 +21,5 @@ export type updateOwnProfileInput = z.infer<typeof updateOwnProfileInputSchema>
 export type DeleteUserInput = z.infer<typeof deleteUserInputSchema>
 
 export type getMeWithDepartmentInput = z.infer<typeof getMeWithDepartmentSchema>
+
+export type createUserFromAdminInput = z.infer<typeof createUserSchema>

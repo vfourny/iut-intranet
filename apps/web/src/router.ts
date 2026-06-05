@@ -32,6 +32,7 @@ export const RouteNames = {
     private: 'profil.private',
     public: 'profil.public',
   },
+  user: 'create',
 } as const
 
 export const routes = [
@@ -52,6 +53,12 @@ export const routes = [
     meta: { access: 'authenticated', layout: 'default' },
     name: RouteNames.calendar,
     path: '/calendar',
+  },
+  {
+    component: () => import('@/pages/user/user-form.vue'),
+    meta: { access: 'authenticated', layout: 'default' },
+    name: RouteNames.user,
+    path: '/user/create',
   },
   {
     component: () => import('@/pages/article/article-list-page.vue'),

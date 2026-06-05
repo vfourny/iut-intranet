@@ -1,6 +1,7 @@
 import type { DepartmentCode } from '@iut-intranet/db/enums'
 import type { uploadAvatarInput } from '@iut-intranet/helpers/types/storage'
 import type {
+  createUserFromAdminInput,
   getMeWithDepartmentInput,
   updateOwnProfileInput,
 } from '@iut-intranet/helpers/types/user'
@@ -129,6 +130,19 @@ export const useUploadAvatar = () => {
         key: ['user', 'me', currentSession.value?.user.id ?? null],
       })
       queryCache.invalidateQueries({ key: ['auth', 'session'] })
+    },
+  })
+}
+
+export const useCreateUser = () => {
+  const queryCache = useQueryCache()
+  return useMutation({
+    mutation: (input: createUserFromAdminInput) =>
+      trpc.user.create.mutate(input),
+    onSuccess: () => {
+      queryCache.invalidateQueries({
+        key: ['user', 'list'],
+      })
     },
   })
 }

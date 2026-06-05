@@ -1,5 +1,5 @@
 <template>
-  <div class="flex gap-4 items-center">
+  <div class="flex gap-4 items-center mt-6">
     <PrimeSelectButton
       :model-value="displayMode"
       option-label="label"
@@ -44,14 +44,25 @@
     :users="infiniteUsers"
     @load-more="infiniteLoadNextPage()"
   />
+  <div
+    v-if="currentSession?.user.role == UserRole.ADMIN"
+    class="flex justify-center mt-6"
+  >
+    <PrimeButton
+      :label="t('user.add.actions.create')"
+      @click="router.push({ name: RouteNames.user })"
+    />
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { DepartmentCode } from '@iut-intranet/db/enums'
+import { DepartmentCode, UserRole } from '@iut-intranet/db/enums'
+import PrimeButton from 'primevue/button'
 import PrimeDropdown from 'primevue/dropdown'
 import PrimeSelectButton from 'primevue/selectbutton'
 import { computed, ref } from 'vue'
 
+import { useSession } from '@/api/auth.api'
 import {
   USER_PAGE_SIZE,
   useUsersInfinite,
@@ -60,12 +71,18 @@ import {
 import UserSearchBar from '@/components/ui/search-bar.vue'
 import UserDataTable from '@/components/user/user-data-table.vue'
 import UserDataView from '@/components/user/user-data-view.vue'
+import { useI18n } from '@/composables/use-i18n'
 import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
+import { RouteNames, router } from '@/router'
 
 enum DisplayMode {
   DATA_TABLE = 'data-table',
   DATA_VIEW = 'data-view',
 }
+
+const { currentSession } = useSession()
+
+const { t } = useI18n()
 
 const SEARCH_DEBOUNCE_MS = 300
 
