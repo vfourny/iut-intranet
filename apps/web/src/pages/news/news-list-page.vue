@@ -54,12 +54,19 @@
     <PrimeDialog
       v-model:visible="formVisible"
       class="w-full max-w-2xl"
-      :header="formNews ? t('news.update') : t('news.list.createNews')"
+      :header="formMode === 'edit' ? t('news.update') : t('news.list.createNews')"
       modal
     >
+      <div
+        v-if="formMode === 'edit' && isSelectedLoading"
+        class="py-8 text-center"
+      >
+        <PrimeProgressSpinner />
+      </div>
       <NewsForm
-        :key="formNews?.id ?? 'create'"
-        :news="formNews"
+        v-else
+        :key="formMode === 'edit' ? (selectedNews?.id ?? 'edit') : 'create'"
+        :news="formMode === 'edit' ? selectedNews : undefined"
         @cancel="formVisible = false"
         @saved="formVisible = false"
       />
@@ -68,10 +75,13 @@
     <PrimeDialog
       v-model:visible="detailVisible"
       class="w-full max-w-2xl"
-      :header="detailNews?.title"
+      :header="selectedNews?.title ?? pendingTitle"
       modal
     >
-      <NewsDetail v-if="detailNews" :news="detailNews" />
+      <div v-if="isSelectedLoading" class="py-8 text-center">
+        <PrimeProgressSpinner />
+      </div>
+      <NewsDetail v-else-if="selectedNews" :news="selectedNews" />
     </PrimeDialog>
   </div>
 </template>
@@ -82,10 +92,16 @@ import { isEditorRole } from '@iut-intranet/helpers/utils/role'
 import PrimeDialog from 'primevue/dialog'
 import PrimeMultiSelect from 'primevue/multiselect'
 import PrimePaginator from 'primevue/paginator'
+import PrimeProgressSpinner from 'primevue/progressspinner'
 import { computed, ref, watch } from 'vue'
 
 import { useSession } from '@/api/auth.api'
-import { type News, NEWS_PAGE_SIZE, useVisibleNews } from '@/api/news.api'
+import {
+  NEWS_PAGE_SIZE,
+  type NewsListItem,
+  useNewsId,
+  useVisibleNews,
+} from '@/api/news.api'
 import NewsCard from '@/components/news/news-card.vue'
 import NewsDetail from '@/components/news/news-detail.vue'
 import NewsForm from '@/components/news/news-form.vue'
@@ -132,24 +148,33 @@ watch([search, selectedDepartments], () => {
   page.value = 1
 })
 
-// `formNews` indéfini = création, défini = édition de cette news.
+// La liste ne porte que l'en-tête (pas `content`) : l'édition et le détail
+// chargent la news complète par id à l'ouverture. `pendingTitle` évite l'en-tête
+// vide du dialog détail pendant ce chargement.
 const formVisible = ref(false)
-const formNews = ref<News | undefined>(undefined)
+const formMode = ref<'create' | 'edit'>('create')
 const detailVisible = ref(false)
-const detailNews = ref<News | undefined>(undefined)
+const selectedNewsId = ref<string | null>(null)
+const pendingTitle = ref('')
+
+const { data: selectedNews, isLoading: isSelectedLoading } =
+  useNewsId(selectedNewsId)
 
 const openCreate = () => {
-  formNews.value = undefined
+  formMode.value = 'create'
+  selectedNewsId.value = null
   formVisible.value = true
 }
 
-const openEdit = (item: News) => {
-  formNews.value = item
+const openEdit = (item: NewsListItem) => {
+  formMode.value = 'edit'
+  selectedNewsId.value = item.id
   formVisible.value = true
 }
 
-const openDetail = (item: News) => {
-  detailNews.value = item
+const openDetail = (item: NewsListItem) => {
+  selectedNewsId.value = item.id
+  pendingTitle.value = item.title
   detailVisible.value = true
 }
 </script>

@@ -7,7 +7,16 @@
         @click="emit('create')"
       />
     </div>
-    <FullCalendar :options="calendar" />
+    <FullCalendar :options="calendar">
+      <template #eventContent="arg">
+        <span
+          v-tooltip="eventTooltip(arg.event.extendedProps.source)"
+          class="cursor-pointer"
+        >
+          {{ arg.event.title }}
+        </span>
+      </template>
+    </FullCalendar>
     <EventClickBox
       ref="clickBox"
       :event="selectedEvent"
@@ -41,6 +50,7 @@ import frLocale from '@fullcalendar/core/locales/fr'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import { type DateClickArg } from '@fullcalendar/interaction'
 import interactionPlugin from '@fullcalendar/interaction'
+import listPlugin from '@fullcalendar/list'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import FullCalendar from '@fullcalendar/vue3'
 import type { DepartmentCode } from '@iut-intranet/db/enums'
@@ -48,6 +58,7 @@ import { eventIdSchema } from '@iut-intranet/helpers/schemas/brand'
 import type { TrpcOutput } from '@iut-intranet/trpc'
 import PrimeButton from 'primevue/button'
 import PrimePopover from 'primevue/popover'
+import vTooltip from 'primevue/tooltip'
 import { computed, ref } from 'vue'
 
 import { useUpdateEvent } from '@/api/event.api'
@@ -98,6 +109,34 @@ function formatClickedDate(date: Date | null) {
   })
 }
 
+function formatTime(date: Date | string) {
+  return new Date(date).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+// Le contenu du tooltip est rendu en HTML (`escape: false`) pour les retours à
+// la ligne : on échappe donc chaque valeur dynamique (ex. description libre).
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+function eventTooltip(source: VisibleEvent) {
+  const lines = [
+    `<strong>${escapeHtml(source.title)}</strong>`,
+    source.location && escapeHtml(source.location),
+    `${formatTime(source.startAt)} – ${formatTime(source.endAt)}`,
+    source.description && escapeHtml(source.description),
+    escapeHtml(`${source.organizer.firstName} ${source.organizer.lastName}`),
+  ].filter(Boolean)
+
+  return { escape: false, value: lines.join('<br>') }
+}
+
 function navigateToCreate() {
   datePopover.value?.hide()
   emit('create', clickedDate.value ?? undefined)
@@ -142,14 +181,20 @@ const calendar = computed(() => ({
     : {
         center: 'title',
         left: 'prev,next today',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay',
+        right: 'listDay,listWeek,listMonth',
       },
   height: 'auto',
-  initialView: isMobile ? 'timeGridDay' : 'timeGridWeek',
+  initialView: isMobile ? 'listDay' : 'listWeek',
   locale: frLocale,
-  plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+  plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
+  views: {
+    listDay: { buttonText: 'Jour' },
+    listMonth: { buttonText: 'Mois' },
+    listWeek: { buttonText: 'Semaine' },
+  },
   scrollTime: '08:00:00',
   selectable: true,
+  slotEventOverlap: false,
   slotMaxTime: '20:00:00',
   slotMinTime: '07:00:00',
 }))

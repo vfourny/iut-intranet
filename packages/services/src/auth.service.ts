@@ -6,7 +6,7 @@ import type {
 import { userIdSchema } from '@iut-intranet/helpers/schemas/brand'
 
 import type { DepartmentService } from '@/department.service'
-import type { UserService } from '@/user.service'
+import type { UserService } from '@/user/user.service'
 
 interface AuthResponse {
   body: NonNullable<AuthSession>

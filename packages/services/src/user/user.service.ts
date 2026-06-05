@@ -1,8 +1,6 @@
-import type { Prisma, prisma } from '@iut-intranet/db'
+import type { prisma } from '@iut-intranet/db'
 import type { UserRole } from '@iut-intranet/db/enums'
-import type { UserModel } from '@iut-intranet/db/models'
 import type { UserId } from '@iut-intranet/helpers/schemas/brand'
-import type { Paginated } from '@iut-intranet/helpers/schemas/common'
 import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
 import type {
   ListUsersInputSchema,
@@ -11,7 +9,7 @@ import type {
 } from '@iut-intranet/helpers/schemas/user'
 import { signUrlField, uploadObject } from '@iut-intranet/providers/s3'
 
-const userInclude = { department: true } satisfies Prisma.UserInclude
+import { userInclude, userListSelect } from '@/user/user.query'
 
 export class UserService {
   constructor(private prisma: prisma) {}
@@ -19,7 +17,7 @@ export class UserService {
   /**
    * Fetches a user by id with their department.
    * @param {UserId} userId - Id of the user to fetch
-   * @returns {Promise<UserModel>} The user with their department and a signed avatar URL
+   * @returns The user with their department and a signed avatar URL
    * @throws Throws if the user doesn't exist
    */
   public async getById(userId: UserId) {
@@ -50,7 +48,8 @@ export class UserService {
   /**
    * Retrieves a paginated list of users, optionally filtered by name.
    * @param {ListUsersInputSchema} payload - Pagination and an optional name search term
-   * @returns {Promise<Paginated<UserModel>>} The users (each with a signed avatar URL) and the total matching count
+   * @returns The directory projection of each matching user (see {@link userListSelect}, with a signed avatar URL) and the total matching count
+   * @remarks Returns only the fields the directory renders — never `role`/`ban*`. The full user (with its own sensitive fields) is reserved for {@link getById}, which is self-only.
    */
   public async list(payload: ListUsersInputSchema) {
     const { page, pageSize, search } = payload
@@ -65,8 +64,8 @@ export class UserService {
 
     const [items, total] = await Promise.all([
       this.prisma.user.findMany({
-        include: userInclude,
         orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+        select: userListSelect,
         skip: (page - 1) * pageSize,
         take: pageSize,
         where,
@@ -79,14 +78,14 @@ export class UserService {
         items.map((item) => signUrlField(item, 'image')),
       ),
       total,
-    } satisfies Paginated<UserModel>
+    }
   }
 
   /**
    * Updates editable columns of a user.
    * @param {Omit<UpdateUserInput, 'userId'> | UpdateMeInput} payload - The validated subset of fields to persist
    * @param {UserId} userId - Id of the user to update
-   * @returns {Promise<UserModel>} The updated user with a signed avatar URL
+   * @returns The updated user with their department and a signed avatar URL
    * @remarks The caller (procedure) decides who the target `userId` is and which fields are allowed through its input schema — the service just persists the validated subset it receives. `image` is never set here: avatars go through `uploadAvatar` (S3 key stored, signed on read).
    */
   public async updateUser(
@@ -106,13 +105,10 @@ export class UserService {
    * Uploads a user avatar to object storage and persists its object key.
    * @param {UploadFileInput} payload - The avatar file to upload
    * @param {UserId} userId - Id of the user whose avatar is set
-   * @returns {Promise<UserModel>} The user with a signed avatar URL
+   * @returns The user with their department and a signed avatar URL
    * @remarks A user owns exactly one avatar under a deterministic key (`users/<userId>/avatar.png`), so every upload overwrites it in place — no orphan keys to track, no social-login URL to special-case.
    */
-  public async uploadAvatar(
-    payload: UploadFileInput,
-    userId: UserId,
-  ): Promise<UserModel> {
+  public async uploadAvatar(payload: UploadFileInput, userId: UserId) {
     const imageKey = await uploadObject({
       ...payload,
       fileName: 'avatar',

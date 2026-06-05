@@ -21,6 +21,7 @@ export const news = {
     title: 'Actualités',
   },
   loading: 'Chargement',
+  publishedAtRequired: 'Une date est requise pour programmer la publication',
   save: {
     success: 'News sauvegardée',
   },

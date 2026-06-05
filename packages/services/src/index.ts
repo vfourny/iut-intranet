@@ -3,10 +3,10 @@ import { prisma } from '@iut-intranet/db'
 
 import { AuthService } from '@/auth.service'
 import { DepartmentService } from '@/department.service'
-import { EventService } from '@/event.service'
+import { EventService } from '@/event/event.service'
 import { HighlightService } from '@/highlight.service'
-import { NewsService } from '@/news.service'
-import { UserService } from '@/user.service'
+import { NewsService } from '@/news/news.service'
+import { UserService } from '@/user/user.service'
 
 const userService = new UserService(prisma)
 const departmentService = new DepartmentService(prisma)

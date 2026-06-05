@@ -12,18 +12,26 @@ import { toValue } from 'vue'
 import { trpc } from '@/lib/trpc'
 import type { QueryKey } from '@/types/api.type'
 
-// Forme « news » du front, dérivée de la sortie tRPC plutôt que d'un schéma de
-// sortie dédié. Seul `publishedAt` est raffiné : sans transformer tRPC, les
-// dates transitent en ISO string, on les recoerce en `Date`. `content` est une
-// string HTML (sérialisée par l'éditeur PrimeVue) typée comme telle de bout en
-// bout, plus aucun raffinage nécessaire.
-type RawNews = TrpcOutput['news']['getById']
-export type News = Omit<RawNews, 'publishedAt'> & {
-  publishedAt: Date | null
-}
-export type NewsList = News[]
+// Formes « news » du front, dérivées des sorties tRPC plutôt que d'un schéma de
+// sortie dédié. Deux granularités distinctes côté API : `getById` renvoie le
+// détail complet (avec `content`, la string HTML de l'éditeur), `listVisible`
+// une projection d'en-tête sans le corps. Seul `publishedAt` est raffiné : sans
+// transformer tRPC les dates transitent en ISO string, on les recoerce en `Date`.
+type RawNewsDetail = TrpcOutput['news']['getById']
+type RawNewsListItem = TrpcOutput['news']['listVisible']['items'][number]
 
-const coerceNews = (news: RawNews): News => ({
+type WithCoercedDate<T extends { publishedAt: string | null }> = Omit<
+  T,
+  'publishedAt'
+> & { publishedAt: Date | null }
+
+export type News = WithCoercedDate<RawNewsDetail>
+export type NewsListItem = WithCoercedDate<RawNewsListItem>
+export type NewsList = NewsListItem[]
+
+const coerceNews = <T extends { publishedAt: string | null }>(
+  news: T,
+): WithCoercedDate<T> => ({
   ...news,
   publishedAt: news.publishedAt ? new Date(news.publishedAt) : null,
 })

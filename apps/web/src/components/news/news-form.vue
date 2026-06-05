@@ -51,7 +51,7 @@
       <PrimeSelect
         id="status"
         v-model="form.status"
-        :options="['DRAFT', 'PUBLISHED', 'SCHEDULED']"
+        :options="['DRAFT', 'PUBLISHED', 'SCHEDULED', 'ARCHIVED']"
         :placeholder="t('news.form.status')"
       />
     </div>
@@ -89,6 +89,10 @@
 <script lang="ts" setup>
 import { DepartmentCode,NewsStatus } from '@iut-intranet/db/enums'
 import { newsIdSchema } from '@iut-intranet/helpers/schemas/brand'
+import type {
+  CreateNewsInput,
+  UpdateNewsInput,
+} from '@iut-intranet/helpers/schemas/news'
 import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
 import { MAX_UPLOAD_BYTES } from '@iut-intranet/helpers/schemas/storage'
 import PrimeDatePicker from 'primevue/datepicker'
@@ -132,7 +136,7 @@ const form = ref<{
   content: string
   publishedAt: Date | null
   status: NewsStatus
-  targetDepartmentCodes: string[]
+  targetDepartmentCodes: DepartmentCode[]
   title: string
 }>({
   content: props.news?.content ?? '',
@@ -177,10 +181,50 @@ const onCoverUpload = async (event: FileUploadUploaderEvent) => {
 }
 
 // La date n'est saisissable que pour une news programmée : un brouillon n'en a
-// pas et une publication immédiate la fige sur « maintenant » à l'envoi.
+// pas, une publication immédiate la fige sur « maintenant » à l'envoi et un
+// archivage conserve la date existante côté serveur.
 const isPublishedAtDisabled = computed(
-  () => form.value.status === 'DRAFT' || form.value.status === 'PUBLISHED',
+  () => form.value.status !== NewsStatus.SCHEDULED,
 )
+
+// Construit l'input discriminé sur le statut : `publishedAt` n'est porté que par
+// la variante SCHEDULED (pour DRAFT/PUBLISHED/ARCHIVED la date est pilotée par le
+// back, la clé n'est pas acceptée). Les branches sont explicites pour que le
+// statut se narrow en littéral et matche la bonne variante de l'union.
+const buildCreateInput = (): CreateNewsInput => {
+  const base = {
+    content: form.value.content,
+    cover: coverFile.value,
+    targetDepartmentCodes: toRaw(form.value.targetDepartmentCodes),
+    title: form.value.title,
+  }
+  const status = form.value.status
+  // `?? new Date()` purement défensif : onSubmit garantit la date en amont.
+  if (status === NewsStatus.SCHEDULED) {
+    return { ...base, publishedAt: form.value.publishedAt ?? new Date(), status }
+  }
+  if (status === NewsStatus.PUBLISHED) return { ...base, status }
+  if (status === NewsStatus.ARCHIVED) return { ...base, status }
+  return { ...base, status: NewsStatus.DRAFT }
+}
+
+const buildUpdateInput = (news: News): UpdateNewsInput => {
+  const base = {
+    content: form.value.content,
+    cover: coverFile.value,
+    // L'id chargé (cuid) est brandé en `NewsId` par parse, sans cast.
+    newsId: newsIdSchema.parse(news.id),
+    targetDepartmentCodes: toRaw(form.value.targetDepartmentCodes),
+    title: form.value.title,
+  }
+  const status = form.value.status
+  if (status === NewsStatus.SCHEDULED) {
+    return { ...base, publishedAt: form.value.publishedAt ?? new Date(), status }
+  }
+  if (status === NewsStatus.PUBLISHED) return { ...base, status }
+  if (status === NewsStatus.ARCHIVED) return { ...base, status }
+  return { ...base, status: NewsStatus.DRAFT }
+}
 
 const onSubmit = async () => {
   if (!me.value?.id) return
@@ -205,39 +249,23 @@ const onSubmit = async () => {
     })
     return
   }
+  // Une news programmée exige une date (le serveur la refuse aussi sans, mais on
+  // évite l'aller-retour). Pour DRAFT/PUBLISHED la date n'est pas envoyée.
+  if (form.value.status === NewsStatus.SCHEDULED && !form.value.publishedAt) {
+    toast.add({
+      life: 5000,
+      severity: 'error',
+      summary: t('news.publishedAtRequired'),
+    })
+    return
+  }
 
   try {
     isLoading.value = true
     if (isUpdate.value && props.news) {
-      await updateNews({
-        content: form.value.content,
-        cover: coverFile.value,
-        // L'id chargé (cuid) est brandé en `NewsId` par parse, sans cast.
-        newsId: newsIdSchema.parse(props.news.id),
-        publishedAt:
-          form.value.status === 'SCHEDULED'
-            ? form.value.publishedAt
-            : form.value.status === 'PUBLISHED'
-              ? (props.news.publishedAt ?? new Date())
-              : null,
-        status: form.value.status,
-        targetDepartmentCodes: toRaw(form.value.targetDepartmentCodes),
-        title: form.value.title,
-      })
+      await updateNews(buildUpdateInput(props.news))
     } else {
-      await createNews({
-        content: form.value.content,
-        cover: coverFile.value,
-        publishedAt:
-          form.value.status === 'SCHEDULED'
-            ? form.value.publishedAt
-            : form.value.status === 'PUBLISHED'
-              ? new Date()
-              : null,
-        status: form.value.status,
-        targetDepartmentCodes: toRaw(form.value.targetDepartmentCodes),
-        title: form.value.title,
-      })
+      await createNews(buildCreateInput())
     }
     toast.add({
       life: 3000,

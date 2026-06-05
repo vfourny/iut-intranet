@@ -2,6 +2,7 @@ enum NewsStatus {
   DRAFT
   PUBLISHED
   SCHEDULED
+  ARCHIVED
 }
 
 model News {

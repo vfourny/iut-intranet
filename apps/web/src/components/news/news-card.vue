@@ -62,7 +62,7 @@
 import type { DepartmentCode } from '@iut-intranet/db/enums'
 import PrimeProgressSpinner from 'primevue/progressspinner'
 
-import type { News, NewsList } from '@/api/news.api'
+import type { NewsList, NewsListItem } from '@/api/news.api'
 import DepartmentTag from '@/components/department/department-tag.vue'
 import NewsTag from '@/components/news/news-tag.vue'
 import { useI18n } from '@/composables/use-i18n'
@@ -81,8 +81,8 @@ withDefaults(
 )
 
 const emit = defineEmits<{
-  edit: [news: News]
-  select: [news: News]
+  edit: [news: NewsListItem]
+  select: [news: NewsListItem]
 }>()
 
 function formatDate(date: string | Date) {

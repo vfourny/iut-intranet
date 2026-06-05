@@ -1,14 +1,19 @@
-import type { Prisma, prisma } from '@iut-intranet/db'
+import type { prisma } from '@iut-intranet/db'
 import type { UserRole } from '@iut-intranet/db/enums'
 import { AppError } from '@iut-intranet/helpers/errors'
 import type { EventId, UserId } from '@iut-intranet/helpers/schemas/brand'
 import type {
   CreateEventInput,
-  EventWithDepartments,
   ListVisibleEventsInput,
   UpdateEventInput,
 } from '@iut-intranet/helpers/schemas/event'
 import { isAdminRole } from '@iut-intranet/helpers/utils/role'
+
+import {
+  buildCalendarWindowFilter,
+  buildVisibilityFilter,
+  eventListInclude,
+} from '@/event/event.query'
 
 /**
  * The user attempting to manage an event. Event management is decided per
@@ -27,7 +32,7 @@ export class EventService {
    * Creates an event organized by the given user, connected to one or more departments.
    * @param {CreateEventInput} payload - Event details and target department codes
    * @param {UserId} userId - Id of the organizing user
-   * @returns {Promise<EventModel>} The created event
+   * @returns The created event
    * @remarks The endAt > startAt invariant is enforced by the input schema at the tRPC boundary, so it isn't re-checked here. Department codes are resolved via Prisma's `connect` on the unique `code`.
    */
   public async createEvent(payload: CreateEventInput, userId: UserId) {
@@ -51,7 +56,7 @@ export class EventService {
    * Deletes an event the manager may manage (its organizer or an admin).
    * @param {EventId} eventId - Id of the event to delete
    * @param {EventManager} manager - The acting user's id and role
-   * @returns {Promise<EventModel>} The deleted event
+   * @returns The deleted event
    * @throws {AppError} FORBIDDEN if the manager may not manage the event
    */
   public async deleteEvent(eventId: EventId, manager: EventManager) {
@@ -65,39 +70,20 @@ export class EventService {
    * Lists events overlapping the requested calendar window and visible to the manager.
    * @param {ListVisibleEventsInput} payload - Calendar window bounds (from/to); unbounded means no window filter
    * @param {EventManager} manager - The acting user's id and role
-   * @returns {Promise<EventModel[]>} The visible events with their department and organizer, ordered by start date
+   * @returns The visible events with their department and organizer, ordered by start date
    * @remarks An admin sees all; others see public events plus those they are invited to or organize.
    */
   public async listVisible(
     payload: ListVisibleEventsInput,
     manager: EventManager,
   ) {
-    // Fenêtre du calendrier : un event est retenu s'il chevauche [from, to]
-    // (commence avant `to` et finit après `from`). Sans bornes, aucun filtre.
-    const overlapsRange: Prisma.EventWhereInput =
-      payload.from && payload.to
-        ? { endAt: { gte: payload.from }, startAt: { lte: payload.to } }
-        : {}
-
-    // Visibilité : un admin voit tout ; sinon events publics, ceux où il est
-    // invité, ou ceux qu'il organise.
-    const visibleToUser: Prisma.EventWhereInput = isAdminRole(manager.role)
-      ? {}
-      : {
-          OR: [
-            { isPublic: true },
-            { invitations: { some: { userId: manager.id } } },
-            { organizerId: manager.id },
-          ],
-        }
-
     return this.prisma.event.findMany({
-      include: {
-        departments: true,
-        organizer: true,
-      },
+      include: eventListInclude,
       orderBy: { startAt: 'asc' },
-      where: { ...overlapsRange, ...visibleToUser },
+      where: {
+        ...buildCalendarWindowFilter(payload.from, payload.to),
+        ...buildVisibilityFilter(manager.id, manager.role),
+      },
     })
   }
 
@@ -105,7 +91,7 @@ export class EventService {
    * Updates an event the manager may manage (its organizer or an admin), optionally replacing its set of departments.
    * @param {UpdateEventInput} payload - Fields to update, including the event id and an optional list of department codes
    * @param {EventManager} manager - The acting user's id and role
-   * @returns {Promise<EventModel>} The updated event
+   * @returns The updated event
    * @throws {AppError} FORBIDDEN if the manager may not manage the event
    * @remarks When `departmentCodes` is provided it fully replaces the event's departments (`set`, not a merge); omitting it leaves them untouched.
    */
@@ -127,7 +113,7 @@ export class EventService {
    * Ensures the user may manage (update/delete) the event: only its organizer or an admin can.
    * @param {EventId} eventId - Id of the event to check
    * @param {EventManager} manager - The acting user's id and role
-   * @returns {Promise<EventWithDepartments>} The event, when it is manageable by the caller
+   * @returns The event (id + organizerId), when it is manageable by the caller
    * @throws {AppError} FORBIDDEN otherwise (mapped to a tRPC error)
    */
   private async assertManageable(eventId: EventId, manager: EventManager) {
@@ -142,18 +128,15 @@ export class EventService {
   }
 
   /**
-   * Fetches an event by id with its department and invitations.
+   * Fetches the ownership-relevant fields of an event by id.
    * @param {EventId} eventId - Id of the event to fetch
-   * @returns {Promise<EventWithDepartments>} The event with its departments and invitations
+   * @returns The event's id and organizerId
    * @throws Throws NOT_FOUND if it doesn't exist
-   * @remarks Internal: used by {@link assertManageable} to resolve the organizer before update/delete.
+   * @remarks Internal: used by {@link assertManageable} to resolve the organizer before update/delete, so it projects only what the ownership check reads (no relations).
    */
-  private async getById(eventId: EventId): Promise<EventWithDepartments> {
+  private async getById(eventId: EventId) {
     return this.prisma.event.findUniqueOrThrow({
-      include: {
-        departments: true,
-        invitations: true,
-      },
+      select: { id: true, organizerId: true },
       where: { id: eventId },
     })
   }
