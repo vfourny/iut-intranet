@@ -68,7 +68,7 @@ import {
 import type { FileUploadUploaderEvent } from 'primevue/fileupload'
 import PrimeFileUpload from 'primevue/fileupload'
 import { useToast } from 'primevue/usetoast'
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import type { MeWithDepartment } from '@/api/users.api'
@@ -109,6 +109,7 @@ const onAvatarUpload = async (event: FileUploadUploaderEvent) => {
       severity: 'success',
       summary: t('profil.avatar.success'),
     })
+    await nextTick()
   } catch {
     toast.add({
       life: 5000,
@@ -121,7 +122,7 @@ const onAvatarUpload = async (event: FileUploadUploaderEvent) => {
 const onSubmit = async () => {
   try {
     await mutate({
-      jobTitle: jobTitle.value || undefined,
+      jobTitle: jobTitle.value,
       phone: (phone.value
         ? formatPhoneForStorage(phone.value)
         : undefined) as Exclude<typeof props.user.phone, null>,

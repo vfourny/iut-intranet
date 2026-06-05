@@ -24,6 +24,14 @@ export const SPECIALTY_BY_DEPARTMENT: Record<
   [DepartmentCode.TC]: 'admin',
 }
 
+export const SPECIALTY_COLORS: Record<DepartmentSpecialty, string> = {
+  admin: '#d7376b',
+  bio: '#7db72f',
+  energy: '#f08200',
+  indus: '#566872',
+  info: '#1fa9e0',
+}
+
 /**
  * Classes Tailwind par spécialité — strings complets pour que le scanner
  * Tailwind v4 les détecte (pas de concaténation dynamique).

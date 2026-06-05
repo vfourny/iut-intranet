@@ -44,7 +44,7 @@ const EVENTS: EventSeed[] = [
   {
     departmentCode: DepartmentCode.GACO,
     endHour: 16,
-    id: 'evt-rentree-gaco',
+    id: 'ia-presentation',
     invitees: [
       { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
       { email: ADMIN.email, status: EventInvitationStatus.PENDING },
@@ -214,11 +214,8 @@ export const seedEvents = async () => {
       )
     }
     const organizerId = userIdByEmail.get(event.organizerEmail)
-    if (!organizerId) {
-      throw new Error(
-        `User ${event.organizerEmail} not found — run seedUsers first`,
-      )
-    }
+    if (!organizerId) throw new Error(`User ${event.organizerEmail} not found`)
+
     return {
       departmentId,
       description: fakeEventDescription(),
@@ -242,10 +239,20 @@ export const seedEvents = async () => {
     }
   })
 
-  await prisma.event.createMany({
-    data: eventsData,
-    skipDuplicates: true,
-  })
+  await Promise.all(
+    eventsData.map(({ departmentIds, ...data }) =>
+      prisma.event.upsert({
+        create: {
+          ...data,
+          departments: {
+            connect: departmentIds.map((id) => ({ id })),
+          },
+        },
+        update: {},
+        where: { id: data.id },
+      }),
+    ),
+  )
 
   const invitationsData: Prisma.EventInvitationCreateManyInput[] =
     EVENTS.flatMap((event) =>

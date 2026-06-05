@@ -91,7 +91,7 @@ export class EventService {
 
     return this.prisma.event.findMany({
       include: {
-        department: true,
+        departments: true,
         organizer: true,
       },
       orderBy: { startAt: 'asc' },

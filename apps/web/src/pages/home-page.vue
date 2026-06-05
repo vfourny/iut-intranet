@@ -247,6 +247,7 @@ const handleUpload = async (event: FileUploadUploaderEvent) => {
   await uploadHighlightImage({
     base64,
     contentType: file.type as 'image/jpeg' | 'image/png' | 'image/webp',
+    name: '',
   })
   await refetch()
 }

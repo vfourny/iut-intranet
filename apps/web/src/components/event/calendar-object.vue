@@ -47,6 +47,7 @@ import PrimeButton from 'primevue/button'
 import PrimePopover from 'primevue/popover'
 import { computed, ref } from 'vue'
 
+import { useUpdateEvent } from '@/api/event.api'
 import EventClickBox from '@/components/event/event-click-box.vue'
 import { useI18n } from '@/composables/use-i18n'
 import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
@@ -58,6 +59,7 @@ interface CalendarObjectProps {
 }
 
 const { events } = defineProps<CalendarObjectProps>()
+const { mutate: updateEvent } = useUpdateEvent()
 
 // `rangeChange` : fenêtre visible (recharge des events). `create`/`edit` :
 // ouverture de la modale côté page calendrier, avec la date cliquée pour la
@@ -71,10 +73,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 function getDepartmentColor(code: DepartmentCode) {
-  const specialty = SPECIALTY_BY_DEPARTMENT[code]
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(`--color-dept-${specialty}-500`)
-    .trim()
+  return SPECIALTY_COLORS[SPECIALTY_BY_DEPARTMENT[code]]
 }
 
 const isMobile = window.innerWidth < 768
@@ -114,8 +113,15 @@ const calendar = computed(() => ({
     selectedEvent.value = info.event.extendedProps.source as VisibleEvent
     clickBox.value?.show(info.jsEvent, info.el)
   },
+  eventDrop: (info: EventDropArg) => {
+    updateEvent({
+      endAt: info.event.end ?? undefined,
+      id: info.event.id,
+      startAt: info.event.start ?? undefined,
+    })
+  },
   events: events.map((event) => ({
-    backgroundColor: getDepartmentColor(event.department.code),
+    backgroundColor: getDepartmentColor(event.departments[0]?.code),
     end: event.endAt,
     extendedProps: { source: event },
     id: event.id,
@@ -136,6 +142,7 @@ const calendar = computed(() => ({
       },
   height: 'auto',
   initialView: isMobile ? 'timeGridDay' : 'timeGridWeek',
+  locale: frLocale,
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
   scrollTime: '08:00:00',
   selectable: true,

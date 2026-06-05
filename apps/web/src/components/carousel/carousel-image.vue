@@ -12,7 +12,7 @@
 import 'vue3-carousel/carousel.css'
 
 import type { TrpcOutput } from '@iut-intranet/trpc'
-import { Carousel, Navigation, Pagination, Slide } from 'vue3-carousel'
+import { Carousel, Slide } from 'vue3-carousel'
 
 type HighlightList = TrpcOutput['highlight']['list']
 
@@ -21,7 +21,9 @@ defineProps<{
 }>()
 
 const config = {
+  autoplay: 1500,
   itemsToShow: 2.5,
+  pauseAutoplayOnHover: true,
   wrapAround: true,
 }
 </script>

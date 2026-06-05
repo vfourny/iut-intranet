@@ -15,7 +15,6 @@
             name="title"
             :placeholder="t('event.placeholder.title')"
           />
-
           <PrimeMessage
             v-if="$form?.title?.invalid"
             severity="error"
