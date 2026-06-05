@@ -5,6 +5,7 @@ import { userIdSchema } from '@/schemas/brand.schema'
 import {
   emailSchema,
   firstNameSchema,
+  jobTitleSchema,
   lastNameSchema,
   paginationSchema,
   phoneValueSchema,

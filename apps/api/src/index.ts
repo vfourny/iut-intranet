@@ -1,10 +1,11 @@
-import { createHttpLogger } from '@iut-intranet/configs/logger'
+import { createHttpLogger, createLogger } from '@iut-intranet/configs/logger'
 import { getServerEnv } from '@iut-intranet/helpers/env'
 import { appRouter } from '@iut-intranet/trpc'
 import { createContext } from '@iut-intranet/trpc/context'
 import { createExpressMiddleware } from '@trpc/server/adapters/express'
 import cors from 'cors'
 import express from 'express'
+import cron from 'node-cron'
 
 import { startCrons } from '@/cron'
 
@@ -12,9 +13,11 @@ const { API_PORT, PUBLIC_API_URL, PUBLIC_APP_URL } = getServerEnv(
   'API_PORT',
   'PUBLIC_API_URL',
   'PUBLIC_APP_URL',
+  'CRON_SECRET',
 )
 
 const app = express()
+const logger = createLogger('logger cron')
 
 app.use(createHttpLogger())
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex gap-4 items-center">
+  <div class="flex gap-4 items-center mt-6">
     <PrimeSelectButton
       :model-value="displayMode"
       option-label="label"
@@ -86,6 +86,7 @@ import UserDataTable from '@/components/user/user-data-table.vue'
 import UserDataView from '@/components/user/user-data-view.vue'
 import { useI18n } from '@/composables/use-i18n'
 import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
+import { RouteNames, router } from '@/router'
 
 const { t } = useI18n()
 const { isAdmin } = useSession()
@@ -96,6 +97,10 @@ enum DisplayMode {
   DATA_TABLE = 'data-table',
   DATA_VIEW = 'data-view',
 }
+
+const { currentSession } = useSession()
+
+const { t } = useI18n()
 
 const SEARCH_DEBOUNCE_MS = 300
 

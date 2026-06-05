@@ -36,7 +36,7 @@ export const schemaConfig = {
       },
       role: {
         defaultValue: UserRole.USER,
-        input: false,
+        input: true,
         required: true,
         type: 'string',
       },
