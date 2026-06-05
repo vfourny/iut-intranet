@@ -9,6 +9,7 @@ interface NewsSeed {
   publishedAtDay?: number
   publishedAtHour?: number
   status: NewsStatus
+  withCover?: boolean
 }
 
 const NEWS: NewsSeed[] = [
@@ -37,6 +38,7 @@ const NEWS: NewsSeed[] = [
     createdAtDayOffset: 3,
     createdAtHour: 16,
     status: NewsStatus.DRAFT,
+    withCover: false,
   },
 ]
 
@@ -86,8 +88,7 @@ export const seedNews = async () => {
       news.createdAtHour,
     )
     const publishedAt =
-      news.publishedAtDay !== undefined &&
-      news.publishedAtHour !== undefined
+      news.publishedAtDay !== undefined && news.publishedAtHour !== undefined
         ? buildDate(monday, news.publishedAtDay, news.publishedAtHour)
         : null
 
@@ -97,7 +98,7 @@ export const seedNews = async () => {
       // Clé S3 déterministe (préfixe `covers`, pas de randomUUID pour qu'un
       // re-seed cible le même objet). `db:seed` n'écrit que la clé ; les octets
       // sont poussés séparément par `provider:seed`.
-      coverUrl: `covers/news-${i + 1}.jpg`,
+      coverUrl: news.withCover === false ? null : `covers/news-${i + 1}.jpg`,
       createdAt,
       publishedAt,
       status: news.status,

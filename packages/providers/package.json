@@ -26,7 +26,7 @@
     "dev:tsc": "tsc --watch --preserveWatchOutput",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "provider:seed": "tsx ./src/seed.ts",
+    "provider:seed": "tsx ./src/s3.seed.ts",
     "ts:check": "tsc --noEmit"
   },
   "type": "module",

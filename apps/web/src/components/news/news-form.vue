@@ -184,16 +184,24 @@ const isPublishedAtDisabled = computed(
 
 const onSubmit = async () => {
   if (!me.value?.id) return
-  if (!form.value.title) return
-  if (!form.value.content) return
   if (isUpdate.value && !form.value.status) return
-  // La couverture est obligatoire à la création (à l'update on garde l'existante).
-  const cover = coverFile.value
-  if (!isUpdate.value && !cover) {
+  // Titre et contenu ne sont requis qu'à la publication/programmation : un
+  // brouillon peut rester incomplet (la couverture, elle, est toujours libre).
+  const isPublishing =
+    form.value.status === 'PUBLISHED' || form.value.status === 'SCHEDULED'
+  if (isPublishing && !form.value.title.trim()) {
     toast.add({
       life: 5000,
       severity: 'error',
-      summary: t('news.coverRequired'),
+      summary: t('news.titleRequired'),
+    })
+    return
+  }
+  if (isPublishing && !form.value.content.trim()) {
+    toast.add({
+      life: 5000,
+      severity: 'error',
+      summary: t('news.contentRequired'),
     })
     return
   }
@@ -203,7 +211,7 @@ const onSubmit = async () => {
     if (isUpdate.value && props.news) {
       await updateNews({
         content: form.value.content,
-        cover,
+        cover: coverFile.value,
         // L'id chargé (cuid) est brandé en `NewsId` par parse, sans cast.
         newsId: newsIdSchema.parse(props.news.id),
         publishedAt:
@@ -219,8 +227,7 @@ const onSubmit = async () => {
     } else {
       await createNews({
         content: form.value.content,
-        // Garanti non-`undefined` par le guard ci-dessus (couverture obligatoire).
-        cover: cover!,
+        cover: coverFile.value,
         publishedAt:
           form.value.status === 'SCHEDULED'
             ? form.value.publishedAt

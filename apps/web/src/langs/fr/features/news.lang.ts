@@ -1,6 +1,6 @@
 export const news = {
   cancel: 'Annuler',
-  coverRequired: 'Une image de couverture est requise',
+  contentRequired: 'Un contenu est requis pour publier',
   coverUploadFail: 'Téléversement de la couverture échoué',
   create: {
     fail: 'News non sauvegardée',
@@ -25,5 +25,6 @@ export const news = {
     success: 'News sauvegardée',
   },
   saveNews: 'Sauvegarder la news',
+  titleRequired: 'Un titre est requis pour publier',
   update: 'Modifier la news',
 }

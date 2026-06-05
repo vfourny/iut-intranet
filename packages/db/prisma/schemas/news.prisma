@@ -8,7 +8,7 @@ model News {
   id          String     @id @default(cuid())
   title       String
   content     String
-  coverUrl    String
+  coverUrl    String?
   authorId    String     @map("author_id")
   status      NewsStatus @default(DRAFT)
   publishedAt DateTime?  @map("published_at")
