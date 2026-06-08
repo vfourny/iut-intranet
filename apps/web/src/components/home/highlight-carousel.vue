@@ -23,7 +23,6 @@
       :choose-label="t('home.addPhoto')"
       class="absolute right-4 top-4 z-10"
       custom-upload
-      :max-file-size="MAX_UPLOAD_BYTES"
       mode="basic"
       @uploader="handleUpload"
     />
@@ -31,7 +30,6 @@
 </template>
 
 <script lang="ts" setup>
-import { MAX_UPLOAD_BYTES } from '@iut-intranet/helpers/schemas/storage'
 import PrimeCarousel from 'primevue/carousel'
 import type { FileUploadUploaderEvent } from 'primevue/fileupload'
 import PrimeFileUpload from 'primevue/fileupload'

@@ -15,7 +15,7 @@
           class="col-span-12 sm:col-span-6 md:col-span-4 xl:col-span-3 p-2"
         >
           <div
-            class="p-6 border border-surface-200 bg-surface-0 rounded flex flex-col cursor-pointer hover:shadow-lg"
+            class="h-full p-6 border border-surface-200 bg-surface-0 rounded flex flex-col cursor-pointer hover:shadow-lg"
             @click="
               router.push({ name: RouteNames.home, params: { id: user.id } })
             "

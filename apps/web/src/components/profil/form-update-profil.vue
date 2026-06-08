@@ -41,7 +41,6 @@
         auto
         choose-label="Changer d'avatar"
         custom-upload
-        :max-file-size="MAX_UPLOAD_BYTES"
         mode="basic"
         @uploader="onAvatarUpload"
       />
@@ -59,7 +58,6 @@
 </template>
 
 <script setup lang="ts">
-import { MAX_UPLOAD_BYTES } from '@iut-intranet/helpers/schemas/storage'
 import {
   formatPhoneForStorage,
   formatPhoneNational,

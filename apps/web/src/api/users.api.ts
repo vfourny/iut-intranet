@@ -1,3 +1,4 @@
+import type { DepartmentCode } from '@iut-intranet/db/enums'
 import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
 import type {
   CreateUserInput,

@@ -1,7 +1,5 @@
 import { z } from 'zod'
 
-export const MAX_UPLOAD_BYTES = 2 * 1024 * 1024
-
 export const ContentType = {
   IMAGE_JPEG: 'image/jpeg',
   IMAGE_PNG: 'image/png',

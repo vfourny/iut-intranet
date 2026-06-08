@@ -1,7 +1,13 @@
 import { prisma } from '@iut-intranet/db'
 import { ContentType } from '@iut-intranet/helpers/schemas/storage'
 
-import { updateObject, uploadObject } from '@/s3.provider'
+import {
+  deleteObject,
+  listObjects,
+  StorageFolders,
+  updateObject,
+  uploadObject,
+} from '@/s3.provider'
 
 const KNOWN_CONTENT_TYPES = new Set<string>(Object.values(ContentType))
 
@@ -98,7 +104,23 @@ const seedHighlights = async (): Promise<void> => {
   )
 }
 
+/**
+ * Vide le bucket des objets seedés/uploadés avant de le re-semer. Sans ça, un
+ * reset réécrit bien les clés courantes (dérivées de la base, elle aussi remise
+ * à zéro) mais laisse les objets des runs précédents en orphelins — visibles
+ * notamment dans le carrousel « à la une », qui liste tout le dossier.
+ */
+const purgeStorage = async (): Promise<void> => {
+  await Promise.all(
+    Object.values(StorageFolders).map(async (folder) => {
+      const objects = await listObjects(folder)
+      await Promise.all(objects.map((object) => deleteObject(object.key)))
+    }),
+  )
+}
+
 async function main() {
+  await purgeStorage()
   await Promise.all([seedAvatars(), seedNewsCovers(), seedHighlights()])
 }
 

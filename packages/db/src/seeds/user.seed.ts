@@ -12,6 +12,7 @@ export const ADMIN = {
   firstName: 'John',
   jobTitle: 'Chef de département',
   lastName: 'ADMIN',
+  phone: '+33321990101',
   role: UserRole.ADMIN,
 }
 
@@ -21,6 +22,7 @@ export const USER = {
   firstName: 'John',
   jobTitle: 'Enseignant',
   lastName: 'USER',
+  phone: '+33321990102',
   role: UserRole.USER,
 }
 
@@ -30,6 +32,7 @@ export const EDITOR = {
   firstName: 'Jane',
   jobTitle: 'Responsable pédagogique',
   lastName: 'EDITOR',
+  phone: '+33321990103',
   role: UserRole.EDITOR,
 }
 

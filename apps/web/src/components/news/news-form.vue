@@ -27,7 +27,6 @@
         auto
         :choose-label="t('news.form.chooseCover')"
         custom-upload
-        :max-file-size="MAX_UPLOAD_BYTES"
         mode="basic"
         @uploader="onCoverUpload"
       />
@@ -46,7 +45,10 @@
       />
     </div>
 
-    <div class="flex flex-col gap-1">
+    <!-- Statut et date de publication ne sont pilotables qu'à l'édition : une
+         création publie directement la news (PUBLISHED), pour qu'elle apparaisse
+         aussitôt dans la liste (qui ne montre que les news publiées). -->
+    <div v-if="isUpdate" class="flex flex-col gap-1">
       <label for="status">{{ t('news.form.status') }}</label>
       <PrimeSelect
         id="status"
@@ -56,7 +58,7 @@
       />
     </div>
 
-    <div class="flex flex-col gap-1">
+    <div v-if="isUpdate" class="flex flex-col gap-1">
       <label for="publishedAt">{{ t('news.form.publishedAt') }}</label>
       <PrimeDatePicker
         id="publishedAt"
@@ -94,7 +96,6 @@ import type {
   UpdateNewsInput,
 } from '@iut-intranet/helpers/schemas/news'
 import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
-import { MAX_UPLOAD_BYTES } from '@iut-intranet/helpers/schemas/storage'
 import PrimeButton from 'primevue/button'
 import PrimeDatePicker from 'primevue/datepicker'
 import PrimeEditor from 'primevue/editor'
@@ -144,7 +145,8 @@ const form = ref<{
 }>({
   content: props.news?.content ?? '',
   publishedAt: props.news?.publishedAt ?? null,
-  status: props.news?.status ?? NewsStatus.DRAFT,
+  // À la création, le statut n'est pas exposé : on publie directement.
+  status: props.news?.status ?? NewsStatus.PUBLISHED,
   targetDepartmentCodes:
     props.news?.targetDepartments.map((d) => d.code) ?? [],
   title: props.news?.title ?? '',

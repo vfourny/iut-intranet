@@ -33,16 +33,6 @@
           :placeholder="t('user.add.placeholders.email')"
           type="email"
         />
-        <SelectField
-          v-model="role"
-          :error="errors.role"
-          :label="t('user.add.fields.role')"
-          name="role"
-          option-label="label"
-          option-value="value"
-          :options="roleOptions"
-          :placeholder="t('user.add.placeholders.role')"
-        />
       </div>
     </section>
 
@@ -116,7 +106,6 @@
 </template>
 
 <script lang="ts" setup>
-import { UserRole } from '@iut-intranet/db/enums'
 import { createUserInputSchema } from '@iut-intranet/helpers/schemas/user'
 import { formatPhoneNational } from '@iut-intranet/helpers/utils/phone'
 import PrimeButton from 'primevue/button'
@@ -140,7 +129,6 @@ const toast = useToast()
 
 const { isLoading, mutateAsync: createUser } = useCreateUser()
 
-const roleOptions = useEnumOptions('role')
 const departmentOptions = useEnumOptions('department')
 
 type CreateUserFormValues = z.infer<typeof createUserInputSchema>
@@ -150,7 +138,6 @@ const {
   errors,
   handleSubmit: createSubmitHandler,
 } = useForm<CreateUserFormValues>({
-  initialValues: { role: UserRole.USER },
   validationSchema: createUserInputSchema,
 })
 
@@ -160,7 +147,6 @@ const [firstName] = defineField('firstName')
 const [jobTitle] = defineField('jobTitle')
 const [lastName] = defineField('lastName')
 const [phone] = defineField('phone')
-const [role] = defineField('role')
 
 const onPhoneInput = (event: Event) => {
   // Ne pas reformater lors d'une suppression : AsYouType ré-insérerait les

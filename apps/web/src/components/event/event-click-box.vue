@@ -25,10 +25,11 @@
         size="small"
         @click="confirmDelete"
       />
-      <PrimeConfirmDialog />
     </div>
   </PrimePopover>
-  <Toast />
+  <!-- Hors du popover : sinon il est démonté quand le popover se ferme à
+       l'ouverture de la confirmation, et la suppression ne part jamais. -->
+  <PrimeConfirmDialog />
 </template>
 
 <script lang="ts" setup>

@@ -7,9 +7,7 @@ import {
   PutObjectCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { AppError } from '@iut-intranet/helpers/errors'
 import { ContentType } from '@iut-intranet/helpers/schemas/storage'
-import { MAX_UPLOAD_BYTES } from '@iut-intranet/helpers/schemas/storage'
 
 import { S3_BUCKET_NAME, s3Client } from '@/s3.client'
 
@@ -66,9 +64,9 @@ export const signUrlField = async <T, K extends keyof T>(
 }
 
 /**
- * Decodes a base64 payload, enforces the upload size limit, and writes it to the
- * given key (overwriting any existing object). Shared by {@link uploadObject}
- * (fresh key) and {@link updateObject} (existing key).
+ * Decodes a base64 payload and writes it to the given key (overwriting any
+ * existing object). Shared by {@link uploadObject} (fresh key) and
+ * {@link updateObject} (existing key).
  */
 const putObject = async (
   key: string,
@@ -76,12 +74,6 @@ const putObject = async (
   contentType: ContentType,
 ): Promise<void> => {
   const body = Buffer.from(base64, 'base64')
-  if (body.byteLength > MAX_UPLOAD_BYTES) {
-    throw new AppError(
-      'PAYLOAD_TOO_LARGE',
-      'File exceeds the maximum upload size',
-    )
-  }
 
   await s3Client.send(
     new PutObjectCommand({
