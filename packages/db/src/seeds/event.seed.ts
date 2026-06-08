@@ -18,9 +18,12 @@ interface EventSeed {
   endDayOffset?: number
   endHour: number
   endMinute?: number
-  id: string
   invitees: EventInviteeSeed[]
   isPublic: boolean
+  // Clé interne au seed pour relier les invitations à leur event. L'id réel est
+  // un cuid généré par Prisma (`@default(cuid())`) : le forcer à une valeur
+  // lisible violait `eventIdSchema` (z.cuid()) et cassait update/delete côté app.
+  key: string
   organizerEmail: string
   startDayOffset: number
   startHour: number
@@ -31,12 +34,12 @@ const EVENTS: EventSeed[] = [
   {
     departmentCodes: [DepartmentCode.INFO],
     endHour: 11,
-    id: 'evt-soutenances-info',
     invitees: [
       { email: USER.email, status: EventInvitationStatus.ACCEPTED },
       { email: EDITOR.email, status: EventInvitationStatus.PENDING },
     ],
     isPublic: true,
+    key: 'evt-soutenances-info',
     organizerEmail: ADMIN.email,
     startDayOffset: 0,
     startHour: 9,
@@ -44,12 +47,12 @@ const EVENTS: EventSeed[] = [
   {
     departmentCodes: [DepartmentCode.GACO],
     endHour: 16,
-    id: 'ia-presentation',
     invitees: [
       { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
       { email: ADMIN.email, status: EventInvitationStatus.PENDING },
     ],
     isPublic: true,
+    key: 'ia-presentation',
     organizerEmail: USER.email,
     startDayOffset: 0,
     startHour: 14,
@@ -57,9 +60,9 @@ const EVENTS: EventSeed[] = [
   {
     departmentCodes: [DepartmentCode.TC],
     endHour: 17,
-    id: 'evt-visite-tc',
     invitees: [{ email: ADMIN.email, status: EventInvitationStatus.DECLINED }],
     isPublic: true,
+    key: 'evt-visite-tc',
     organizerEmail: EDITOR.email,
     startDayOffset: 1,
     startHour: 13,
@@ -67,12 +70,12 @@ const EVENTS: EventSeed[] = [
   {
     departmentCodes: [DepartmentCode.INFO],
     endHour: 12,
-    id: 'evt-conseil-pedago',
     invitees: [
       { email: USER.email, status: EventInvitationStatus.ACCEPTED },
       { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
     ],
     isPublic: false,
+    key: 'evt-conseil-pedago',
     organizerEmail: ADMIN.email,
     startDayOffset: 2,
     startHour: 9,
@@ -85,9 +88,9 @@ const EVENTS: EventSeed[] = [
       DepartmentCode.TC,
     ],
     endHour: 17,
-    id: 'evt-jpo',
     invitees: [],
     isPublic: true,
+    key: 'evt-jpo',
     organizerEmail: ADMIN.email,
     startDayOffset: 3,
     startHour: 9,
@@ -96,9 +99,9 @@ const EVENTS: EventSeed[] = [
     departmentCodes: [DepartmentCode.GACO],
     endDayOffset: 5,
     endHour: 18,
-    id: 'evt-salon-gaco',
     invitees: [{ email: EDITOR.email, status: EventInvitationStatus.PENDING }],
     isPublic: true,
+    key: 'evt-salon-gaco',
     organizerEmail: USER.email,
     startDayOffset: 4,
     startHour: 9,
@@ -107,9 +110,9 @@ const EVENTS: EventSeed[] = [
     departmentCodes: [DepartmentCode.TC],
     endHour: 11,
     endMinute: 30,
-    id: 'evt-challenge-vente',
     invitees: [{ email: ADMIN.email, status: EventInvitationStatus.ACCEPTED }],
     isPublic: true,
+    key: 'evt-challenge-vente',
     organizerEmail: EDITOR.email,
     startDayOffset: 7,
     startHour: 9,
@@ -117,12 +120,12 @@ const EVENTS: EventSeed[] = [
   {
     departmentCodes: [DepartmentCode.GACO],
     endHour: 17,
-    id: 'evt-soutenances-gaco',
     invitees: [
       { email: ADMIN.email, status: EventInvitationStatus.DECLINED },
       { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
     ],
     isPublic: true,
+    key: 'evt-soutenances-gaco',
     organizerEmail: USER.email,
     startDayOffset: 8,
     startHour: 14,
@@ -130,12 +133,12 @@ const EVENTS: EventSeed[] = [
   {
     departmentCodes: [DepartmentCode.INFO],
     endHour: 11,
-    id: 'evt-reunion-direction',
     invitees: [
       { email: USER.email, status: EventInvitationStatus.ACCEPTED },
       { email: EDITOR.email, status: EventInvitationStatus.PENDING },
     ],
     isPublic: false,
+    key: 'evt-reunion-direction',
     organizerEmail: ADMIN.email,
     startDayOffset: 9,
     startHour: 10,
@@ -144,9 +147,9 @@ const EVENTS: EventSeed[] = [
     // Chevauche volontairement evt-reunion-direction (même créneau)
     departmentCodes: [DepartmentCode.INFO],
     endHour: 12,
-    id: 'evt-comite-qualite',
     invitees: [{ email: USER.email, status: EventInvitationStatus.PENDING }],
     isPublic: true,
+    key: 'evt-comite-qualite',
     organizerEmail: ADMIN.email,
     startDayOffset: 9,
     startHour: 10,
@@ -154,12 +157,12 @@ const EVENTS: EventSeed[] = [
   {
     departmentCodes: [DepartmentCode.TC],
     endHour: 15,
-    id: 'evt-projet-tutore',
     invitees: [
       { email: ADMIN.email, status: EventInvitationStatus.ACCEPTED },
       { email: USER.email, status: EventInvitationStatus.ACCEPTED },
     ],
     isPublic: true,
+    key: 'evt-projet-tutore',
     organizerEmail: EDITOR.email,
     startDayOffset: 10,
     startHour: 13,
@@ -168,12 +171,12 @@ const EVENTS: EventSeed[] = [
     // Fête de fin d'année : inter-départements.
     departmentCodes: [DepartmentCode.INFO, DepartmentCode.GACO],
     endHour: 23,
-    id: 'evt-fete-fin-annee',
     invitees: [
       { email: USER.email, status: EventInvitationStatus.ACCEPTED },
       { email: EDITOR.email, status: EventInvitationStatus.ACCEPTED },
     ],
     isPublic: true,
+    key: 'evt-fete-fin-annee',
     organizerEmail: ADMIN.email,
     startDayOffset: 11,
     startHour: 18,
@@ -210,14 +213,16 @@ export const seedEvents = async () => {
 
   // Un event cible un ou plusieurs départements : on les rattache par `connect`
   // sur le code (`@unique`), donc pas besoin de résoudre les ids au préalable.
-  await Promise.all(
-    EVENTS.map((event) => {
+  // On laisse Prisma générer l'id (cuid) et on capture le couple clé→id pour
+  // relier ensuite les invitations (comme news.seed/user.seed).
+  const createdEvents = await Promise.all(
+    EVENTS.map(async (event) => {
       const organizerId = userIdByEmail.get(event.organizerEmail)
       if (!organizerId)
         throw new Error(`User ${event.organizerEmail} not found`)
 
-      return prisma.event.upsert({
-        create: {
+      const created = await prisma.event.create({
+        data: {
           departments: {
             connect: event.departmentCodes.map((code) => ({ code })),
           },
@@ -228,7 +233,6 @@ export const seedEvents = async () => {
             event.endHour,
             event.endMinute ?? 0,
           ),
-          id: event.id,
           isPublic: event.isPublic,
           location: fakeEventLocation(),
           organizerId,
@@ -240,11 +244,12 @@ export const seedEvents = async () => {
           ),
           title: fakeEventTitle(),
         },
-        update: {},
-        where: { id: event.id },
+        select: { id: true },
       })
+      return [event.key, created.id] as const
     }),
   )
+  const eventIdByKey = new Map(createdEvents)
 
   const invitationsData: Prisma.EventInvitationCreateManyInput[] =
     EVENTS.flatMap((event) =>
@@ -255,9 +260,10 @@ export const seedEvents = async () => {
             `User ${invitee.email} not found — run seedUsers first`,
           )
         }
+        const eventId = eventIdByKey.get(event.key)
+        if (!eventId) throw new Error(`Event ${event.key} not seeded`)
         return {
-          eventId: event.id,
-          id: `${event.id}-inv-${invitee.email.split('@')[0]}`,
+          eventId,
           status: invitee.status,
           userId,
         }

@@ -86,7 +86,6 @@ import UserDataTable from '@/components/user/user-data-table.vue'
 import UserDataView from '@/components/user/user-data-view.vue'
 import { useI18n } from '@/composables/use-i18n'
 import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
-import { RouteNames, router } from '@/router'
 
 const { t } = useI18n()
 const { isAdmin } = useSession()

@@ -43,10 +43,9 @@ export type UpdateMeInput = z.infer<typeof updateMeInputSchema>
 // ── Inputs (création par un admin) ────────────────────────────────────────────
 
 export const createUserInputSchema = userSchema
-  .omit({ userId: true })
+  .omit({ role: true, userId: true })
   .extend({
     departmentCode: z.enum(DepartmentCode),
-    role: z.enum(UserRole).default(UserRole.USER),
   })
   .strict()
 export type CreateUserInput = z.infer<typeof createUserInputSchema>
@@ -60,6 +59,7 @@ export type UploadMyAvatarInput = z.infer<typeof uploadMyAvatarInputSchema>
 
 export const listUsersInputSchema = paginationSchema
   .extend({
+    department: z.enum(DepartmentCode).optional(),
     search: searchSchema,
   })
   .strict()

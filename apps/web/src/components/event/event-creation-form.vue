@@ -137,10 +137,7 @@ import type {
   CreateEventInput,
   UpdateEventInput,
 } from '@iut-intranet/helpers/schemas/event'
-import {
-  eventWriteSchema,
-  updateEventInputSchema,
-} from '@iut-intranet/helpers/schemas/event'
+import { eventWriteSchema } from '@iut-intranet/helpers/schemas/event'
 import type { FormSubmitEvent } from '@primevue/forms'
 import { Form as PrimeForm } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
@@ -187,13 +184,11 @@ const departmentOptions = Object.values(DepartmentCode).map((code) => ({
 
 const isUpdateMode = computed(() => !!props.eventId)
 
-const resolver = zodResolver(
-  isUpdateMode.value
-    ? updateEventInputSchema
-    : eventWriteSchema.omit({
-        departmentCodes: true,
-      }),
-)
+// Le formulaire valide uniquement les champs réellement saisis : `id`
+// (édition) et `departmentCodes` (gérés à part) sont injectés dans `onSubmit`.
+// Valider avec `updateEventInputSchema` exigeait un `id` absent des valeurs du
+// form, qui restait donc invalide et bloquait toute mise à jour.
+const resolver = zodResolver(eventWriteSchema.omit({ departmentCodes: true }))
 
 // Par défaut, on pré-sélectionne le département de l'utilisateur courant ; à
 // l'édition on reprend les départements de l'event.

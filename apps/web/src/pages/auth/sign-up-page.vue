@@ -65,7 +65,6 @@
     <PrimeFileUpload
       accept="image/jpeg,image/png,image/webp"
       choose-label="Changer d'avatar"
-      :max-file-size="2_000_000"
       mode="basic"
       @select="onAvatarSelect"
     />
