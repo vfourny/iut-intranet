@@ -20,7 +20,9 @@
               router.push({ name: RouteNames.home, params: { id: user.id } })
             "
           >
-            <div class="aspect-square w-full overflow-hidden rounded bg-surface-50">
+            <div
+              class="aspect-square w-full overflow-hidden rounded bg-surface-50"
+            >
               <img
                 v-if="user.image"
                 :alt="`${user.firstName} ${user.lastName}`"
@@ -40,6 +42,13 @@
                   <DepartmentTag
                     v-if="user.department?.code"
                     :code="user.department.code"
+                  />
+                  <PrimeButton
+                    v-if="isAdmin"
+                    icon="pi pi-pencil"
+                    rounded
+                    text
+                    @click.stop="onEdit(user)"
                   />
                   <div class="text-lg font-medium mt-1">
                     {{ user.firstName }} {{ user.lastName }}
@@ -71,21 +80,37 @@
       </div>
     </template>
   </PrimeDataView>
-  <div ref="sentinelRef" class="h-8" />
-  <div
-    v-if="loading"
-    class="flex justify-center py-4 text-surface-500"
+  <PrimeDialog
+    v-model:visible="editVisible"
+    class="w-full max-w-2xl"
+    :header="t('user.edit.title')"
+    modal
   >
+    <AddUser
+      v-if="selectedUserId"
+      :user-id="selectedUserId"
+      @cancel="editVisible = false"
+      @saved="editVisible = false"
+    />
+  </PrimeDialog>
+  <div ref="sentinelRef" class="h-8" />
+  <div v-if="loading" class="flex justify-center py-4 text-surface-500">
     <i class="pi pi-spinner pi-spin text-2xl" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { UserRole } from '@iut-intranet/db/enums'
 import type { TrpcOutput } from '@iut-intranet/trpc'
+import PrimeButton from 'primevue/button'
 import PrimeDataView from 'primevue/dataview'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import PrimeDialog from 'primevue/dialog'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
+import { useSession } from '@/api/auth.api'
 import DepartmentTag from '@/components/department/department-tag.vue'
+import AddUser from '@/components/user/add-user.vue'
+import { useI18n } from '@/composables/use-i18n'
 import { RouteNames, router } from '@/router'
 
 type User = TrpcOutput['user']['list']['items'][number]
@@ -96,8 +121,21 @@ interface UserDataViewProps {
   users: User[]
 }
 
+const { t } = useI18n()
+const { currentSession } = useSession()
+const isAdmin = computed(
+  () => currentSession.value?.user.role === UserRole.ADMIN,
+)
 const props = defineProps<UserDataViewProps>()
 const emit = defineEmits<{ 'load-more': [] }>()
+
+const selectedUserId = ref<string | undefined>(undefined)
+const editVisible = ref(false)
+
+const onEdit = (user: User) => {
+  selectedUserId.value = user.id
+  editVisible.value = true
+}
 
 const getInitials = (user: User) => `${user.firstName[0]}${user.lastName[0]}`
 

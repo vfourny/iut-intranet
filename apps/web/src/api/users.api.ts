@@ -3,6 +3,7 @@ import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
 import type {
   CreateUserInput,
   UpdateMeInput,
+  updateUserFromAdminInput,
 } from '@iut-intranet/helpers/schemas/user'
 import {
   useInfiniteQuery,
@@ -123,6 +124,35 @@ export const useCreateUser = () => {
     onSuccess: () => {
       queryCache.invalidateQueries({ key: ['user', 'list'] })
     },
+  })
+}
+
+export const useUpdateUser = () => {
+  const queryCache = useQueryCache()
+
+  return useMutation({
+    mutation: (input: updateUserFromAdminInput) =>
+      trpc.user.update.mutate(input),
+    onSuccess: () => {
+      queryCache.invalidateQueries({ key: ['user', 'list'] })
+    },
+  })
+}
+
+export const useGetUserById = (
+  userId: MaybeRefOrGetter<string | undefined>,
+) => {
+  return useQuery({
+    enabled: () => !!toValue(userId),
+    key: () => ['user', 'detail', toValue(userId) ?? null] as const,
+    query: () => {
+      const id = toValue(userId)
+      if (!id) {
+        throw new Error('User ID is required to fetch details')
+      }
+      return trpc.user.getById.query({ userId: id })
+    },
+    staleTime: 1000 * 60,
   })
 }
 

@@ -40,6 +40,23 @@ export const user = {
       },
     },
   },
+  edit: {
+    actions: {
+      cancel: 'Annuler',
+      submit: 'Enregistrer les modifications',
+    },
+    title: 'Modifier un utilisateur',
+    toast: {
+      error: {
+        detail: 'Une erreur est survenue lors de la modification.',
+        summary: 'Erreur',
+      },
+      success: {
+        detail: 'Le compte a bien été modifié.',
+        summary: 'Utilisateur modifié',
+      },
+    },
+  },
   search: 'Rechercher un utilisateur',
   table: {
     department: 'Département',

@@ -67,6 +67,11 @@ export const deleteUserInputSchema = z.object({
 })
 export type deleteUserInput = z.infer<typeof deleteUserInputSchema>
 
+export const getByIdInputSchema = z.object({
+  userId: z.string(),
+})
+export type getByIdInput = z.infer<typeof getByIdInputSchema>
+
 // ── Listing ───────────────────────────────────────────────────────────────────
 
 export const listUsersInputSchema = paginationSchema

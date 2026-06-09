@@ -18,8 +18,8 @@
   "scripts": {
     "build": "tsc && tsc-alias",
     "clean": "rimraf dist node_modules .turbo",
-    "dev": "tsx watch src/index.ts",
     "cron:archive-news": "tsx src/cron/archive-news.cron.ts",
+    "dev": "tsx watch src/index.ts",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "start": "node dist/index.js",

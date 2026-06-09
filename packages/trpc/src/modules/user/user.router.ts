@@ -1,5 +1,6 @@
 import { createUserProcedure } from '@/modules/user/procedures/create-user.procedure'
 import { deleteUser } from '@/modules/user/procedures/delete-user-from-admin'
+import { getByIdProcedure } from '@/modules/user/procedures/get-by-id'
 import { getMeProcedure } from '@/modules/user/procedures/get-me.procedure'
 import { listUsersProcedure } from '@/modules/user/procedures/list-users.procedure'
 import { updateMeProcedure } from '@/modules/user/procedures/update-me.procedure'
@@ -11,6 +12,7 @@ import { router } from '@/trpc'
 export const userRouter = router({
   create: createUserProcedure,
   delete: deleteUser,
+  getById: getByIdProcedure,
   getMe: getMeProcedure,
   list: listUsersProcedure,
   update: updateUserFromAdmin,

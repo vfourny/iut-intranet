@@ -50,6 +50,7 @@ export class AuthService {
 
     const user = await this.userService.getById(
       userIdSchema.parse(signInResponse.user.id),
+      userIdSchema.parse(signInResponse.user.id),
     )
 
     return {
@@ -101,6 +102,7 @@ export class AuthService {
       })
 
     const user = await this.userService.getById(
+      userIdSchema.parse(signUpResponse.user.id),
       userIdSchema.parse(signUpResponse.user.id),
     )
 
