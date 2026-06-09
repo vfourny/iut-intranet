@@ -3,14 +3,18 @@ import { randomBytes } from 'node:crypto'
 import type { BetterAuthInstance } from '@iut-intranet/auth/types'
 import type { Prisma, prisma } from '@iut-intranet/db'
 import { UserRole } from '@iut-intranet/db/enums'
+import { AppError } from '@iut-intranet/helpers/errors'
 import type { UserId } from '@iut-intranet/helpers/schemas/brand'
 import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
 import type {
   CreateUserInput,
+  deleteUserInput,
   ListUsersInputSchema,
   UpdateMeInput,
+  updateUserFromAdminInput,
   UpdateUserInput,
 } from '@iut-intranet/helpers/schemas/user'
+import { isAdminRole } from '@iut-intranet/helpers/utils/role'
 import { signUrlField, uploadObject } from '@iut-intranet/providers/s3'
 
 import { userInclude, userListSelect } from '@/user/user.query'
@@ -51,6 +55,32 @@ export class UserService {
         email,
         name: lastName,
         password,
+      },
+    })
+  }
+
+  /**
+   * Delete a user by id.
+   * @param {UserId} userId - Id of the user to delete
+   * @returns The user with their department and a signed avatar URL
+   * @throws Prisma P6002 (mapped to UNAUTHORIZED) if the user doesn't exist or not be admin
+   */
+  public async delete(payload: deleteUserInput, adminId: string) {
+    const admin = await this.prisma.user.findUnique({
+      where: {
+        id: adminId,
+      },
+    })
+    if (!admin || !isAdminRole(admin.role)) {
+      throw new AppError(
+        'UNAUTHORIZED',
+        'You are not allowed to do this operation',
+      )
+    }
+
+    await this.prisma.user.delete({
+      where: {
+        id: payload.userId,
       },
     })
   }
@@ -121,6 +151,53 @@ export class UserService {
       ),
       total,
     }
+  }
+
+  /**
+   * Update a user account on behalf of an admin.
+   * @param {CreateUserInput} payload - Identity, contact and target department code of the account to update
+   * @returns The update user as returned by the auth provider
+   * @throws Prisma P6002 (mapped to UNAUTHORIZED) if the user doesn't exist or not be admin
+   * @throws Prisma P2025 (mapped to NOT_FOUND) if the target department code doesn't exist
+   * @remarks Admin-only operation — authorization is enforced upstream by the `adminProcedure`, so the service trusts its caller and never re-checks the actor's role. The password is generated server-side (the account is provisioned, not self-registered); delivering it to the new user is out of this method's scope. Account creation goes through better-auth (hashing, account row, schema field mapping) rather than a raw Prisma insert, and the department code is resolved to its id since the auth schema stores `departmentId`.
+   */
+  public async udpate(adminId: string, payload: updateUserFromAdminInput) {
+    const admin = await this.prisma.user.findUnique({
+      where: {
+        id: adminId,
+      },
+    })
+    if (!admin || !isAdminRole(admin.role)) {
+      throw new AppError(
+        'UNAUTHORIZED',
+        'You are not allowed to do this operation',
+      )
+    }
+
+    const department = await this.prisma.department.findUnique({
+      where: {
+        code: payload.departmentCode,
+      },
+    })
+    if (!department) {
+      throw new AppError('NOT_FOUND', "The department doesn't exist")
+    }
+
+    const { departmentCode, userId, ...data } = payload
+
+    const user = await this.prisma.user.update({
+      data: {
+        ...data,
+        department: {
+          connect: { code: departmentCode },
+        },
+      },
+      where: {
+        id: userId,
+      },
+    })
+
+    return user
   }
 
   /**
