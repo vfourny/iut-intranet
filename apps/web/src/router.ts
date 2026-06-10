@@ -70,6 +70,13 @@ export const NAV_ITEMS = {
   },
 } as const satisfies Record<NavKey, NavItem>
 
+export const NAV_ORDER: (keyof typeof NAV_ITEMS)[] = [
+  'home',
+  'directory',
+  'calendar',
+  'news',
+]
+
 const HomePage = () => import('@/pages/home-page.vue')
 const UserListPage = () => import('@/pages/user-list-page.vue')
 const CalendarPage = () => import('@/pages/event-page.vue')
