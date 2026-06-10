@@ -2,6 +2,7 @@ import type { DepartmentCode } from '@iut-intranet/db/enums'
 import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
 import type {
   CreateUserInput,
+  deleteUserInput,
   UpdateMeInput,
   updateUserFromAdminInput,
 } from '@iut-intranet/helpers/schemas/user'
@@ -169,6 +170,17 @@ export const useUploadMyAvatar = () => {
         key: ['user', 'me', currentSession.value?.user.id ?? null],
       })
       queryCache.invalidateQueries({ key: ['auth', 'session'] })
+    },
+  })
+}
+
+export const useDeleteUser = () => {
+  const queryCache = useQueryCache()
+
+  return useMutation({
+    mutation: (input: deleteUserInput) => trpc.user.delete.mutate(input),
+    onSuccess: () => {
+      queryCache.invalidateQueries({ key: ['user', 'list'] })
     },
   })
 }

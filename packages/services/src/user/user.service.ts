@@ -91,12 +91,13 @@ export class UserService {
    * @returns The user with their department and a signed avatar URL
    * @throws Throws if the user doesn't exist
    */
-  public async getById(userId: string, userRequestId: string) {
-    const { role } = await this.prisma.user.findUniqueOrThrow({
+  public async getById(userId: string, requesterId: string) {
+    const requester = await this.prisma.user.findUniqueOrThrow({
       select: { role: true },
-      where: { id: userId },
+      where: { id: requesterId },
     })
-    if (userId !== userRequestId || role !== UserRole.ADMIN) {
+
+    if (userId !== requesterId && !isAdminRole(requester.role)) {
       throw new AppError('UNAUTHORIZED', 'Not authorized')
     }
 

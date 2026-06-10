@@ -40,6 +40,24 @@ export const user = {
       },
     },
   },
+  delete: {
+    actions: {
+      cancel: 'Annuler',
+      confirm: 'Supprimer',
+    },
+    confirm: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
+    title: 'Supprimer un utilisateur',
+    toast: {
+      error: {
+        detail: 'Une erreur est survenue lors de la suppression.',
+        summary: 'Erreur',
+      },
+      success: {
+        detail: 'Le compte a bien été supprimé.',
+        summary: 'Utilisateur supprimé',
+      },
+    },
+  },
   edit: {
     actions: {
       cancel: 'Annuler',
