@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col gap-6">
-    <Teleport :to="pageHeaderSelector.actions">
+    <Teleport defer :to="pageHeaderSelector.actions">
       <PrimeButton
         icon="pi pi-plus"
         :label="t('news.list.createNews')"
@@ -19,6 +19,14 @@
         option-value="value"
         :options="departmentOptions"
         placeholder="Filtrer par département"
+      />
+      <PrimeMultiSelect
+        v-model="selectedStatus"
+        class="w-full md:w-64"
+        option-label="label"
+        option-value="value"
+        :options="statusOptions"
+        placeholder="Filtrer par statut"
       />
     </div>
 
@@ -118,9 +126,17 @@ const SEARCH_DEBOUNCE_MS = 300
 let debounceTimer: ReturnType<typeof setTimeout> | undefined
 
 const selectedDepartments = ref<string[]>([])
+const selectedStatus = ref<NewsStatus[]>([NewsStatus.PUBLISHED])
 const page = ref(1)
 
 const departmentOptions = useEnumOptions('department')
+
+const statusOptions = computed(() => [
+  { label: t('news.status.published'), value: NewsStatus.PUBLISHED },
+  { label: t('news.status.draft'), value: NewsStatus.DRAFT },
+  { label: t('news.status.archived'), value: NewsStatus.ARCHIVED },
+  { label: t('news.status.scheduled'), value: NewsStatus.SCHEDULED },
+])
 
 const onSearch = (value: string) => {
   clearTimeout(debounceTimer)
@@ -132,7 +148,7 @@ const onSearch = (value: string) => {
 // Recherche, filtre département et pagination sont désormais résolus côté
 // serveur : l'API ne renvoie que la page demandée + le total.
 const { data, isLoading } = useVisibleNews(
-  NewsStatus.PUBLISHED,
+  selectedStatus,
   page,
   search,
   selectedDepartments,
@@ -141,7 +157,7 @@ const { data, isLoading } = useVisibleNews(
 const news = computed(() => data.value?.items ?? [])
 const totalRecords = computed(() => data.value?.total ?? 0)
 
-watch([search, selectedDepartments], () => {
+watch([search, selectedDepartments, selectedStatus], () => {
   page.value = 1
 })
 
