@@ -146,9 +146,7 @@ const displayMode = ref<DisplayMode>(DisplayMode.PLANNING)
 const granularity = ref<Granularity>(isMobile ? 'day' : 'week')
 
 watch(displayMode, (mode) => {
-  calendarRef.value
-    ?.getApi()
-    .changeView(VIEW_BY_MODE[mode][granularity.value])
+  calendarRef.value?.getApi().changeView(VIEW_BY_MODE[mode][granularity.value])
 })
 
 const selectedEvent = ref<null | VisibleEvent>(null)

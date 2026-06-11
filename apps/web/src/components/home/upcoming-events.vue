@@ -31,7 +31,9 @@
           <p class="truncate font-medium text-foreground">
             {{ event.title }}
           </p>
-          <p class="flex items-center gap-1 truncate text-sm text-muted-foreground">
+          <p
+            class="flex items-center gap-1 truncate text-sm text-muted-foreground"
+          >
             <i class="pi pi-map-marker text-xs" />
             {{ event.location }}
           </p>
@@ -48,8 +50,8 @@
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 
-import { useI18n } from '@/composables/use-i18n'
 import { useDashboardEvents } from '@/composables/use-dashboard'
+import { useI18n } from '@/composables/use-i18n'
 import { RouteNames } from '@/router'
 
 const { t } = useI18n()

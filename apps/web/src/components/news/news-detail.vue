@@ -6,7 +6,11 @@
       class="h-64 w-full rounded-lg object-cover"
       :src="news.coverUrl"
     />
-    <div v-else class="h-64 w-full rounded-lg" :style="{ backgroundColor: '#6366f1' }" />
+    <div
+      v-else
+      class="h-64 w-full rounded-lg"
+      :style="{ backgroundColor: '#6366f1' }"
+    />
 
     <div class="flex flex-wrap items-center gap-1">
       <NewsTag :status="news.status" />

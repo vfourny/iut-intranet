@@ -20,7 +20,9 @@
               router.push({ name: RouteNames.home, params: { id: user.id } })
             "
           >
-            <div class="aspect-square w-full overflow-hidden rounded bg-surface-50">
+            <div
+              class="aspect-square w-full overflow-hidden rounded bg-surface-50"
+            >
               <img
                 v-if="user.image"
                 :alt="`${user.firstName} ${user.lastName}`"
@@ -72,10 +74,7 @@
     </template>
   </PrimeDataView>
   <div ref="sentinelRef" class="h-8" />
-  <div
-    v-if="loading"
-    class="flex justify-center py-4 text-surface-500"
-  >
+  <div v-if="loading" class="flex justify-center py-4 text-surface-500">
     <i class="pi pi-spinner pi-spin text-2xl" />
   </div>
 </template>

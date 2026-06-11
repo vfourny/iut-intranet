@@ -2,10 +2,7 @@
   <div class="max-w-5xl mx-auto w-full px-6 py-8 bg-white rounded-xl shadow-md">
     <form class="flex flex-col gap-6" @submit.prevent="onSubmit">
       <div class="flex flex-col gap-1.5">
-        <label
-          class="text-sm font-medium text-surface-700"
-          for="phone"
-        >
+        <label class="text-sm font-medium text-surface-700" for="phone">
           {{ t('profil.fields.phone') }}
         </label>
         <PrimeInputText
@@ -20,10 +17,7 @@
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label
-          class="text-sm font-medium text-surface-700"
-          for="jobTitle"
-        >
+        <label class="text-sm font-medium text-surface-700" for="jobTitle">
           {{ t('profil.fields.jobTitle') }}
         </label>
         <PrimeInputText

@@ -1,4 +1,4 @@
-import type { DepartmentCode,NewsStatus } from '@iut-intranet/db/enums'
+import type { DepartmentCode, NewsStatus } from '@iut-intranet/db/enums'
 import type {
   CreateNewsInput,
   UpdateNewsInput,

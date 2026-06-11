@@ -47,7 +47,9 @@
     <PrimeDialog
       v-model:visible="formVisible"
       class="w-full max-w-2xl"
-      :header="formMode === 'edit' ? t('news.update') : t('news.list.createNews')"
+      :header="
+        formMode === 'edit' ? t('news.update') : t('news.list.createNews')
+      "
       modal
     >
       <div
@@ -96,13 +98,13 @@ import {
   useNewsId,
   useVisibleNews,
 } from '@/api/news.api'
-import { pageHeaderSelector } from '@/lib/page-header'
 import NewsCard from '@/components/news/news-card.vue'
 import NewsDetail from '@/components/news/news-detail.vue'
 import NewsForm from '@/components/news/news-form.vue'
 import UserSearchBar from '@/components/ui/search-bar.vue'
 import { useEnumOptions } from '@/composables/use-enum-options'
 import { useI18n } from '@/composables/use-i18n'
+import { pageHeaderSelector } from '@/lib/page-header'
 
 const { t } = useI18n()
 const { currentSession } = useSession()
