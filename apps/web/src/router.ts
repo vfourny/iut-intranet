@@ -39,7 +39,7 @@ export type RouteName = RouteNameLeaves<typeof RouteNames>
 // une entrée `layout.default.nav.*` force à compléter `NAV_ITEMS` (exhaustif).
 export type NavKey = keyof MessageSchema['layout']['default']['nav']
 
-export type NavItem = {
+export interface NavItem {
   icon: string
   label: TranslationKey
   route: RouteName
@@ -48,20 +48,20 @@ export type NavItem = {
 // Source unique de la barre de navigation : libellé i18n, icône et route au
 // même endroit. `header-bar` ne fait que projeter ça en `MenuItem` PrimeVue.
 export const NAV_ITEMS = {
-  home: {
-    icon: 'pi pi-home',
-    label: 'layout.default.nav.home',
-    route: RouteNames.home,
+  calendar: {
+    icon: 'pi pi-calendar',
+    label: 'layout.default.nav.calendar',
+    route: RouteNames.calendar,
   },
   directory: {
     icon: 'pi pi-users',
     label: 'layout.default.nav.directory',
     route: RouteNames.users,
   },
-  calendar: {
-    icon: 'pi pi-calendar',
-    label: 'layout.default.nav.calendar',
-    route: RouteNames.calendar,
+  home: {
+    icon: 'pi pi-home',
+    label: 'layout.default.nav.home',
+    route: RouteNames.home,
   },
   news: {
     icon: 'pi pi-file',

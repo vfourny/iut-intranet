@@ -120,4 +120,7 @@ export const fakeNewsTitle = (): string =>
   `${pick(NEWS_PREFIXES)} ${pick(NEWS_TOPICS)}`
 
 export const fakeNewsContent = (): string =>
-  Array.from({ length: faker.number.int({ max: 3, min: 1 }) }, () => `<p>${frSentence()}</p>`).join('')
+  Array.from(
+    { length: faker.number.int({ max: 3, min: 1 }) },
+    () => `<p>${frSentence()}</p>`,
+  ).join('')

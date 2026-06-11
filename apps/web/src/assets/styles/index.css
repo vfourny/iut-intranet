@@ -15,7 +15,8 @@
   --font-sans:
     'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
     sans-serif;
-  --font-narrow: 'Inter', system-ui, -apple-system, Helvetica, Arial, sans-serif;
+  --font-narrow:
+    'Inter', system-ui, -apple-system, Helvetica, Arial, sans-serif;
 
   /* ============================================================
    * Palettes de marque — charte IUT Littoral Côte d'Opale
@@ -246,8 +247,7 @@ body {
   /* Rendu typographique soigné : lissage + chiffres tabulaires + features Inter. */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings:
-    'cv11', 'ss01';
+  font-feature-settings: 'cv11', 'ss01';
   letter-spacing: -0.011em;
   text-rendering: optimizeLegibility;
 }

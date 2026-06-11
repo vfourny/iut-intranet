@@ -37,12 +37,9 @@ export const SPECIALTY_COLORS: Record<DepartmentSpecialty, string> = {
  * Tailwind v4 les détecte (pas de concaténation dynamique).
  */
 export const SPECIALTY_TAG_CLASSES: Record<DepartmentSpecialty, string> = {
-  admin:
-    'bg-dept-admin-100 text-dept-admin-800',
+  admin: 'bg-dept-admin-100 text-dept-admin-800',
   bio: 'bg-dept-bio-100 text-dept-bio-800',
-  energy:
-    'bg-dept-energy-100 text-dept-energy-800',
-  indus:
-    'bg-dept-indus-100 text-dept-indus-800',
+  energy: 'bg-dept-energy-100 text-dept-energy-800',
+  indus: 'bg-dept-indus-100 text-dept-indus-800',
   info: 'bg-dept-info-100 text-dept-info-800',
 }

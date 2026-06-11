@@ -1,8 +1,8 @@
 import { createLogger, type Logger } from '@iut-intranet/configs/logger'
-import { articleService } from '@iut-intranet/services'
+import { newsService } from '@iut-intranet/services'
 
 export async function ArchiveArticlesJob(logger: Logger) {
-  const { count } = await articleService.archivePastPublishedArticles()
+  const { count } = await newsService.archivePastPublishedNews()
   logger.info(`[cron] archiveArticles: ${count} article(s) archivé(s)`)
 }
 

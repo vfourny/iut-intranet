@@ -96,23 +96,23 @@ Raccourci pour repartir d'une base propre : `npm run env:reset` (reset complet d
 
 ## Commandes utiles
 
-| Commande                                  | Description                                                      |
-| ----------------------------------------- | --------------------------------------------------------------- |
-| `npm run dev`                             | Lance toutes les apps en mode watch (via `dotenvx`)             |
-| `npm run build`                           | Build de production (via `dotenvx`)                             |
-| `npm run ts:check`                        | Type-check global                                               |
-| `npm run lint` / `npm run lint:fix`       | Lint global                                                     |
-| `npm run format` / `npm run format:check` | Formatte / vérifie le formatage Prettier                       |
-| `npm run syncpack:check`                  | Vérifie l'uniformité des versions de dépendances               |
-| `npm run env:start` / `env:stop`          | Démarre / arrête l'environnement local (Postgres + MinIO)      |
-| `npm run env:reset`                       | Reset complet de la base + reseed des buckets S3               |
-| `npm run db:migrate -- <name>`            | Crée et applique une migration                                 |
-| `npm run db:deploy`                       | Applique les migrations existantes (CI / prod)                 |
-| `npm run db:seed`                         | Peuple la base avec des données de démo                        |
-| `npm run db:studio`                       | Ouvre Prisma Studio                                            |
-| `npm run test`                            | Lance la suite Vitest dans Docker                             |
-| `npm run test:watch`                      | Vitest en watch + UI dans Docker                              |
-| `npm run clean`                           | Nettoie `dist`, `.turbo`, `.cache` et `node_modules`         |
+| Commande                                  | Description                                               |
+| ----------------------------------------- | --------------------------------------------------------- |
+| `npm run dev`                             | Lance toutes les apps en mode watch (via `dotenvx`)       |
+| `npm run build`                           | Build de production (via `dotenvx`)                       |
+| `npm run ts:check`                        | Type-check global                                         |
+| `npm run lint` / `npm run lint:fix`       | Lint global                                               |
+| `npm run format` / `npm run format:check` | Formatte / vérifie le formatage Prettier                  |
+| `npm run syncpack:check`                  | Vérifie l'uniformité des versions de dépendances          |
+| `npm run env:start` / `env:stop`          | Démarre / arrête l'environnement local (Postgres + MinIO) |
+| `npm run env:reset`                       | Reset complet de la base + reseed des buckets S3          |
+| `npm run db:migrate -- <name>`            | Crée et applique une migration                            |
+| `npm run db:deploy`                       | Applique les migrations existantes (CI / prod)            |
+| `npm run db:seed`                         | Peuple la base avec des données de démo                   |
+| `npm run db:studio`                       | Ouvre Prisma Studio                                       |
+| `npm run test`                            | Lance la suite Vitest dans Docker                         |
+| `npm run test:watch`                      | Vitest en watch + UI dans Docker                          |
+| `npm run clean`                           | Nettoie `dist`, `.turbo`, `.cache` et `node_modules`      |
 
 Cibler un seul package : `npx turbo <task> --filter=@iut-intranet/<pkg>`.
 
