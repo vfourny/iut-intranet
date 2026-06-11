@@ -13,7 +13,6 @@
     </div>
 
     <PrimeMenubar
-      :model="items"
       :dt="{
         background: 'transparent',
         borderColor: 'transparent',
@@ -21,6 +20,7 @@
         padding: '0',
         gap: '0.25rem',
       }"
+      :model="items"
     >
       <template #item="{ item, props }">
         <a
@@ -32,7 +32,7 @@
               : 'text-muted-foreground hover:bg-muted hover:text-foreground'
           "
         >
-          <i :class="item.icon" class="text-[0.95rem]" />
+          <i class="text-[0.95rem]" :class="item.icon" />
           <span>{{ item.label }}</span>
         </a>
       </template>
@@ -41,11 +41,7 @@
     <div class="flex items-center gap-2">
       <PrimeButton severity="secondary" text @click="profilMenu.toggle($event)">
         <div class="flex items-center gap-2">
-          <PrimeAvatar
-            v-if="me?.image"
-            :image="me.image"
-            shape="circle"
-          />
+          <PrimeAvatar v-if="me?.image" :image="me.image" shape="circle" />
           <PrimeAvatar v-else icon="pi pi-user" shape="circle" />
           <span
             >{{ currentSession?.user.firstName }}
@@ -72,7 +68,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSession, useSignOut } from '@/api/auth.api'
 import { useMe } from '@/api/users.api'
 import { useI18n } from '@/composables/use-i18n'
-import { NAV_ITEMS, RouteNames } from '@/router'
+import { NAV_ITEMS, NAV_ORDER, RouteNames } from '@/router'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -84,12 +80,15 @@ const { currentSession } = useSession()
 const { data: me } = useMe()
 
 const items = computed<MenuItem[]>(() =>
-  Object.values(NAV_ITEMS).map((nav) => ({
-    command: () => router.push({ name: nav.route }),
-    icon: nav.icon,
-    label: t(nav.label),
-    route: nav.route,
-  })),
+  NAV_ORDER.map((key) => {
+    const nav = NAV_ITEMS[key]
+    return {
+      command: () => router.push({ name: nav.route }),
+      icon: nav.icon,
+      label: t(nav.label),
+      route: nav.route,
+    }
+  }),
 )
 
 // La page courante se détecte par son nom de route, posé sur chaque item.

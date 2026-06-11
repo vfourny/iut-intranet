@@ -26,6 +26,12 @@ export const news = {
     success: 'News sauvegardée',
   },
   saveNews: 'Sauvegarder la news',
+  status: {
+    archived: 'Archive',
+    draft: 'Brouillon',
+    published: 'Article publié',
+    scheduled: 'Article programmé',
+  },
   titleRequired: 'Un titre est requis pour publier',
   update: 'Modifier la news',
 }

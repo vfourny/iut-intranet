@@ -20,6 +20,15 @@ export class AuthService {
     private departmentService: DepartmentService,
   ) {}
 
+  public async forgotPassword(
+    email: string,
+    redirectTo: string,
+  ): Promise<void> {
+    await this.betterAuth.api.requestPasswordReset({
+      body: { email, redirectTo },
+    })
+  }
+
   /**
    * Resolves the current session from the request headers.
    * @param {Headers} headers - Incoming request headers carrying the session cookie
@@ -28,6 +37,15 @@ export class AuthService {
   public async getSession(headers: Headers): Promise<AuthSession | null> {
     return this.betterAuth.api.getSession({
       headers,
+    })
+  }
+
+  public async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<void> {
+    await this.betterAuth.api.resetPassword({
+      body: { newPassword, token },
     })
   }
 
@@ -49,6 +67,7 @@ export class AuthService {
       })
 
     const user = await this.userService.getById(
+      userIdSchema.parse(signInResponse.user.id),
       userIdSchema.parse(signInResponse.user.id),
     )
 
@@ -101,6 +120,7 @@ export class AuthService {
       })
 
     const user = await this.userService.getById(
+      userIdSchema.parse(signUpResponse.user.id),
       userIdSchema.parse(signUpResponse.user.id),
     )
 

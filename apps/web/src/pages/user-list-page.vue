@@ -29,7 +29,7 @@
     <UserSearchBar @search="onSearch" />
   </div>
 
-  <Teleport :to="pageHeaderSelector.actions">
+  <Teleport defer :to="pageHeaderSelector.actions">
     <PrimeButton
       v-if="isAdmin"
       icon="pi pi-user-plus"
@@ -79,13 +79,13 @@ import {
   useUsersInfinite,
   useUsersPaginated,
 } from '@/api/users.api'
-import { pageHeaderSelector } from '@/lib/page-header'
 import UserSearchBar from '@/components/ui/search-bar.vue'
 import AddUser from '@/components/user/add-user.vue'
 import UserDataTable from '@/components/user/user-data-table.vue'
 import UserDataView from '@/components/user/user-data-view.vue'
 import { useI18n } from '@/composables/use-i18n'
 import { SPECIALTY_BY_DEPARTMENT } from '@/lib/department'
+import { pageHeaderSelector } from '@/lib/page-header'
 
 const { t } = useI18n()
 const { isAdmin } = useSession()

@@ -2,7 +2,9 @@ import type { DepartmentCode } from '@iut-intranet/db/enums'
 import type { UploadFileInput } from '@iut-intranet/helpers/schemas/storage'
 import type {
   CreateUserInput,
+  deleteUserInput,
   UpdateMeInput,
+  updateUserFromAdminInput,
 } from '@iut-intranet/helpers/schemas/user'
 import {
   useInfiniteQuery,
@@ -126,6 +128,35 @@ export const useCreateUser = () => {
   })
 }
 
+export const useUpdateUser = () => {
+  const queryCache = useQueryCache()
+
+  return useMutation({
+    mutation: (input: updateUserFromAdminInput) =>
+      trpc.user.update.mutate(input),
+    onSuccess: () => {
+      queryCache.invalidateQueries({ key: ['user', 'list'] })
+    },
+  })
+}
+
+export const useGetUserById = (
+  userId: MaybeRefOrGetter<string | undefined>,
+) => {
+  return useQuery({
+    enabled: () => !!toValue(userId),
+    key: () => ['user', 'detail', toValue(userId) ?? null] as const,
+    query: () => {
+      const id = toValue(userId)
+      if (!id) {
+        throw new Error('User ID is required to fetch details')
+      }
+      return trpc.user.getById.query({ userId: id })
+    },
+    staleTime: 1000 * 60,
+  })
+}
+
 export const useUploadMyAvatar = () => {
   const queryCache = useQueryCache()
   const { currentSession } = useSession()
@@ -139,6 +170,17 @@ export const useUploadMyAvatar = () => {
         key: ['user', 'me', currentSession.value?.user.id ?? null],
       })
       queryCache.invalidateQueries({ key: ['auth', 'session'] })
+    },
+  })
+}
+
+export const useDeleteUser = () => {
+  const queryCache = useQueryCache()
+
+  return useMutation({
+    mutation: (input: deleteUserInput) => trpc.user.delete.mutate(input),
+    onSuccess: () => {
+      queryCache.invalidateQueries({ key: ['user', 'list'] })
     },
   })
 }
