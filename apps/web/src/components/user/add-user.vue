@@ -73,15 +73,14 @@
       </h2>
 
       <div class="grid grid-cols-2 gap-4">
-        <SelectField
-          v-model="departmentCode"
-          :error="errors.departmentCode"
-          :label="t('user.add.fields.departmentCode')"
-          name="departmentCode"
+        <PrimeMultiSelect
+          v-model="departmentCodes"
+          display="chip"
+          :invalid="!!errors.departmentCodes"
           option-label="label"
           option-value="value"
           :options="departmentOptions"
-          :placeholder="t('user.add.placeholders.departmentCode')"
+          :placeholder="t('user.add.placeholders.departmentCodes')"
         />
       </div>
     </section>
@@ -112,6 +111,7 @@ import type { updateUserFromAdminInput } from '@iut-intranet/helpers/schemas/use
 import { createUserInputSchema } from '@iut-intranet/helpers/schemas/user'
 import { formatPhoneNational } from '@iut-intranet/helpers/utils/phone'
 import PrimeButton from 'primevue/button'
+import PrimeMultiSelect from 'primevue/multiselect'
 import { useToast } from 'primevue/usetoast'
 import { useForm } from 'vee-validate'
 import { computed, watch } from 'vue'
@@ -119,7 +119,6 @@ import type { z } from 'zod'
 
 import { useCreateUser, useGetUserById, useUpdateUser } from '@/api/users.api'
 import InputField from '@/components/ui/input-field.vue'
-import SelectField from '@/components/ui/select-field.vue'
 import { useEnumOptions } from '@/composables/use-enum-options'
 import { useI18n } from '@/composables/use-i18n'
 
@@ -159,7 +158,7 @@ const {
   validationSchema: createUserInputSchema,
 })
 
-const [departmentCode] = defineField('departmentCode')
+const [departmentCodes] = defineField('departmentCodes')
 const [email] = defineField('email')
 const [firstName] = defineField('firstName')
 const [jobTitle] = defineField('jobTitle')
@@ -176,7 +175,7 @@ const onPhoneInput = (event: Event) => {
 watch(user, (u) => {
   if (!u) return
   setValues({
-    departmentCode: u.department.code,
+    departmentCodes: u.departments.map((ud) => ud.department.code),
     email: u.email,
     firstName: u.firstName,
     jobTitle: u.jobTitle ?? undefined,

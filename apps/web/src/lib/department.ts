@@ -1,6 +1,12 @@
 import { DepartmentCode } from '@iut-intranet/db/enums'
 
-export type DepartmentSpecialty = 'admin' | 'bio' | 'energy' | 'indus' | 'info'
+export type DepartmentSpecialty =
+  | 'admin'
+  | 'bio'
+  | 'energy'
+  | 'indus'
+  | 'info'
+  | 'others'
 
 /**
  * Mapping code département → spécialité (charte ADIUT, p.7-8) :
@@ -14,14 +20,16 @@ export const SPECIALTY_BY_DEPARTMENT: Record<
   DepartmentCode,
   DepartmentSpecialty
 > = {
+  [DepartmentCode.Administration]: 'others',
   [DepartmentCode.GACO]: 'admin',
   [DepartmentCode.GB]: 'bio',
   [DepartmentCode.GEA]: 'admin',
   [DepartmentCode.GEII]: 'info',
   [DepartmentCode.GIM]: 'indus',
-  [DepartmentCode.GTE]: 'energy',
   [DepartmentCode.INFO]: 'info',
+  [DepartmentCode.MT2E]: 'energy',
   [DepartmentCode.TC]: 'admin',
+  [DepartmentCode.Technique]: 'others',
 }
 
 export const SPECIALTY_COLORS: Record<DepartmentSpecialty, string> = {
@@ -30,6 +38,7 @@ export const SPECIALTY_COLORS: Record<DepartmentSpecialty, string> = {
   energy: '#f08200',
   indus: '#566872',
   info: '#1fa9e0',
+  others: '#8b5cf6',
 }
 
 /**
@@ -37,12 +46,10 @@ export const SPECIALTY_COLORS: Record<DepartmentSpecialty, string> = {
  * Tailwind v4 les détecte (pas de concaténation dynamique).
  */
 export const SPECIALTY_TAG_CLASSES: Record<DepartmentSpecialty, string> = {
-  admin:
-    'bg-dept-admin-100 text-dept-admin-800',
+  admin: 'bg-dept-admin-100 text-dept-admin-800',
   bio: 'bg-dept-bio-100 text-dept-bio-800',
-  energy:
-    'bg-dept-energy-100 text-dept-energy-800',
-  indus:
-    'bg-dept-indus-100 text-dept-indus-800',
+  energy: 'bg-dept-energy-100 text-dept-energy-800',
+  indus: 'bg-dept-indus-100 text-dept-indus-800',
   info: 'bg-dept-info-100 text-dept-info-800',
+  others: 'bg-dept-others-100 text-dept-others-800',
 }

@@ -33,20 +33,13 @@ export class UserService {
    * @remarks Admin-only operation — authorization is enforced upstream by the `adminProcedure`, so the service trusts its caller and never re-checks the actor's role. The password is generated server-side (the account is provisioned, not self-registered); delivering it to the new user is out of this method's scope. Account creation goes through better-auth (hashing, account row, schema field mapping) rather than a raw Prisma insert, and the department code is resolved to its id since the auth schema stores `departmentId`.
    */
   public async create(payload: CreateUserInput) {
-    const { departmentCode, email, firstName, jobTitle, lastName, phone } =
+    const { departmentCodes, email, firstName, jobTitle, lastName, phone } =
       payload
     const password = randomBytes(12).toString('base64url')
 
-    const { id: departmentId } = await this.prisma.department.findUniqueOrThrow(
-      {
-        where: { code: departmentCode },
-      },
-    )
-
-    return this.betterAuth.api.createUser({
+    const result = await this.betterAuth.api.createUser({
       body: {
         data: {
-          departmentId,
           firstName,
           jobTitle,
           phone,
@@ -57,13 +50,28 @@ export class UserService {
         password,
       },
     })
+
+    if (result && result.user) {
+      await this.prisma.user.update({
+        data: {
+          departments: {
+            create: departmentCodes.map((code) => ({
+              department: {
+                connect: { code },
+              },
+            })),
+          },
+        },
+        where: { id: result.user.id },
+      })
+    }
   }
 
   /**
    * Delete a user by id.
    * @param {UserId} userId - Id of the user to delete
    * @returns The user with their department and a signed avatar URL
-   * @throws Prisma P6002 (mapped to UNAUTHORIZED) if the user doesn't exist or not be admin
+   * @throws Prisma P6002 (mapped to UNAUTHORIZED) if the user doesn't exist or not be admin or the user is the only admin or the user is connect
    */
   public async delete(payload: deleteUserInput, adminId: string) {
     const admin = await this.prisma.user.findUnique({
@@ -71,11 +79,27 @@ export class UserService {
         id: adminId,
       },
     })
-    if (!admin || !isAdminRole(admin.role)) {
+    if (!admin || !isAdminRole(admin.role) || admin.id === payload.userId) {
       throw new AppError(
         'UNAUTHORIZED',
         'You are not allowed to do this operation',
       )
+    }
+
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: payload.userId,
+      },
+    })
+    if (!user) throw new AppError('NOT_FOUND', "User don't exist")
+    if (user.role === UserRole.ADMIN) {
+      const nbAdmin = await this.prisma.user.count({
+        where: {
+          role: UserRole.ADMIN,
+        },
+      })
+      if (nbAdmin < 2)
+        throw new AppError('UNAUTHORIZED', 'this user cannot be delete')
     }
 
     await this.prisma.user.delete({
@@ -170,7 +194,7 @@ export class UserService {
    * @throws Prisma P2025 (mapped to NOT_FOUND) if the target department code doesn't exist
    * @remarks Admin-only operation — authorization is enforced upstream by the `adminProcedure`, so the service trusts its caller and never re-checks the actor's role. The password is generated server-side (the account is provisioned, not self-registered); delivering it to the new user is out of this method's scope. Account creation goes through better-auth (hashing, account row, schema field mapping) rather than a raw Prisma insert, and the department code is resolved to its id since the auth schema stores `departmentId`.
    */
-  public async udpate(adminId: string, payload: updateUserFromAdminInput) {
+  public async update(adminId: string, payload: updateUserFromAdminInput) {
     const admin = await this.prisma.user.findUnique({
       where: {
         id: adminId,
@@ -183,22 +207,25 @@ export class UserService {
       )
     }
 
-    const department = await this.prisma.department.findUnique({
+    const department = await this.prisma.department.findMany({
       where: {
-        code: payload.departmentCode,
+        code: { in: payload.departmentCodes },
       },
     })
     if (!department) {
-      throw new AppError('NOT_FOUND', "The department doesn't exist")
+      throw new AppError('NOT_FOUND', "The department(s) doesn't exist")
     }
 
-    const { departmentCode, userId, ...data } = payload
+    const { departmentCodes, userId, ...data } = payload
 
     const user = await this.prisma.user.update({
       data: {
         ...data,
-        department: {
-          connect: { code: departmentCode },
+        departments: {
+          create: departmentCodes.map((code) => ({
+            department: { connect: { code } },
+          })),
+          deleteMany: {},
         },
       },
       where: {

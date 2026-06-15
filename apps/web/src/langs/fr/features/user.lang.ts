@@ -6,7 +6,7 @@ export const user = {
       submit: "Créer l'utilisateur",
     },
     fields: {
-      departmentCode: 'Département',
+      departmentCodes: 'Département(s)',
       email: 'Email',
       firstName: 'Prénom',
       jobTitle: 'Poste',
@@ -15,7 +15,7 @@ export const user = {
       role: 'Rôle',
     },
     placeholders: {
-      departmentCode: 'Sélectionner un département',
+      departmentCodes: 'Sélectionner un département(s)',
       email: "jean{'@'}univ-littoral.fr",
       firstName: 'Jean',
       jobTitle: 'Responsable RH',

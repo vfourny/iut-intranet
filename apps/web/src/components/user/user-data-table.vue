@@ -22,13 +22,16 @@
       :header="col.header"
     >
       <template
-        v-if="col.field === 'department.code'"
+        v-if="col.field === 'departments'"
         #body="{ data: user }: { data: User }"
       >
-        <DepartmentTag
-          v-if="user.department?.code"
-          :code="user.department.code"
-        />
+        <div class="flex gap-1 flex-wrap">
+          <DepartmentTag
+            v-for="ud in user.departments"
+            :key="ud.department.code"
+            :code="ud.department.code"
+          />
+        </div>
       </template>
     </PrimeColumn>
     <PrimeColumn v-if="isAdmin">
@@ -99,9 +102,7 @@ import AddUser from '@/components/user/add-user.vue'
 import { useI18n } from '@/composables/use-i18n'
 
 type User = TrpcOutput['user']['list']['items'][number]
-type UserField =
-  | (keyof User & string)
-  | `department.${keyof User['department'] & string}`
+type UserField = (keyof User & string) | 'departments'
 
 const { t } = useI18n()
 
@@ -170,7 +171,7 @@ const confirmDelete = async () => {
 const columns = [
   { field: 'firstName', header: t('user.table.prénom') },
   { field: 'lastName', header: t('user.table.nom') },
-  { field: 'department.code', header: t('user.table.department') },
+  { field: 'departments', header: t('user.table.department') },
   { field: 'jobTitle', header: t('user.table.job') },
   { field: 'email', header: t('user.table.email') },
   { field: 'phone', header: t('user.table.phone') },

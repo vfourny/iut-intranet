@@ -7,7 +7,7 @@ import { DepartmentCode, UserRole } from '@/generated/enums'
 const DEFAULT_PASSWORD = 'Password123!'
 
 export const ADMIN = {
-  departmentCode: DepartmentCode.INFO,
+  departmentCodes: [DepartmentCode.INFO],
   email: 'admin@univ-littoral.fr',
   firstName: 'John',
   jobTitle: 'Chef de département',
@@ -17,7 +17,7 @@ export const ADMIN = {
 }
 
 export const USER = {
-  departmentCode: DepartmentCode.GACO,
+  departmentCodes: [DepartmentCode.GACO],
   email: 'user@univ-littoral.fr',
   firstName: 'John',
   jobTitle: 'Enseignant',
@@ -27,7 +27,7 @@ export const USER = {
 }
 
 export const EDITOR = {
-  departmentCode: DepartmentCode.TC,
+  departmentCodes: [DepartmentCode.TC],
   email: 'editor@univ-littoral.fr',
   firstName: 'Jane',
   jobTitle: 'Responsable pédagogique',
@@ -37,9 +37,6 @@ export const EDITOR = {
 }
 
 export const seedUsers = async () => {
-  const departments = await prisma.department.findMany()
-  const departmentIdByCode = new Map(departments.map((d) => [d.code, d.id]))
-
   const defaultUserInput = {
     banExpires: null,
     banned: false,
@@ -49,26 +46,23 @@ export const seedUsers = async () => {
 
   const seededUsers = [ADMIN, USER, EDITOR]
 
-  const users: Prisma.UserCreateManyInput[] = seededUsers.map(
-    ({ departmentCode, ...user }) => {
-      const departmentId = departmentIdByCode.get(departmentCode)
-      if (!departmentId) {
-        throw new Error(
-          `Department ${departmentCode} not found — run seedDepartments first`,
-        )
-      }
-      return {
-        ...user,
-        ...defaultUserInput,
-        departmentId,
-      }
-    },
+  const createdUsers = await Promise.all(
+    seededUsers.map(({ departmentCodes, ...user }) =>
+      prisma.user.upsert({
+        create: {
+          ...user,
+          ...defaultUserInput,
+          departments: {
+            create: departmentCodes.map((code) => ({
+              department: { connect: { code } },
+            })),
+          },
+        },
+        update: {},
+        where: { email: user.email },
+      }),
+    ),
   )
-
-  const createdUsers = await prisma.user.createManyAndReturn({
-    data: users,
-    skipDuplicates: true,
-  })
 
   // Clé S3 déterministe alignée sur le runtime (`uploadAvatar`) :
   // `users/<userId>/avatar.png`. Posée après coup car l'id (cuid) est généré par

@@ -22,7 +22,7 @@ export const signUpWithPasswordInputSchema = userSchema
     phone: true,
   })
   .extend({
-    departmentCode: z.enum(DepartmentCode),
+    departmentCodes: z.array(z.enum(DepartmentCode)).min(1),
     password: passwordSchema,
   })
   .strict()

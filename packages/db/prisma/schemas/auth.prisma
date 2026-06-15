@@ -19,10 +19,8 @@ model User {
   banExpires    DateTime?
   phone         String?
   jobTitle      String?   @map("job_title")
-  departmentId  String    @map("department_id")
   managerId     String?   @map("manager_id")
 
-  department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
   manager      User?      @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
   subordinates User[]     @relation("UserManager")
 
@@ -31,10 +29,20 @@ model User {
   organizedEvents  Event[]
   eventInvitations EventInvitation[]
   news             News[]
+  departments  UserDepartment[]
 
-  @@index([departmentId])
   @@index([managerId])
   @@map("user")
+}
+
+model UserDepartment {
+  userId       String     @map("user_id")
+  departmentId String     @map("department_id")
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, departmentId])
+  @@map("user_department")
 }
 
 model Account {

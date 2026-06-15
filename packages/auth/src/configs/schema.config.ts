@@ -9,11 +9,6 @@ export const schemaConfig = {
   },
   user: {
     additionalFields: {
-      departmentId: {
-        input: true,
-        required: true,
-        type: 'string',
-      },
       firstName: {
         input: true,
         required: true,

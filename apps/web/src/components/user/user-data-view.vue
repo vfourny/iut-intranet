@@ -40,8 +40,9 @@
               <div class="flex flex-row justify-between items-start gap-2">
                 <div>
                   <DepartmentTag
-                    v-if="user.department?.code"
-                    :code="user.department.code"
+                    v-for="ud in user.departments"
+                    :key="ud.department.code"
+                    :code="ud.department.code"
                   />
                   <PrimeButton
                     v-if="isAdmin"

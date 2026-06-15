@@ -107,27 +107,23 @@ export class AuthService {
     payload: SignUpWithPasswordInput,
     headers: Headers,
   ): Promise<AuthResponse> {
-    const { departmentCode, lastName, ...rest } = payload
-
-    const { id: departmentId } =
-      await this.departmentService.getByCode(departmentCode)
+    const { departmentCodes, lastName, ...rest } = payload
 
     const { headers: headersResponse, response: signUpResponse } =
       await this.betterAuth.api.signUpEmail({
-        body: { ...rest, departmentId, name: lastName },
+        body: { ...rest, name: lastName },
         headers,
         returnHeaders: true,
       })
 
-    const user = await this.userService.getById(
-      userIdSchema.parse(signUpResponse.user.id),
-      userIdSchema.parse(signUpResponse.user.id),
-    )
+    const userId = userIdSchema.parse(signUpResponse.user.id)
+
+    await this.departmentService.connectToUser({ departmentCodes, userId })
+
+    const user = await this.userService.getById(userId, userId)
 
     return {
-      body: {
-        user,
-      },
+      body: { user },
       headersResponse,
     }
   }

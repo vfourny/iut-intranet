@@ -50,13 +50,13 @@ export type UploadMyAvatarInput = z.infer<typeof uploadMyAvatarInputSchema>
 export const createUserInputSchema = userSchema
   .omit({ role: true, userId: true })
   .extend({
-    departmentCode: z.enum(DepartmentCode),
+    departmentCodes: z.array(z.enum(DepartmentCode)).min(1),
   })
   .strict()
 export type CreateUserInput = z.infer<typeof createUserInputSchema>
 
 export const updateUserFromAdminInputSchema = userSchema.extend({
-  departmentCode: z.enum(DepartmentCode),
+  departmentCodes: z.array(z.enum(DepartmentCode)).min(1),
 })
 export type updateUserFromAdminInput = z.infer<
   typeof updateUserFromAdminInputSchema
