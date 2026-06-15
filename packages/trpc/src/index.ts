@@ -1,6 +1,7 @@
 import type { inferRouterOutputs } from '@trpc/server'
 
 import { authRouter } from '@/modules/auth/auth.router'
+import { documentRouter } from '@/modules/document/document.router'
 import { eventRouter } from '@/modules/event/event.router'
 import { highlightRouter } from '@/modules/highlight/highlight.router'
 import { newsRouter } from '@/modules/news/news.router'
@@ -9,6 +10,7 @@ import { router } from '@/trpc'
 
 export const appRouter = router({
   auth: authRouter,
+  document: documentRouter,
   event: eventRouter,
   highlight: highlightRouter,
   news: newsRouter,

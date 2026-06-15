@@ -2,6 +2,7 @@ import { fromNodeHeaders } from '@iut-intranet/auth'
 import { createLogger } from '@iut-intranet/configs/logger'
 import {
   authService,
+  documentService,
   eventService,
   highlightService,
   newsService,
@@ -13,6 +14,7 @@ const logger = createLogger('trpc')
 
 const services = {
   auth: authService,
+  document: documentService,
   event: eventService,
   highlight: highlightService,
   news: newsService,
