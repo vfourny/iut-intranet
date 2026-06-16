@@ -14,7 +14,7 @@ const departmentService = new DepartmentService(prisma)
 const eventService = new EventService(prisma)
 const newsService = new NewsService(prisma, userService)
 const highlightService = new HighlightService()
-const documentService = new DocumentService()
+const documentService = new DocumentService(userService)
 const authService = new AuthService(
   betterAuthInstance,
   userService,

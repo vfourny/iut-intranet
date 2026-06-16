@@ -9,6 +9,7 @@ export const layout = {
     nav: {
       calendar: 'Calendrier',
       directory: 'Annuaire',
+      document: 'Documents',
       home: 'Accueil',
       news: 'Actualités',
     },
