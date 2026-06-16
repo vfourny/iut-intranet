@@ -85,7 +85,8 @@
   },
   "prettier": "@iut-intranet/configs/prettier",
   "dependencies": {
-    "vue3-carousel": "0.17.0",
-    "@primevue/forms": "4.5.5"
+    "@primevue/forms": "4.5.5",
+    "pdfjs-dist": "6.0.227",
+    "vue3-carousel": "0.17.0"
   }
 }

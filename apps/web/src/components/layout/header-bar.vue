@@ -13,7 +13,6 @@
     </div>
 
     <PrimeMenubar
-      :model="items"
       :dt="{
         background: 'transparent',
         borderColor: 'transparent',
@@ -21,6 +20,7 @@
         padding: '0',
         gap: '0.25rem',
       }"
+      :model="items"
     >
       <template #item="{ item, props }">
         <a
@@ -32,7 +32,7 @@
               : 'text-muted-foreground hover:bg-muted hover:text-foreground'
           "
         >
-          <i :class="item.icon" class="text-[0.95rem]" />
+          <i class="text-[0.95rem]" :class="item.icon" />
           <span>{{ item.label }}</span>
         </a>
       </template>
@@ -41,11 +41,7 @@
     <div class="flex items-center gap-2">
       <PrimeButton severity="secondary" text @click="profilMenu.toggle($event)">
         <div class="flex items-center gap-2">
-          <PrimeAvatar
-            v-if="me?.image"
-            :image="me.image"
-            shape="circle"
-          />
+          <PrimeAvatar v-if="me?.image" :image="me.image" shape="circle" />
           <PrimeAvatar v-else icon="pi pi-user" shape="circle" />
           <span
             >{{ currentSession?.user.firstName }}

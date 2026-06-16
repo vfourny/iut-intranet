@@ -14,12 +14,14 @@ import { S3_BUCKET_NAME, s3Client } from '@/s3.client'
 const SIGNED_URL_TTL_SECONDS = 24 * 60 * 60
 
 const ExtensionByContentType = {
+  [ContentType.DOCUMENT_PDF]: 'pdf',
   [ContentType.IMAGE_JPEG]: 'jpg',
   [ContentType.IMAGE_PNG]: 'png',
   [ContentType.IMAGE_WEBP]: 'webp',
 } as const satisfies Record<ContentType, string>
 
 export const StorageFolders = {
+  documents: 'documents',
   highlights: 'highlights',
   news: 'news',
   users: 'users',
