@@ -6,7 +6,7 @@ import {
 } from '@iut-intranet/helpers/schemas/auth'
 
 const validSignUp = {
-  departmentCode: DepartmentCode.INFO,
+  departmentCodes: [DepartmentCode.INFO],
   email: 'jane.doe@univ-littoral.fr',
   firstName: 'Jane',
   lastName: 'Doe',
@@ -35,7 +35,7 @@ describe('signUpWithPasswordInputSchema', () => {
     expect(
       signUpWithPasswordInputSchema.safeParse({
         ...validSignUp,
-        departmentCode: 'UNKNOWN',
+        departmentCodes: ['UNKNOWN'],
       }).success,
     ).toBe(false)
   })
