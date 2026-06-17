@@ -16,11 +16,14 @@ const { mockGetSignedObjectUrl, mockUpdateObject, mockUploadObject } =
 vi.mock('@iut-intranet/providers/s3', () => ({
   getSignedObjectUrl: mockGetSignedObjectUrl,
   signUrlField: async (item: unknown, field: string) => {
-    if (!item) return item
+    if (!item || typeof item !== 'object') return item
+
+    const safeItem = item as Record<string, unknown>
     const mockUrl = await mockGetSignedObjectUrl()
+
     return {
-      ...item,
-      [field]: item[field] ? mockUrl : null,
+      ...safeItem,
+      [field]: safeItem[field] ? mockUrl : null,
     }
   },
   StorageFolders: { highlights: 'highlights', news: 'news', users: 'users' },
