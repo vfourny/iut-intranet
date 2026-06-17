@@ -1,9 +1,9 @@
 import { getByIdInputSchema } from '@iut-intranet/helpers/schemas/user'
 
-import { authenticatedProcedure } from '@/procedures'
+import { adminProcedure } from '@/procedures'
 
-export const getByIdProcedure = authenticatedProcedure
+export const getByIdProcedure = adminProcedure
   .input(getByIdInputSchema)
   .query(({ ctx, input }) => {
-    return ctx.services.user.getById(input.userId, ctx.user.id)
+    return ctx.services.user.getById(input.userId)
   })

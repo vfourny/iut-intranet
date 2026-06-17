@@ -88,7 +88,6 @@ const CalendarPage = () => import('@/pages/event-page.vue')
 const NewsListPage = () => import('@/pages/news-list-page.vue')
 const ProfilPage = () => import('@/pages/profil-page.vue')
 const SignInPage = () => import('@/pages/auth/sign-in-page.vue')
-const SignUpPage = () => import('@/pages/auth/sign-up-page.vue')
 const DocumentPage = () => import('@/pages/document-page.vue')
 
 export const routes = [
