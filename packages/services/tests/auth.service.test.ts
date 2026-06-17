@@ -11,7 +11,7 @@ describe('AuthService', () => {
   describe('signUpWithPassword', () => {
     it('should create a user matching the input', async () => {
       const input = {
-        departmentCode: DepartmentCode.INFO,
+        departmentCodes: [DepartmentCode.INFO],
         email: faker.internet.email().toLowerCase(),
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName().toUpperCase(),

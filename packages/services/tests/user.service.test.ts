@@ -33,7 +33,10 @@ describe('UserService', () => {
     it('should return the user matching the id', async () => {
       const user = await createDbUserFixture()
 
-      const result = await userService.getById(userIdSchema.parse(user.id))
+      const result = await userService.getById(
+        userIdSchema.parse(user.id),
+        user.id,
+      )
 
       expect(result).toMatchObject({ email: user.email, id: user.id })
     })

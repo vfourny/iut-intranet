@@ -1,10 +1,9 @@
 import { DepartmentCode } from '@iut-intranet/db/enums'
-
 import {
   MIN_PASSWORD_LENGTH,
   signInWithPasswordInputSchema,
   signUpWithPasswordInputSchema,
-} from '@/schemas/auth.schema'
+} from '@iut-intranet/helpers/schemas/auth'
 
 const validSignUp = {
   departmentCode: DepartmentCode.INFO,
@@ -20,7 +19,7 @@ describe('signUpWithPasswordInputSchema', () => {
 
     expect(result.email).toBe('jane.doe@univ-littoral.fr')
     expect(result.lastName).toBe('DOE')
-    expect(result.departmentCode).toBe(DepartmentCode.INFO)
+    expect(result.departmentCodes).toEqual([DepartmentCode.INFO])
   })
 
   it('should reject a weak password', () => {
