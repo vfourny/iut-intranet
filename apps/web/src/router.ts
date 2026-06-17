@@ -21,6 +21,7 @@ export const RouteNames = {
     signIn: 'auth.sign-in',
   },
   calendar: 'calendar',
+  document: 'document',
   home: 'home',
   news: 'news',
   profil: 'profil',
@@ -57,6 +58,11 @@ export const NAV_ITEMS = {
     label: 'layout.default.nav.directory',
     route: RouteNames.users,
   },
+  document: {
+    icon: 'pi pi-file-pdf',
+    label: 'layout.default.nav.document',
+    route: RouteNames.document,
+  },
   home: {
     icon: 'pi pi-home',
     label: 'layout.default.nav.home',
@@ -82,6 +88,7 @@ const CalendarPage = () => import('@/pages/event-page.vue')
 const NewsListPage = () => import('@/pages/news-list-page.vue')
 const ProfilPage = () => import('@/pages/profil-page.vue')
 const SignInPage = () => import('@/pages/auth/sign-in-page.vue')
+const DocumentPage = () => import('@/pages/document-page.vue')
 
 export const routes = [
   {
@@ -103,6 +110,12 @@ export const routes = [
         meta: { title: 'layout.default.nav.calendar' },
         name: RouteNames.calendar,
         path: 'calendar',
+      },
+      {
+        component: DocumentPage,
+        meta: { title: 'layout.default.nav.document' },
+        name: RouteNames.document,
+        path: 'document',
       },
       {
         children: [

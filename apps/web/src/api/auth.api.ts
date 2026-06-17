@@ -2,7 +2,7 @@ import type {
   SignInWithPasswordInput,
   SignUpWithPasswordInput,
 } from '@iut-intranet/helpers/schemas/auth'
-import { isAdminRole } from '@iut-intranet/helpers/utils/role'
+import { isAdminRole, isEditorRole } from '@iut-intranet/helpers/utils/role'
 import {
   defineMutation,
   defineQuery,
@@ -33,11 +33,17 @@ export const useSession = defineQuery(() => {
     () => !!currentSession.value && isAdminRole(currentSession.value.user.role),
   )
 
+  const isEditor = computed(
+    () =>
+      !!currentSession.value && isEditorRole(currentSession.value.user.role),
+  )
+
   return {
     ...rest,
     currentSession,
     isAdmin,
     isAuthenticated,
+    isEditor,
   }
 })
 

@@ -73,19 +73,7 @@ export class UserService {
    * @returns The user with their department and a signed avatar URL
    * @throws Prisma P6002 (mapped to UNAUTHORIZED) if the user doesn't exist or not be admin or the user is the only admin or the user is connect
    */
-  public async delete(payload: deleteUserInput, adminId: string) {
-    const admin = await this.prisma.user.findUnique({
-      where: {
-        id: adminId,
-      },
-    })
-    if (!admin || !isAdminRole(admin.role) || admin.id === payload.userId) {
-      throw new AppError(
-        'UNAUTHORIZED',
-        'You are not allowed to do this operation',
-      )
-    }
-
+  public async delete(payload: deleteUserInput) {
     const user = await this.prisma.user.findFirst({
       where: {
         id: payload.userId,
@@ -115,16 +103,7 @@ export class UserService {
    * @returns The user with their department and a signed avatar URL
    * @throws Throws if the user doesn't exist
    */
-  public async getById(userId: string, requesterId: string) {
-    const requester = await this.prisma.user.findUniqueOrThrow({
-      select: { role: true },
-      where: { id: requesterId },
-    })
-
-    if (userId !== requesterId && !isAdminRole(requester.role)) {
-      throw new AppError('UNAUTHORIZED', 'Not authorized')
-    }
-
+  public async getById(userId: string) {
     const user = await this.prisma.user.findUniqueOrThrow({
       include: userInclude,
       where: { id: userId },

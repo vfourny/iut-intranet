@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 export const ContentType = {
+  DOCUMENT_PDF: 'application/pdf',
   IMAGE_JPEG: 'image/jpeg',
   IMAGE_PNG: 'image/png',
   IMAGE_WEBP: 'image/webp',
