@@ -6,7 +6,7 @@ export const user = {
       submit: "Créer l'utilisateur",
     },
     fields: {
-      departmentCode: 'Département',
+      departmentCodes: 'Département(s)',
       email: 'Email',
       firstName: 'Prénom',
       jobTitle: 'Poste',
@@ -15,7 +15,7 @@ export const user = {
       role: 'Rôle',
     },
     placeholders: {
-      departmentCode: 'Sélectionner un département',
+      departmentCodes: 'Sélectionner un département(s)',
       email: "jean{'@'}univ-littoral.fr",
       firstName: 'Jean',
       jobTitle: 'Responsable RH',
@@ -37,6 +37,41 @@ export const user = {
       success: {
         detail: 'Le compte a bien été créé.',
         summary: 'Utilisateur créé',
+      },
+    },
+  },
+  delete: {
+    actions: {
+      cancel: 'Annuler',
+      confirm: 'Supprimer',
+    },
+    confirm: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
+    title: 'Supprimer un utilisateur',
+    toast: {
+      error: {
+        detail: 'Une erreur est survenue lors de la suppression.',
+        summary: 'Erreur',
+      },
+      success: {
+        detail: 'Le compte a bien été supprimé.',
+        summary: 'Utilisateur supprimé',
+      },
+    },
+  },
+  edit: {
+    actions: {
+      cancel: 'Annuler',
+      submit: 'Enregistrer les modifications',
+    },
+    title: 'Modifier un utilisateur',
+    toast: {
+      error: {
+        detail: 'Une erreur est survenue lors de la modification.',
+        summary: 'Erreur',
+      },
+      success: {
+        detail: 'Le compte a bien été modifié.',
+        summary: 'Utilisateur modifié',
       },
     },
   },

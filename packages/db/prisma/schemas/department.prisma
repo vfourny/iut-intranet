@@ -13,7 +13,9 @@ enum DepartmentCode {
   GEII
   GIM
   GB
-  GTE
+  MT2E
+  Administration
+  Technique
 }
 
 model Department {
@@ -21,9 +23,9 @@ model Department {
   code DepartmentCode @unique
   site Site
 
-  users          User[]
   events         Event[] @relation("EventDepartments")
   targetedByNews News[]
+  users  UserDepartment[]
 
   @@map("department")
 }

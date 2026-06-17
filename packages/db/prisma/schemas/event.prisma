@@ -17,7 +17,7 @@ model Event {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   departments Department[]      @relation("EventDepartments")
-  organizer   User              @relation(fields: [organizerId], references: [id], onDelete: Restrict)
+  organizer   User              @relation(fields: [organizerId], references: [id], onDelete: Cascade)
   invitations EventInvitation[]
 
   @@index([organizerId])

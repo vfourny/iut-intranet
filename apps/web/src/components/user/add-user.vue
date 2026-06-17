@@ -73,15 +73,14 @@
       </h2>
 
       <div class="grid grid-cols-2 gap-4">
-        <SelectField
-          v-model="departmentCode"
-          :error="errors.departmentCode"
-          :label="t('user.add.fields.departmentCode')"
-          name="departmentCode"
+        <PrimeMultiSelect
+          v-model="departmentCodes"
+          display="chip"
+          :invalid="!!errors.departmentCodes"
           option-label="label"
           option-value="value"
           :options="departmentOptions"
-          :placeholder="t('user.add.placeholders.departmentCode')"
+          :placeholder="t('user.add.placeholders.departmentCodes')"
         />
       </div>
     </section>
@@ -95,9 +94,11 @@
         @click="emit('cancel')"
       />
       <PrimeButton
-        icon="pi pi-user-plus"
+        :icon="isEditing ? 'pi pi-save' : 'pi pi-user-plus'"
         icon-pos="right"
-        :label="t('user.add.actions.submit')"
+        :label="
+          t(isEditing ? 'user.edit.actions.submit' : 'user.add.actions.submit')
+        "
         :loading="isLoading"
         type="submit"
       />
@@ -106,16 +107,18 @@
 </template>
 
 <script lang="ts" setup>
+import type { updateUserFromAdminInput } from '@iut-intranet/helpers/schemas/user'
 import { createUserInputSchema } from '@iut-intranet/helpers/schemas/user'
 import { formatPhoneNational } from '@iut-intranet/helpers/utils/phone'
 import PrimeButton from 'primevue/button'
+import PrimeMultiSelect from 'primevue/multiselect'
 import { useToast } from 'primevue/usetoast'
 import { useForm } from 'vee-validate'
+import { computed, watch } from 'vue'
 import type { z } from 'zod'
 
-import { useCreateUser } from '@/api/users.api'
+import { useCreateUser, useGetUserById, useUpdateUser } from '@/api/users.api'
 import InputField from '@/components/ui/input-field.vue'
-import SelectField from '@/components/ui/select-field.vue'
 import { useEnumOptions } from '@/composables/use-enum-options'
 import { useI18n } from '@/composables/use-i18n'
 
@@ -127,21 +130,35 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const toast = useToast()
 
-const { isLoading, mutateAsync: createUser } = useCreateUser()
+const { asyncStatus: createStatus, mutateAsync: createUser } = useCreateUser()
+const { asyncStatus: updateStatus, mutateAsync: updateUser } = useUpdateUser()
+
+const isLoading = computed(
+  () => createStatus.value === 'loading' || updateStatus.value === 'loading',
+)
 
 const departmentOptions = useEnumOptions('department')
 
 type CreateUserFormValues = z.infer<typeof createUserInputSchema>
 
+const props = defineProps<{
+  userId?: string
+}>()
+
+const { data: user } = useGetUserById(computed(() => props.userId))
+
+const isEditing = computed(() => props.userId !== undefined)
+
 const {
   defineField,
   errors,
   handleSubmit: createSubmitHandler,
+  setValues,
 } = useForm<CreateUserFormValues>({
   validationSchema: createUserInputSchema,
 })
 
-const [departmentCode] = defineField('departmentCode')
+const [departmentCodes] = defineField('departmentCodes')
 const [email] = defineField('email')
 const [firstName] = defineField('firstName')
 const [jobTitle] = defineField('jobTitle')
@@ -155,22 +172,59 @@ const onPhoneInput = (event: Event) => {
   phone.value = formatPhoneNational(phone.value ?? '')
 }
 
+watch(user, (u) => {
+  if (!u) return
+  setValues({
+    departmentCodes: u.departments.map((ud) => ud.department.code),
+    email: u.email,
+    firstName: u.firstName,
+    jobTitle: u.jobTitle ?? undefined,
+    lastName: u.lastName,
+    phone: u.phone ?? undefined,
+  })
+})
+
 const onSubmit = createSubmitHandler(async (values) => {
   try {
-    await createUser(values)
+    if (isEditing.value) {
+      if (!user.value) return
+      await updateUser({
+        ...values,
+        role: user.value.role,
+        userId: user.value.id as updateUserFromAdminInput['userId'],
+      })
+    } else {
+      await createUser(values)
+    }
     toast.add({
-      detail: t('user.add.toast.success.detail'),
+      detail: t(
+        isEditing.value
+          ? 'user.edit.toast.success.detail'
+          : 'user.add.toast.success.detail',
+      ),
       life: 3000,
       severity: 'success',
-      summary: t('user.add.toast.success.summary'),
+      summary: t(
+        isEditing.value
+          ? 'user.edit.toast.success.summary'
+          : 'user.add.toast.success.summary',
+      ),
     })
     emit('saved')
   } catch {
     toast.add({
-      detail: t('user.add.toast.error.detail'),
+      detail: t(
+        isEditing.value
+          ? 'user.edit.toast.error.detail'
+          : 'user.add.toast.error.detail',
+      ),
       life: 5000,
       severity: 'error',
-      summary: t('user.add.toast.error.summary'),
+      summary: t(
+        isEditing.value
+          ? 'user.edit.toast.error.summary'
+          : 'user.add.toast.error.summary',
+      ),
     })
   }
 })

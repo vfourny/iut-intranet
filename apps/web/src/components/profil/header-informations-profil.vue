@@ -15,7 +15,11 @@
             <h1 class="text-xl font-semibold text-gray-900">
               {{ user.firstName }} {{ user.lastName }}
             </h1>
-            <DepartmentTag :code="user.department.code" />
+            <DepartmentTag
+              v-for="ud in user.departments"
+              :key="ud.department.code"
+              :code="ud.department.code"
+            />
           </div>
           <p class="text-sm text-gray-500 mt-1">{{ user.email }}</p>
         </div>

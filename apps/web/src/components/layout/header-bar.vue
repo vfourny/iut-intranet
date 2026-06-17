@@ -68,7 +68,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSession, useSignOut } from '@/api/auth.api'
 import { useMe } from '@/api/users.api'
 import { useI18n } from '@/composables/use-i18n'
-import { NAV_ITEMS, RouteNames } from '@/router'
+import { NAV_ITEMS, NAV_ORDER, RouteNames } from '@/router'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -80,12 +80,15 @@ const { currentSession } = useSession()
 const { data: me } = useMe()
 
 const items = computed<MenuItem[]>(() =>
-  Object.values(NAV_ITEMS).map((nav) => ({
-    command: () => router.push({ name: nav.route }),
-    icon: nav.icon,
-    label: t(nav.label),
-    route: nav.route,
-  })),
+  NAV_ORDER.map((key) => {
+    const nav = NAV_ITEMS[key]
+    return {
+      command: () => router.push({ name: nav.route }),
+      icon: nav.icon,
+      label: t(nav.label),
+      route: nav.route,
+    }
+  }),
 )
 
 // La page courante se détecte par son nom de route, posé sur chaque item.

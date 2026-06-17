@@ -24,7 +24,11 @@ export const createDbUserFixture = async () => {
   const department = await prisma.department.findFirstOrThrow()
   return prisma.user.create({
     data: {
-      departmentId: department.id,
+      departments: {
+        create: {
+          departmentId: department.id,
+        },
+      },
       email: faker.internet
         .email({ provider: 'univ-littoral.fr' })
         .toLowerCase(),

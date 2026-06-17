@@ -1,0 +1,28 @@
+meta {
+  name: Update User From Admin
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{SERVER_URL}}/{{TRPC}}/user.update
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "userId": "cmq6gkjcj0009jcoisv6n6ctg",
+    "email": "user@univ-littoral.fr",
+    "firstName": "John",
+    "lastName": "USER",
+    "role": "USER",
+    "departmentCode": "GACO",
+    "jobTitle": "Enseignant"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

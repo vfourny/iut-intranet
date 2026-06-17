@@ -62,7 +62,7 @@ import { RouteNames } from '@/router'
 
 const { t } = useI18n()
 
-const { data: newsPage } = useVisibleNews(NewsStatus.PUBLISHED, 1, '', [])
+const { data: newsPage } = useVisibleNews([NewsStatus.PUBLISHED], 1, '', [])
 const news = computed(() => (newsPage.value?.items ?? []).slice(0, 4))
 
 const newsDateFormatter = new Intl.DateTimeFormat('fr-FR', {

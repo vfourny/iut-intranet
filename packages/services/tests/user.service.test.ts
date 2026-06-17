@@ -15,6 +15,17 @@ const { mockGetSignedObjectUrl, mockUpdateObject, mockUploadObject } =
 
 vi.mock('@iut-intranet/providers/s3', () => ({
   getSignedObjectUrl: mockGetSignedObjectUrl,
+  signUrlField: async (item: unknown, field: string) => {
+    if (!item || typeof item !== 'object') return item
+
+    const safeItem = item as Record<string, unknown>
+    const mockUrl = await mockGetSignedObjectUrl()
+
+    return {
+      ...safeItem,
+      [field]: safeItem[field] ? mockUrl : null,
+    }
+  },
   StorageFolders: { highlights: 'highlights', news: 'news', users: 'users' },
   updateObject: mockUpdateObject,
   uploadObject: mockUploadObject,
@@ -33,7 +44,10 @@ describe('UserService', () => {
     it('should return the user matching the id', async () => {
       const user = await createDbUserFixture()
 
-      const result = await userService.getById(userIdSchema.parse(user.id))
+      const result = await userService.getById(
+        userIdSchema.parse(user.id),
+        user.id,
+      )
 
       expect(result).toMatchObject({ email: user.email, id: user.id })
     })

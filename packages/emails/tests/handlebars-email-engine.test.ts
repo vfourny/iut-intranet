@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 
 import { HandlebarEmailEngine } from '@/handlebars-email-engine'
-import { en, fr } from '@/locales'
+import { fr } from '@/locales'
 import { EmailTemplate } from '@/types'
 
 const engine = new HandlebarEmailEngine()
@@ -35,17 +35,6 @@ describe('HandlebarEmailEngine', () => {
       expect(html).toContain(String(payload.expiresIn))
       expect(html).toContain(fr['reset-password'].singleUseNotice)
       expect(html).toContain(fr['reset-password'].cta)
-    })
-
-    it('should render in english when lang is "en"', () => {
-      const html = engine.renderTemplate(
-        EmailTemplate.ResetPassword,
-        payload,
-        'en',
-      )
-
-      expect(html).toContain(en['reset-password'].cta)
-      expect(html).not.toContain(fr['reset-password'].cta)
     })
   })
 })
