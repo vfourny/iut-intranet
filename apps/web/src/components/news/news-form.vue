@@ -89,7 +89,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DepartmentCode,NewsStatus } from '@iut-intranet/db/enums'
+import { DepartmentCode, NewsStatus } from '@iut-intranet/db/enums'
 import { newsIdSchema } from '@iut-intranet/helpers/schemas/brand'
 import type {
   CreateNewsInput,
@@ -147,8 +147,7 @@ const form = ref<{
   publishedAt: props.news?.publishedAt ?? null,
   // À la création, le statut n'est pas exposé : on publie directement.
   status: props.news?.status ?? NewsStatus.PUBLISHED,
-  targetDepartmentCodes:
-    props.news?.targetDepartments.map((d) => d.code) ?? [],
+  targetDepartmentCodes: props.news?.targetDepartments.map((d) => d.code) ?? [],
   title: props.news?.title ?? '',
 })
 
@@ -206,7 +205,11 @@ const buildCreateInput = (): CreateNewsInput => {
   const status = form.value.status
   // `?? new Date()` purement défensif : onSubmit garantit la date en amont.
   if (status === NewsStatus.SCHEDULED) {
-    return { ...base, publishedAt: form.value.publishedAt ?? new Date(), status }
+    return {
+      ...base,
+      publishedAt: form.value.publishedAt ?? new Date(),
+      status,
+    }
   }
   if (status === NewsStatus.PUBLISHED) return { ...base, status }
   if (status === NewsStatus.ARCHIVED) return { ...base, status }
@@ -224,7 +227,11 @@ const buildUpdateInput = (news: News): UpdateNewsInput => {
   }
   const status = form.value.status
   if (status === NewsStatus.SCHEDULED) {
-    return { ...base, publishedAt: form.value.publishedAt ?? new Date(), status }
+    return {
+      ...base,
+      publishedAt: form.value.publishedAt ?? new Date(),
+      status,
+    }
   }
   if (status === NewsStatus.PUBLISHED) return { ...base, status }
   if (status === NewsStatus.ARCHIVED) return { ...base, status }

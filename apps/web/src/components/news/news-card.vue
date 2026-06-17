@@ -26,9 +26,7 @@
           <span v-if="item.publishedAt">{{
             formatDate(item.publishedAt)
           }}</span>
-          <span
-            >{{ item.author.firstName }} {{ item.author.lastName }}</span
-          >
+          <span>{{ item.author.firstName }} {{ item.author.lastName }}</span>
         </div>
 
         <div
