@@ -40,20 +40,37 @@ export const updateMeInputSchema = userSchema
   .strict()
 export type UpdateMeInput = z.infer<typeof updateMeInputSchema>
 
-// ── Inputs (création par un admin) ────────────────────────────────────────────
-
-export const createUserInputSchema = userSchema
-  .omit({ role: true, userId: true })
-  .extend({
-    departmentCode: z.enum(DepartmentCode),
-  })
-  .strict()
-export type CreateUserInput = z.infer<typeof createUserInputSchema>
-
 // ── Upload (avatar) ───────────────────────────────────────────────────────────
 
 export const uploadMyAvatarInputSchema = uploadObjectInputSchema
 export type UploadMyAvatarInput = z.infer<typeof uploadMyAvatarInputSchema>
+
+// ── Inputs (gestion de l'utilisateur par un admin) ────────────────────────────────────────────
+
+export const createUserInputSchema = userSchema
+  .omit({ role: true, userId: true })
+  .extend({
+    departmentCodes: z.array(z.enum(DepartmentCode)).min(1),
+  })
+  .strict()
+export type CreateUserInput = z.infer<typeof createUserInputSchema>
+
+export const updateUserFromAdminInputSchema = userSchema.extend({
+  departmentCodes: z.array(z.enum(DepartmentCode)).min(1),
+})
+export type updateUserFromAdminInput = z.infer<
+  typeof updateUserFromAdminInputSchema
+>
+
+export const deleteUserInputSchema = z.object({
+  userId: z.string(),
+})
+export type deleteUserInput = z.infer<typeof deleteUserInputSchema>
+
+export const getByIdInputSchema = z.object({
+  userId: z.string(),
+})
+export type getByIdInput = z.infer<typeof getByIdInputSchema>
 
 // ── Listing ───────────────────────────────────────────────────────────────────
 

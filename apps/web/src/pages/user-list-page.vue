@@ -29,7 +29,7 @@
     <UserSearchBar @search="onSearch" />
   </div>
 
-  <Teleport :to="pageHeaderSelector.actions">
+  <Teleport defer :to="pageHeaderSelector.actions">
     <PrimeButton
       v-if="isAdmin"
       icon="pi pi-user-plus"

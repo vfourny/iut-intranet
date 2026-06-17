@@ -1,17 +1,20 @@
-import { en } from '@/locales/en'
 import { fr } from '@/locales/fr'
 
-export type SupportedLocale = 'fr' | 'en'
+export type SupportedLocale = 'fr'
 
-type LocaleShape = {
-  [Template in keyof typeof fr]: {
-    [Key in keyof (typeof fr)[Template]]: string
-  }
+type DeepLocaleShape<T> = {
+  [K in keyof T]: T[K] extends string
+    ? string
+    : T[K] extends object
+      ? DeepLocaleShape<T[K]>
+      : never
 }
 
-export const locales = { en, fr } as const satisfies Record<
+type LocaleShape = DeepLocaleShape<typeof fr>
+
+export const locales = { fr } as const satisfies Record<
   SupportedLocale,
   LocaleShape
 >
 
-export { en, fr }
+export { fr }

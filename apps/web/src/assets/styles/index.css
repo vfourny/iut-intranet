@@ -135,6 +135,19 @@
   --color-dept-energy-900: #301a00;
   --color-dept-energy-950: #180d00;
 
+  /* others — administration, technique, support → #8B5CF6 */
+  --color-dept-others-50: #f5f3ff;
+  --color-dept-others-100: #ede9fe;
+  --color-dept-others-200: #ddd6fe;
+  --color-dept-others-300: #c4b5fd;
+  --color-dept-others-400: #a78bfa;
+  --color-dept-others-500: #8b5cf6;
+  --color-dept-others-600: #7c3aed;
+  --color-dept-others-700: #6d28d9;
+  --color-dept-others-800: #4c1d95;
+  --color-dept-others-900: #2e1065;
+  --color-dept-others-950: #1a0a3d;
+
   /* ============================================================
    * Palettes d'état (status) — feedback UI
    *   danger  → rouge IUT (#E3000F)

@@ -36,16 +36,6 @@
         {{ t('auth.signIn.fields.rememberMe') }}
       </label>
     </div>
-
-    <template #footer>
-      {{ t('auth.signIn.footer.noAccount') }}
-      <RouterLink
-        class="font-medium text-primary hover:underline"
-        :to="{ name: RouteNames.auth.signUp }"
-      >
-        {{ t('auth.signIn.footer.createAccount') }}
-      </RouterLink>
-    </template>
   </AuthFormCard>
 </template>
 

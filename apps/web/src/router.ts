@@ -19,7 +19,6 @@ declare module 'vue-router' {
 export const RouteNames = {
   auth: {
     signIn: 'auth.sign-in',
-    signUp: 'auth.sign-up',
   },
   calendar: 'calendar',
   home: 'home',
@@ -70,13 +69,19 @@ export const NAV_ITEMS = {
   },
 } as const satisfies Record<NavKey, NavItem>
 
+export const NAV_ORDER: (keyof typeof NAV_ITEMS)[] = [
+  'home',
+  'directory',
+  'calendar',
+  'news',
+]
+
 const HomePage = () => import('@/pages/home-page.vue')
 const UserListPage = () => import('@/pages/user-list-page.vue')
 const CalendarPage = () => import('@/pages/event-page.vue')
 const NewsListPage = () => import('@/pages/news-list-page.vue')
 const ProfilPage = () => import('@/pages/profil-page.vue')
 const SignInPage = () => import('@/pages/auth/sign-in-page.vue')
-const SignUpPage = () => import('@/pages/auth/sign-up-page.vue')
 
 export const routes = [
   {
@@ -131,11 +136,6 @@ export const routes = [
         name: RouteNames.auth.signIn,
         path: 'sign-in',
       },
-      {
-        component: SignUpPage,
-        name: RouteNames.auth.signUp,
-        path: 'sign-up',
-      },
     ],
     meta: { access: 'guest', layout: 'auth' },
     path: '/auth',
@@ -160,8 +160,11 @@ export const resolveRedirect = (
 }
 
 router.beforeEach(async (to) => {
-  const { isAuthenticated, refresh } = useSession()
-  await refresh()
+  const { isAuthenticated, refresh, status } = useSession()
+
+  if (status.value === 'pending') {
+    await refresh()
+  }
 
   if (to.meta.access === 'authenticated' && !isAuthenticated.value)
     return { name: RouteNames.auth.signIn, query: { redirect: to.fullPath } }

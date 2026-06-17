@@ -22,7 +22,7 @@ export const signUpWithPasswordInputSchema = userSchema
     phone: true,
   })
   .extend({
-    departmentCode: z.enum(DepartmentCode),
+    departmentCodes: z.array(z.enum(DepartmentCode)).min(1),
     password: passwordSchema,
   })
   .strict()
@@ -42,3 +42,18 @@ export const signInWithPasswordInputSchema = z
 export type SignInWithPasswordInput = z.infer<
   typeof signInWithPasswordInputSchema
 >
+
+// ── Forgot password ───────────────────────────────────────────────────────────
+export const forgotPasswordInputSchema = z
+  .object({ email: emailSchema })
+  .strict()
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordInputSchema>
+
+// ── Reset password ────────────────────────────────────────────────────────────
+export const resetPasswordInputSchema = z
+  .object({
+    newPassword: passwordSchema,
+    token: z.string(),
+  })
+  .strict()
+export type ResetPasswordInput = z.infer<typeof resetPasswordInputSchema>

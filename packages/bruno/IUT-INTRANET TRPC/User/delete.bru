@@ -1,0 +1,22 @@
+meta {
+  name: Delete User From Admin
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{SERVER_URL}}/{{TRPC}}/user.delete
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "userId": "cmq6gkjcj0009jcoisv6n6ctg"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

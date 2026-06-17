@@ -1,4 +1,5 @@
-import type { DepartmentCode, NewsStatus } from '@iut-intranet/db/enums'
+import type { DepartmentCode } from '@iut-intranet/db/enums'
+import { NewsStatus } from '@iut-intranet/db/enums'
 import type {
   CreateNewsInput,
   UpdateNewsInput,
@@ -42,7 +43,7 @@ export const NEWS_KEYS = {
   all: () => ['news', 'all'] as const,
   getById: (newsId: string) => ['news', newsId] as const,
   visibleList: (
-    status: NewsStatus,
+    status: NewsStatus[],
     page: number,
     search: string,
     departmentCodes: string[],
@@ -68,7 +69,7 @@ export interface VisibleNewsPage {
 }
 
 export const useVisibleNews = (
-  status: NewsStatus,
+  status: MaybeRefOrGetter<NewsStatus[]>,
   page: MaybeRefOrGetter<number>,
   search: MaybeRefOrGetter<string>,
   departmentCodes: MaybeRefOrGetter<string[]>,
@@ -77,19 +78,23 @@ export const useVisibleNews = (
   return useQuery({
     key: () =>
       NEWS_KEYS.visibleList(
-        status,
+        toValue(status),
         toValue(page),
         toValue(search),
         toValue(departmentCodes),
       ),
     placeholderData: (previous) => previous,
     query: async (): Promise<VisibleNewsPage> => {
+      const resolvedStatus = toValue(status)
       const result = await trpc.news.listVisible.query({
         departmentCodes: toValue(departmentCodes) as DepartmentCode[],
         page: toValue(page),
         pageSize,
         search: toValue(search).trim() || undefined,
-        status: [status],
+        status:
+          resolvedStatus.length > 0
+            ? resolvedStatus
+            : Object.values(NewsStatus),
       })
       return {
         items: result.items.map(coerceNews),

@@ -194,8 +194,7 @@ const resolver = zodResolver(eventWriteSchema.omit({ departmentCodes: true }))
 // l'édition on reprend les départements de l'event.
 const defaultDepartmentCodes = (): DepartmentCode[] => {
   if (props.departmentCodes) return props.departmentCodes
-  const own = currentSession.value?.user?.department?.code
-  return own ? [own] : []
+  return []
 }
 
 const initialValues = computed(() => ({

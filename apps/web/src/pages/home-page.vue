@@ -2,7 +2,9 @@
   <div class="flex flex-col gap-8">
     <!-- L'en-tête générique (titre « Accueil ») est rendu par le layout ; on y
       téléporte seulement la date du jour comme sous-titre. -->
-    <Teleport :to="pageHeaderSelector.subtitle">{{ todayLabel }}</Teleport>
+    <Teleport defer :to="pageHeaderSelector.subtitle">{{
+      todayLabel
+    }}</Teleport>
 
     <DashboardStats />
 

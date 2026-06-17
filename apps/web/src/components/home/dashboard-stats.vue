@@ -29,7 +29,7 @@ const { t } = useI18n()
 // Mêmes requêtes que les sections (liste events / news) : dédupliquées par clé,
 // donc aucune requête supplémentaire — on ne lit ici que les compteurs.
 const { upcoming } = useDashboardEvents()
-const { data: newsPage } = useVisibleNews(NewsStatus.PUBLISHED, 1, '', [])
+const { data: newsPage } = useVisibleNews([NewsStatus.PUBLISHED], 1, '', [])
 const { data: usersPage } = useUsersPaginated(1, '', undefined)
 
 const stats = computed(

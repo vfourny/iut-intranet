@@ -5,12 +5,15 @@ meta {
 }
 
 get {
-  url: {{SERVER_URL}}/{{TRPC}}/user.list
+  url: {{SERVER_URL}}/{{TRPC}}/user.list?input=%7B%7D
   body: none
   auth: inherit
 }
 
+params:query {
+  input: {"json":{}}
+}
+
 settings {
-  encodeUrl: true
-  timeout: 0
+  encodeUrl: false
 }
