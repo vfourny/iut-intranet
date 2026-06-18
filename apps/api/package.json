@@ -1,6 +1,8 @@
 {
   "dependencies": {
+    "@iut-intranet/auth": "*",
     "@iut-intranet/configs": "*",
+    "@iut-intranet/db": "*",
     "@iut-intranet/helpers": "*",
     "@iut-intranet/services": "*",
     "@iut-intranet/trpc": "*",
@@ -16,6 +18,7 @@
   "name": "@iut-intranet/api",
   "private": true,
   "scripts": {
+    "bootstrap:admin": "node dist/scripts/bootstrap-admin.js",
     "build": "tsc && tsc-alias",
     "clean": "rimraf dist node_modules .turbo",
     "cron:archive-news": "tsx src/cron/archive-news.cron.ts",

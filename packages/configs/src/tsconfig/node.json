@@ -1,4 +1,7 @@
 {
   "display": "Node Configuration",
-  "extends": "@vfourny/node-toolkit/tsconfig/node"
+  "extends": "@vfourny/node-toolkit/tsconfig/node",
+  "tsc-alias": {
+    "resolveFullPaths": true
+  }
 }

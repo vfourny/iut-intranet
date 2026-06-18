@@ -68,10 +68,13 @@ services:
       - traefik.http.routers.api.rule=Host(`${NAME}.jrcan.dev`) && PathPrefix(/api)
       - traefik.http.routers.api.tls=true
       - traefik.http.routers.api.tls.certresolver=myresolver
+    # Seeds are dev-only (see packages/db db:seed). Prod applies migrations, then
+    # runs the idempotent admin bootstrap (no-op once an admin exists; skipped if
+    # ADMIN_EMAIL is unset), then starts the server.
     command:
       - sh
       - -c
-      - 'npx turbo db:deploy --filter=@iut-intranet/db && (npx turbo db:seed --filter=@iut-intranet/db || echo "seed skipped (likely already populated)") && node apps/api/dist/index.js'
+      - 'npx turbo db:deploy --filter=@iut-intranet/db && node apps/api/dist/scripts/bootstrap-admin.js && node apps/api/dist/index.js'
 
   web:
     container_name: ${NAME:-iut-intranet}-web

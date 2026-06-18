@@ -6,6 +6,12 @@ export const publicEnvSchema = z.object({
 })
 
 export const serverEnvSchema = publicEnvSchema.extend({
+  // Optional on purpose: when unset, the admin bootstrap is skipped rather than
+  // crashing the API at startup. Read only by apps/api/src/scripts/bootstrap-admin.ts.
+  ADMIN_EMAIL: z.string().email('ADMIN_EMAIL must be a valid email').optional(),
+  // Optional: when set, the bootstrap admin uses it; otherwise a random password
+  // is generated and printed once in the logs. Read only by bootstrap-admin.ts.
+  ADMIN_PASSWORD: z.string().optional(),
   API_PORT: z.coerce
     .number({ error: 'API_PORT must be a valid number' })
     .optional()
@@ -33,12 +39,22 @@ export const serverEnvSchema = publicEnvSchema.extend({
 export type PublicEnv = z.infer<typeof publicEnvSchema>
 export type ServerEnv = z.infer<typeof serverEnvSchema>
 
-export function getPublicEnv<K extends keyof PublicEnv>(...keys: K[]) {
+export function getPublicEnv<K extends keyof PublicEnv>(
+  ...keys: K[]
+): Pick<PublicEnv, K> {
   const mask = keys.reduce((acc, k) => ({ ...acc, [k]: true }), {})
-  return publicEnvSchema.pick(mask).parse(process.env)
+  return publicEnvSchema.pick(mask).parse(process.env) as unknown as Pick<
+    PublicEnv,
+    K
+  >
 }
 
-export function getServerEnv<K extends keyof ServerEnv>(...keys: K[]) {
+export function getServerEnv<K extends keyof ServerEnv>(
+  ...keys: K[]
+): Pick<ServerEnv, K> {
   const mask = keys.reduce((acc, k) => ({ ...acc, [k]: true }), {})
-  return serverEnvSchema.pick(mask).parse(process.env)
+  return serverEnvSchema.pick(mask).parse(process.env) as unknown as Pick<
+    ServerEnv,
+    K
+  >
 }
