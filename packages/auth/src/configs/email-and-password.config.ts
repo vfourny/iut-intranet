@@ -1,6 +1,6 @@
 import { sendEmail } from '@iut-intranet/emails/email-sender'
 import { EmailTemplate } from '@iut-intranet/emails/types'
-import { MIN_PASSWORD_LENGTH } from '@iut-intranet/helpers/schemas/auth'
+import { MIN_PASSWORD_LENGTH } from '@iut-intranet/helpers/schemas/common'
 import argon2 from 'argon2'
 import type { BetterAuthOptions } from 'better-auth/types'
 

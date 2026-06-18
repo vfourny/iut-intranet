@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import { formatPhoneForStorage, isValidPhone } from '@/utils/phone.util'
-import { NAME_PATTERN_REGEX } from '@/utils/regex.util'
+import { NAME_PATTERN_REGEX, PASSWORD_REGEX } from '@/utils/regex.util'
 
 // ── Identité ────────────────────────────────────────────────────────────────
 
@@ -65,3 +65,12 @@ export interface Paginated<T> {
   items: T[]
   total: number
 }
+
+// Password
+
+export const MIN_PASSWORD_LENGTH = 8
+
+export const passwordSchema = z
+  .string()
+  .min(MIN_PASSWORD_LENGTH)
+  .regex(PASSWORD_REGEX)
