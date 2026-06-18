@@ -5,7 +5,7 @@ CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'USER', 'EDITOR');
 CREATE TYPE "Site" AS ENUM ('BOULOGNE', 'CALAIS', 'DUNKERQUE', 'SAINT_OMER');
 
 -- CreateEnum
-CREATE TYPE "DepartmentCode" AS ENUM ('GACO', 'GEA', 'TC', 'INFO', 'GEII', 'GIM', 'GB', 'GTE');
+CREATE TYPE "DepartmentCode" AS ENUM ('GACO', 'GEA', 'TC', 'INFO', 'GEII', 'GIM', 'GB', 'MT2E', 'Administration', 'Technique');
 
 -- CreateEnum
 CREATE TYPE "EventInvitationStatus" AS ENUM ('PENDING', 'ACCEPTED', 'DECLINED');
@@ -29,10 +29,17 @@ CREATE TABLE "user" (
     "banExpires" TIMESTAMP(3),
     "phone" TEXT,
     "job_title" TEXT,
-    "department_id" TEXT NOT NULL,
     "manager_id" TEXT,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_department" (
+    "user_id" TEXT NOT NULL,
+    "department_id" TEXT NOT NULL,
+
+    CONSTRAINT "user_department_pkey" PRIMARY KEY ("user_id","department_id")
 );
 
 -- CreateTable
@@ -126,7 +133,6 @@ CREATE TABLE "news" (
     "author_id" TEXT NOT NULL,
     "status" "NewsStatus" NOT NULL DEFAULT 'DRAFT',
     "published_at" TIMESTAMP(3),
-    "archived_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -151,9 +157,6 @@ CREATE TABLE "_DepartmentToNews" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
-
--- CreateIndex
-CREATE INDEX "user_department_id_idx" ON "user"("department_id");
 
 -- CreateIndex
 CREATE INDEX "user_manager_id_idx" ON "user"("manager_id");
@@ -189,10 +192,13 @@ CREATE INDEX "_EventDepartments_B_index" ON "_EventDepartments"("B");
 CREATE INDEX "_DepartmentToNews_B_index" ON "_DepartmentToNews"("B");
 
 -- AddForeignKey
-ALTER TABLE "user" ADD CONSTRAINT "user_department_id_fkey" FOREIGN KEY ("department_id") REFERENCES "department"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "user" ADD CONSTRAINT "user_manager_id_fkey" FOREIGN KEY ("manager_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user" ADD CONSTRAINT "user_manager_id_fkey" FOREIGN KEY ("manager_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "user_department" ADD CONSTRAINT "user_department_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_department" ADD CONSTRAINT "user_department_department_id_fkey" FOREIGN KEY ("department_id") REFERENCES "department"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -201,7 +207,7 @@ ALTER TABLE "account" ADD CONSTRAINT "account_user_id_fkey" FOREIGN KEY ("user_i
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "event" ADD CONSTRAINT "event_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "event" ADD CONSTRAINT "event_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "event_invitation" ADD CONSTRAINT "event_invitation_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "event"("id") ON DELETE CASCADE ON UPDATE CASCADE;
