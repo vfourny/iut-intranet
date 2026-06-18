@@ -80,6 +80,7 @@ export const NAV_ORDER: (keyof typeof NAV_ITEMS)[] = [
   'directory',
   'calendar',
   'news',
+  'document',
 ]
 
 const HomePage = () => import('@/pages/home-page.vue')
