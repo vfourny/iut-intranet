@@ -94,6 +94,48 @@ Raccourci pour repartir d'une base propre : `npm run env:reset` (reset complet d
 - API : http://localhost:8000
 - Web : http://localhost:5173
 
+## Déploiement (prod)
+
+Le déploiement tourne en Docker (`docker/prod.compose.yml`, image construite via `docker/Dockerfile`). Au démarrage, le conteneur `api` exécute, dans l'ordre :
+
+```
+db:deploy          # prisma migrate deploy — applique les migrations, ne supprime jamais rien
+bootstrap-admin    # provisionne le compte ADMIN au 1er déploiement (idempotent)
+node dist/index.js # démarre le serveur
+```
+
+**Les seeds ne tournent jamais en prod** — ils sont réservés au dev local. La base est sur un volume Docker persistant (`db_data`) : un redéploiement **conserve** les données.
+
+### Initialiser le compte admin (1er déploiement)
+
+Le compte admin se crée automatiquement via un script idempotent (`apps/api/src/scripts/bootstrap-admin.ts`), pas via les seeds. Mode opératoire :
+
+1. **Avant le déploiement**, renseigner dans le `.env` de prod :
+   - `ADMIN_EMAIL` (obligatoire pour activer le bootstrap ; si absent, le bootstrap est ignoré) ;
+   - `ADMIN_PASSWORD` (**optionnel**, min. 8 caractères) — recommandé pour éviter d'aller chercher le mot de passe dans les logs.
+2. **Déployer** (push sur `main` → webhook). Le script s'exécute au démarrage de l'API :
+   - s'il existe déjà un admin → **no-op** (rejouable à chaque deploy sans risque) ;
+   - sinon il crée le compte via better-auth (hash argon2 + compte de connexion corrects).
+3. **Mot de passe** :
+   - si `ADMIN_PASSWORD` est défini → c'est celui-là, rien à récupérer ;
+   - sinon un mot de passe **aléatoire** est généré et affiché **une seule fois** dans les logs du conteneur `iut-intranet-api` (ligne `bootstrap-admin … Admin created with a generated password`). Le copier immédiatement.
+4. **Se connecter** avec `ADMIN_EMAIL` + ce mot de passe, puis **le changer** depuis l'appli.
+
+> Toute la gestion des comptes se fait ensuite **via l'appli** (interface admin), jamais via les seeds ni en base directement.
+
+### Dépannage — migration en échec (`P3009`)
+
+Si `db:deploy` refuse d'appliquer les migrations avec `Error: P3009` (« failed migrations in the target database »), c'est qu'une migration antérieure a échoué et bloque les suivantes. Si les données de prod sont **jetables**, repartir d'une base vierge (le devops, sur l'hôte Docker) :
+
+```bash
+docker ps --filter "name=postgres"        # confirmer le nom (défaut : iut-intranet-postgres)
+docker exec -i iut-intranet-postgres psql -U root -d iut-intranet-db \
+  -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'
+docker restart iut-intranet-api           # rejoue db:deploy sur base vierge
+```
+
+> ⚠️ Cette commande **efface toute la base**. Pour conserver les données, résoudre plutôt la migration manuellement (`prisma migrate resolve`, voir https://pris.ly/d/migrate-resolve).
+
 ## Commandes utiles
 
 | Commande                                  | Description                                               |

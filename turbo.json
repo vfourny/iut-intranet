@@ -86,6 +86,8 @@
   },
   "globalEnv": [
     "NODE_ENV",
+    "ADMIN_EMAIL",
+    "ADMIN_PASSWORD",
     "DATABASE_URL",
     "API_PORT",
     "PUBLIC_API_URL",
