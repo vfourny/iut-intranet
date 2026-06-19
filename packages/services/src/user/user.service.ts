@@ -11,6 +11,7 @@ import type {
   deleteUserInput,
   ListUsersInputSchema,
   UpdateMeInput,
+  UpdatePasswordInput,
   updateUserFromAdminInput,
   UpdateUserInput,
 } from '@iut-intranet/helpers/schemas/user'
@@ -213,6 +214,13 @@ export class UserService {
     })
 
     return user
+  }
+
+  public async updatePassword(input: UpdatePasswordInput, headers: Headers) {
+    return this.betterAuth.api.changePassword({
+      body: { ...input, revokeOtherSessions: true },
+      headers,
+    })
   }
 
   /**

@@ -7,6 +7,7 @@ import {
   firstNameSchema,
   lastNameSchema,
   paginationSchema,
+  passwordSchema,
   phoneValueSchema,
   searchSchema,
 } from '@/schemas/common.schema'
@@ -81,3 +82,11 @@ export const listUsersInputSchema = paginationSchema
   })
   .strict()
 export type ListUsersInputSchema = z.infer<typeof listUsersInputSchema>
+
+// ── Update Password ───────────────────────────────────────────────────────────────────
+
+export const updatePasswordInputSchema = z.object({
+  currentPassword: passwordSchema,
+  newPassword: passwordSchema,
+})
+export type UpdatePasswordInput = z.infer<typeof updatePasswordInputSchema>

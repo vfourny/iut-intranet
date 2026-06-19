@@ -1,9 +1,9 @@
 import { DepartmentCode } from '@iut-intranet/db/enums'
 import {
-  MIN_PASSWORD_LENGTH,
   signInWithPasswordInputSchema,
   signUpWithPasswordInputSchema,
 } from '@iut-intranet/helpers/schemas/auth'
+import { MIN_PASSWORD_LENGTH } from '@iut-intranet/helpers/schemas/common'
 
 const validSignUp = {
   departmentCodes: [DepartmentCode.INFO],

@@ -25,8 +25,10 @@
         </div>
       </div>
     </div>
-
-    <FormUpdateProfil :user="user" />
+    <div class="grid grid-cols-2 gap-8 px-6 py-8">
+      <FormUpdateProfil :user="user" />
+      <FormUpdatePassword />
+    </div>
   </div>
 </template>
 
@@ -35,6 +37,7 @@ import { useI18n } from 'vue-i18n'
 
 import type { MeWithDepartment } from '@/api/users.api'
 import DepartmentTag from '@/components/department/department-tag.vue'
+import FormUpdatePassword from '@/components/profil/form-update-password.vue'
 import FormUpdateProfil from '@/components/profil/form-update-profil.vue'
 
 defineProps<{

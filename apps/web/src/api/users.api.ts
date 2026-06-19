@@ -4,6 +4,7 @@ import type {
   CreateUserInput,
   deleteUserInput,
   UpdateMeInput,
+  UpdatePasswordInput,
   updateUserFromAdminInput,
 } from '@iut-intranet/helpers/schemas/user'
 import {
@@ -182,5 +183,12 @@ export const useDeleteUser = () => {
     onSuccess: () => {
       queryCache.invalidateQueries({ key: ['user', 'list'] })
     },
+  })
+}
+
+export const useUpdatePasswordUser = () => {
+  return useMutation({
+    mutation: (input: UpdatePasswordInput) =>
+      trpc.user.updatePassword.mutate(input),
   })
 }
